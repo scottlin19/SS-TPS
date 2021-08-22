@@ -1,0 +1,6 @@
+{
+  "to_run": "simulation",
+  "static_file": "random_particles_static_data.txt",
+  "dynamic_file": "random_particles_dynamic_data.txt",
+  "benchmark_iterations": 10
+}

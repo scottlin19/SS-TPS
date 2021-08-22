@@ -2,3 +2,5 @@
 results/
 target/
 *.iml
+random_particles_dynamic_data.txt
+random_particles_static_data.txt

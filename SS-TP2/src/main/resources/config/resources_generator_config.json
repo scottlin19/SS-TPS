@@ -1,0 +1,10 @@
+{
+  "N": 300,
+  "L": 7,
+  "RC": 0.5,
+  "hasWalls": false,
+  "ETA": 2,
+  "maxIter": 1000,
+  "initialVelocity": 0.03,
+  "particleRadius": 0
+}
