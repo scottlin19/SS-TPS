@@ -18,7 +18,7 @@ public class StaticFile {
     private Double RC;
     private int MAX_M;
     private double initialVelocity;
-    private double dirNoise;
+    private double ETA;
     private Boolean hasWalls;
     private Integer maxIterations;
 
@@ -61,10 +61,7 @@ public class StaticFile {
                                 hasWalls = sc.nextInt() == 1 ? Boolean.TRUE : Boolean.FALSE;
                                 break;
                             case 4:
-                                double ETA = sc.nextDouble();
-                                Random r = new Random();
-                                dirNoise = r.nextDouble()*ETA - ETA/2;
-                                System.out.println("dir Noise:" +dirNoise);
+                                ETA = sc.nextDouble();
                                 break;
                             case 5:
                                 maxIterations = sc.nextInt();
@@ -103,7 +100,7 @@ public class StaticFile {
                 if(maxRadius < radius){
                     maxRadius = radius;
                 }
-                particles.add(new Particle(line++,0.0,0.0,radius,dirNoise,initialVelocity));
+                particles.add(new Particle(line++,0.0,0.0,radius,ETA,initialVelocity));
 
             }
             System.out.println("Loaded "+line+" particles.");
@@ -147,7 +144,7 @@ public class StaticFile {
         return initialVelocity;
     }
 
-    public double getDirNoise() {
-        return dirNoise;
+    public double getETA() {
+        return ETA;
     }
 }

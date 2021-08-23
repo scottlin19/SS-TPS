@@ -12,19 +12,18 @@ public class Particle{
     private double direction;
     private Map<Integer, Double> neighboursDirs;
     private double radius;
-    private final double dirNoise;
+    private final double ETA;
 
 
 
 
-    public Particle(int id,double posX,double posY,double radius,double dirNoise,double initialVelocity){
+    public Particle(int id,double posX,double posY,double radius,double ETA,double initialVelocity){
         this.id = id;
         this.radius = radius;
-        this.dirNoise = dirNoise;
+        this.ETA = ETA;
         this.velocity = initialVelocity;
         this.posX = posX;
         this.posY = posY;
-
         this.neighboursDirs = new HashMap<>();
     }
 
@@ -52,11 +51,14 @@ public class Particle{
         double sinProm = neighbourDirections.stream().mapToDouble(Math::sin).average().orElse(Double.NaN);
         double cosProm = neighbourDirections.stream().mapToDouble(Math::cos).average().orElse(Double.NaN);
         double dirProm = Math.atan2(sinProm,cosProm);
-
-        direction = dirProm + dirNoise;
-
+        direction = dirProm + randomNoise();
         clearNeighbours();
 
+    }
+
+    private double randomNoise(){
+        Random r = new Random();
+        return r.nextDouble()*ETA - ETA/2;
     }
     public void clearNeighbours() {
         neighboursDirs = new HashMap<>();

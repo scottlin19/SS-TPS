@@ -33,7 +33,7 @@ public class OutputFile {
                 double greenProportion = 0;
                 double blueProportion = 1 - redProportion;
 
-                sb.append(dto.getPosX()).append(" ").append(dto.getPosY()).append(" ").append(redProportion).append(" ").append(greenProportion).append(" ").append(blueProportion).append("\n");
+                sb.append(dto.getPosX()).append(" ").append(dto.getPosY()).append(" ").append(direction).append(" ").append(redProportion).append(" ").append(greenProportion).append(" ").append(blueProportion).append("\n");
             }
         }
         try {

@@ -3,7 +3,7 @@
   "L": 7,
   "RC": 0.5,
   "hasWalls": false,
-  "ETA": 2,
+  "ETA": 4,
   "maxIter": 1000,
   "initialVelocity": 0.03,
   "particleRadius": 0
