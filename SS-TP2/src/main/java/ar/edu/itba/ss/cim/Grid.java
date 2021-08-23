@@ -1,6 +1,7 @@
 package ar.edu.itba.ss.cim;
 
-import ar.edu.itba.ss.off_lattice.ParticleDTO;
+import ar.edu.itba.ss.commons.GridSnapshot;
+import ar.edu.itba.ss.commons.ParticleDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -47,8 +48,8 @@ public class Grid {
         }
     }
 
-    public List<ParticleDTO> snapshot(){
-        return this.particles.stream().map(ParticleDTO::fromParticle).collect(Collectors.toList());
+    public GridSnapshot snapshot(){
+        return new GridSnapshot(particles);
     }
 
     public int[] addParticle(Particle particle){
@@ -315,14 +316,5 @@ public class Grid {
 
     }
 
-    public List<Double> getVAs(double initialVelocity) {
-        double counterX = 0;
-        double counterY = 0;
-        for (Particle p: particles) {
-            counterX += p.getVelocity()*Math.cos(p.getDirection());
-            counterY += p.getVelocity()*Math.sin(p.getDirection());
-        }
-        return List.of(Math.abs(counterX)/(particles.size()*initialVelocity),Math.abs(counterY)/(particles.size()*initialVelocity));
-    }
 }
 

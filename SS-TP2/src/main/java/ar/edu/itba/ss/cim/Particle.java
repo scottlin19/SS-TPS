@@ -60,6 +60,7 @@ public class Particle{
         Random r = new Random();
         return r.nextDouble()*ETA - ETA/2;
     }
+
     public void clearNeighbours() {
         neighboursDirs = new HashMap<>();
     }

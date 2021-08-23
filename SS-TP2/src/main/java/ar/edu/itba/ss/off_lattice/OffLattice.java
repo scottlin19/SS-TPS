@@ -2,17 +2,10 @@ package ar.edu.itba.ss.off_lattice;
 
 import ar.edu.itba.ss.cim.Grid;
 import ar.edu.itba.ss.cim.Particle;
-import ar.edu.itba.ss.commons.DynamicFile;
-import ar.edu.itba.ss.commons.OutputFile;
-import ar.edu.itba.ss.commons.StaticFile;
-import com.google.gson.Gson;
-
-import java.io.File;
-
-import java.io.FileWriter;
-import java.io.IOException;
+import ar.edu.itba.ss.commons.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class OffLattice {
@@ -22,9 +15,7 @@ public class OffLattice {
 
     private final StaticFile sf;
 
-    private final List<List<ParticleDTO>> snapshots;
-
-    private List<List<Double>> VAs;
+    private final List<GridSnapshot> snapshots;
 
     public OffLattice(String staticDataPath, String dynamicDataPath){
         this.particles = new ArrayList<>();
@@ -32,7 +23,6 @@ public class OffLattice {
         DynamicFile.initDynamicData(dynamicDataPath,particles);
         System.out.println(this.particles);
         this.snapshots = new ArrayList<>();
-        VAs = new ArrayList<>();
     }
 
     public void simulate(){
@@ -43,12 +33,10 @@ public class OffLattice {
             for (int i = 0; i < iterations; i++) {
                 grid.updateNeighbours();
                 snapshot(); // Obtengo todos los valores de la iteracion actual para la animacion
-                //grid.printAll();
-//                VAs.add(grid.getVAs(sf.getInitialVelocity()));
                 grid.updateParticles();
                 grid.updateGrid();
             }
-//            VAs.forEach(System.out::println);
+            System.out.println(snapshots.stream().mapToDouble(GridSnapshot::getVA).average().orElse(0));
     }
 
     private void snapshot(){
@@ -57,6 +45,6 @@ public class OffLattice {
 
     // Guarda a archivo XYZ
     public void saveResults(String fileName){
-        OutputFile.createOutputFile(snapshots,fileName);
+        OutputFile.createOutputFile(snapshots.stream().map(GridSnapshot::getParticlesData).collect(Collectors.toList()), fileName);
     }
 }

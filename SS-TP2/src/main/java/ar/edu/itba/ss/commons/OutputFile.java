@@ -1,13 +1,8 @@
 package ar.edu.itba.ss.commons;
 
-import ar.edu.itba.ss.off_lattice.ParticleDTO;
-import ar.edu.itba.ss.resource_generation.ResourcesGenerator;
-
-import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class OutputFile {

@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.off_lattice;
+package ar.edu.itba.ss.commons;
 
 import ar.edu.itba.ss.cim.Particle;
 
