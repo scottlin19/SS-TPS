@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import json
+import statistics 
+
+import numpy as np
 
 
 ETA_UNICODE = "\u03B7"
@@ -13,6 +16,7 @@ if __name__=="__main__":
 
 
     # -------Grafico de VA en funcion de la cantidad de iteraciones-----------------
+    
     dataFor1stGraph = jsonVAsData['data'][2]
     n = dataFor1stGraph["n"]
     etas = dataFor1stGraph["etas"]
@@ -35,7 +39,7 @@ if __name__=="__main__":
         y = []
         err = []
         for i in range(iterations):
-            if (i % 2 == 0 or i < 20) and i < 200:
+            if (i % 2 == 0 or i < 20):
                 x.append(i)
                 y.append(avgs[i])
                 err.append(stds[i])
@@ -49,4 +53,17 @@ if __name__=="__main__":
     # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.show()
 
-    # -------
+    # -------------------------------------------------------------------------------
+
+    dataFor2ndTemporalGraph = jsonVAsData['data'][2]
+    n = dataFor2ndTemporalGraph["n"]
+    x = []
+    y = []
+    err = []
+    for eta in etas: 
+        x.append(eta["eta"])
+        y.append(np.mean(eta["avgs"][500:]))
+        err.append(np.mean(eta["stds"][500:]))
+    
+    plt.errorbar(x, y, yerr=err, fmt="o", label = f'{ETA_UNICODE} = {eta["eta"]}')
+    plt.show()
