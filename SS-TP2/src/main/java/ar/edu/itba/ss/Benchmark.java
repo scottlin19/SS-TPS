@@ -31,7 +31,7 @@ public class Benchmark {
         int surface = (int)Math.pow(L,2);
         List<Integer> Ns = densities.stream().map(d-> (int)(d*surface)).collect(Collectors.toList());
         List<Double> etas = Arrays.asList(0.1,2.0,5.0);
-        int iterations = 1;
+        int iterations = 1000;
         double RC = 1;
         double initialVelocity = 0.03;
         double particleRadius = 0;
@@ -68,7 +68,7 @@ public class Benchmark {
         double maxNoise = 5;
         List<Double> etas = IntStream.range(0,(int)(maxNoise*(1/step) + 1)).mapToDouble(i-> i*step).boxed().collect(Collectors.toList());
         System.out.println(etas);
-        int iterations = 1;
+        int iterations = 1000;
         double density = 4.0;
         double RC = 1;
         double initialVelocity = 0.03;
