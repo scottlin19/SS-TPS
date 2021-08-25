@@ -25,11 +25,10 @@ public class Main {
             CimConfig config = new Gson().fromJson(bufferedReader, CimConfig.class);
             String static_file = config.getStatic_file();
             String dynamic_file = config.getDynamic_file();
-            System.out.println(static_file);
-            System.out.println(dynamic_file);
             OffLattice offLattice = new OffLattice(static_file, dynamic_file);
             offLattice.simulate();
             offLattice.saveResults("simulation.exyz");
+
         }
         catch(FileNotFoundException e){
             e.printStackTrace();

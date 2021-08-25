@@ -11,23 +11,34 @@ import java.util.stream.Collectors;
 public class OffLattice {
 
     private Grid grid;
-    private final List<Particle> particles;
+    private List<Particle> particles;
 
-    private final StaticFile sf;
+    private final StaticData sd;
 
     private final List<GridSnapshot> snapshots;
 
+    // Contruct OffLattice from static and dynamic files
     public OffLattice(String staticDataPath, String dynamicDataPath){
         this.particles = new ArrayList<>();
-        this.sf =  new StaticFile(staticDataPath,particles);
+        this.sd = new StaticData(staticDataPath,particles);
         DynamicFile.initDynamicData(dynamicDataPath,particles);
-        System.out.println(this.particles);
         this.snapshots = new ArrayList<>();
     }
 
+    // Contruct OffLattice from provided values (for benchmarking usage)
+    public OffLattice(List<Particle> particles, int L, int maxM, double RC, boolean hasWalls, int maxIterations, double ETA){
+        this.particles = particles;
+        this.sd = new StaticData(L, maxM, RC, hasWalls, maxIterations, ETA);
+        this.snapshots = new ArrayList<>();
+    }
+
+    public void setParticles(List<Particle> particles){
+        this.particles = particles;
+    }
+
     public void simulate(){
-            int iterations = sf.getMaxIterations();
-            grid = new Grid(sf.getL(),sf.getMaxM(),sf.getRC(),sf.getHasWalls(),this.particles);
+            int iterations = sd.getMaxIterations();
+            grid = new Grid(sd.getL(),sd.getMaxM(),sd.getRC(),sd.getHasWalls(),this.particles);
             grid.completeGrid();
 
             for (int i = 0; i < iterations; i++) {
@@ -36,7 +47,7 @@ public class OffLattice {
                 grid.updateParticles();
                 grid.updateGrid();
             }
-            System.out.println(snapshots.stream().mapToDouble(GridSnapshot::getVA).average().orElse(0));
+
     }
 
     private void snapshot(){
@@ -46,5 +57,17 @@ public class OffLattice {
     // Guarda a archivo XYZ
     public void saveResults(String fileName){
         OutputFile.createOutputFile(snapshots.stream().map(GridSnapshot::getParticlesData).collect(Collectors.toList()), fileName);
+    }
+
+    //Guarda archivo para los VAs en Json
+    public void saveVAResults(String fileName){
+//        OutputFile.createVAOutputFile(snapshots.stream().map(GridSnapshot::getVA).collect(Collectors.toList()), sd.getMaxIterations(), sd.getETA(), fileName);
+    }
+
+
+    /////////////////////////////////////////////////////////
+
+    public List<Double> getVAs() {
+        return snapshots.stream().map(GridSnapshot::getVA).collect(Collectors.toList());
     }
 }
