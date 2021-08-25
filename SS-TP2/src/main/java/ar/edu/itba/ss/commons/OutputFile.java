@@ -52,7 +52,7 @@ public class OutputFile {
                         "stds": lista desviaciones estandar
                        }))
     */
-   public static void createVAOutputFile(Map<Integer,Map<Double, Map<String,List<Double>>>> datas, String fileName) {
+   public static void createEtaBenchmarkOutputFile(Map<Integer,Map<Double, Map<String,List<Double>>>> datas, String fileName) {
        JsonObject resp = new JsonObject();
        Set<Integer> Ns = datas.keySet();
        JsonArray datasJson = new JsonArray();
@@ -96,34 +96,46 @@ public class OutputFile {
    }
 
 
-    public static void createVAOutputFile(List<List<Double>> VAs, Integer maxIterations, List<Double> eta, String fileName) {
+    public static void createDensityBenchmarkOutputFile(Map<Double, Map<Double, Map<String, List<Double>>>> datas, String fileName) {
         JsonObject resp = new JsonObject();
-        JsonArray totalData = new JsonArray();
+        Set<Double> etas = datas.keySet();
+        JsonArray datasJson = new JsonArray();
 
-        int VAsSize = VAs.size();
-        for (int i = 0; i < VAsSize; i++) {
+        for (Double eta : etas) {
             JsonObject data = new JsonObject();
-            JsonArray VAData = new JsonArray();
+            JsonArray densitiesJson = new JsonArray();
 
-            data.addProperty("eta",eta.get(i));
-            VAs.get(i).forEach(VAData::add);
-            data.add("vas",VAData);
-            totalData.add(data);
+            Map<Double, Map<String, List<Double>>> densities = datas.get(eta);
+            for (Double density : densities.keySet()) {
+                JsonObject densityJson = new JsonObject();
+                Map<String, List<Double>> etaData = densities.get(density);
+                JsonArray avgs = new JsonArray();
+                JsonArray stds = new JsonArray();
+
+                etaData.get("avgs").forEach(avgs::add);
+                etaData.get("stds").forEach(stds::add);
+
+                densityJson.addProperty("density", density);
+                densityJson.add("avgs", avgs);
+                densityJson.add("stds", stds);
+
+                densitiesJson.add(densityJson);
+            }
+
+            data.addProperty("eta", eta);
+            data.add("densities", densitiesJson);
+            datasJson.add(data);
         }
 
-        resp.addProperty("vasQuantity",VAsSize);
-        resp.addProperty("iterations", maxIterations);
-        resp.add("data", totalData);
+        resp.add("data", datasJson);
 
         try {
             FileWriter fw = new FileWriter(RESULTS_DIRECTORY + fileName);
-            fw.write(resp.getAsString());
+            fw.write(new Gson().toJson(resp));
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
 
 }
