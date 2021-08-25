@@ -9,10 +9,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Scanner;
 
-public class StaticFile {
+public class StaticData {
     private Integer L;
     private Integer N;
     private Double RC;
@@ -22,14 +21,23 @@ public class StaticFile {
     private Boolean hasWalls;
     private Integer maxIterations;
 
-    public StaticFile(String staticDataPath, List<Particle> particles){
+    public StaticData(String staticDataPath, List<Particle> particles){
         initStaticData(staticDataPath, particles);
+    }
+
+    public StaticData(int L, int MAX_M, double RC, boolean hasWalls, int maxIterations, double ETA){
+        this.L = L;
+        this.RC = RC;
+        this.MAX_M = MAX_M;
+        this.hasWalls = hasWalls;
+        this.maxIterations = maxIterations;
+        this.ETA = ETA;
     }
 
     public void initStaticData(String staticDataPath, List<Particle> particles){
         Scanner sc = null;
         // pass the path to the file as a parameter
-        URL resource = StaticFile.class.getClassLoader().getResource(staticDataPath);
+        URL resource = StaticData.class.getClassLoader().getResource(staticDataPath);
         if (resource == null) {
             throw new IllegalArgumentException("File not found!");
         } else {
@@ -100,7 +108,7 @@ public class StaticFile {
                 if(maxRadius < radius){
                     maxRadius = radius;
                 }
-                particles.add(new Particle(line++,0.0,0.0,radius,ETA,initialVelocity));
+                particles.add(new Particle(line++,0.0,0.0,radius,ETA,initialVelocity,0.0));
 
             }
             System.out.println("Loaded "+line+" particles.");

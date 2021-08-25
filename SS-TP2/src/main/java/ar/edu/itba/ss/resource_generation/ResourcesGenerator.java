@@ -23,7 +23,36 @@ public class ResourcesGenerator {
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(config_url.getFile()));
             RandomParticlesGeneratorConfig config = new Gson().fromJson(bufferedReader, RandomParticlesGeneratorConfig.class);
-            final List<int[]> directions = new ArrayList<>(){
+
+            StringBuilder static_data_sb = new StringBuilder();
+            StringBuilder dynamic_data_sb = new StringBuilder("t0\n");
+
+            List<Particle> particles = generateParticles(config);
+            String header = particles.size() + "\n" + config.getL() + "\n" + config.getRC() + "\n" + (config.getHasWalls() ? "1" : "0") + "\n" + config.getETA() + "\n" + config.getMaxIter() + "\n" + config.getInitialVelocity() + "\n";
+            static_data_sb.insert(0,header);
+            for(Particle particle: particles){
+                dynamic_data_sb.append(particle.getPosX()).append(" ").append(particle.getPosY()).append(" ").append(particle.getVelocity()).append(" ").append(particle.getDirection()).append("\n");
+                static_data_sb.append(particle.getRadius()).append("\n");
+
+            }
+            dynamic_data_sb.append("t1\n");
+
+            writeToResources("random_particles_dynamic_data.txt",dynamic_data_sb.toString());
+            writeToResources("random_particles_static_data.txt",static_data_sb.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+    public static List<Particle> generateParticles(final RandomParticlesGeneratorConfig config) {
+        if (config == null) {
+            throw new NullPointerException("Config can't be null.");
+        }
+
+            final List<int[]> directions = new ArrayList<>() {
                 {
                     // add(new int[]{0, 0});
                     add(new int[]{-1, 0});
@@ -40,59 +69,47 @@ public class ResourcesGenerator {
             };
             int N = config.getN();
             int L = config.getL();
-            double velocity = config.getInitialVelocity();
+
             int RC = 0;
 //            boolean hasWalls = false;
             Random r = new Random();
             double radiusLimit = 0.7;
             double minRadius = 0.1;
 
-            int M = (int) Math.floor((L/(RC + 2*(radiusLimit+minRadius))));
+            int M = (int) Math.floor((L / (RC + 2 * (radiusLimit + minRadius))));
 //            double cellLong  = (double)L/M;
-            Grid grid = new Grid(L,M,RC,false, new ArrayList<>());
+            Grid grid = new Grid(L, M, RC, false, new ArrayList<>());
             int i = 0;
             int iter = 0;
-            StringBuilder static_data_sb = new StringBuilder();
-            StringBuilder dynamic_data_sb = new StringBuilder("t0\n");
 
-            Supplier<Double> radius_supplier = config.getParticle_radius() < 0 ? () -> r.nextDouble()*radiusLimit + minRadius : config::getParticle_radius;
+            Supplier<Double> radius_supplier = config.getParticleRadius() < 0 ? () -> r.nextDouble() * radiusLimit + minRadius : config::getParticleRadius;
 
-            while(i < N && iter < MAX_ITER){
-                System.out.println("ITER: "+iter + ", i: "+i);
+            List<Particle> result = new ArrayList<>();
+            while (i < N && iter < MAX_ITER) {
                 iter++;
-                double posx,posy;
+                double posx, posy;
                 double radius = radius_supplier.get();
                 posx = L * r.nextDouble();
                 posy = L * r.nextDouble();
-
-                Particle particle = new Particle(i,posx,posy,radius,0.0,0.0);
+                double direction = r.nextDouble() * 2 * Math.PI;
+                Particle particle = new Particle(i, posx, posy, radius, config.getETA(), config.getInitialVelocity(), direction);
 
                 int[] index = grid.addParticle(particle);
-                grid.addNeighboursForParticle(directions,particle, index[0], index[1]);
-                if(particle.hasNeighbours()){
+                grid.addNeighboursForParticle(directions, particle, index[0], index[1]);
+                if (particle.hasNeighbours()) {
                     grid.removeParticle(particle);
-                }
-                else{
+                } else {
                     i++;
                     iter = 0;
+                    result.add(particle);
 
-                    double direction = r.nextDouble()*2*Math.PI;
-
-                    dynamic_data_sb.append(posx).append(" ").append(posy).append(" ").append(velocity).append(" ").append(direction).append("\n");
-                    static_data_sb.append(radius).append("\n");
                 }
             }
-            String header = i + "\n" + L + "\n" + config.getRC() + "\n" + (config.getHasWalls() ? "1" : "0") + "\n" + config.getETA() + "\n" + config.getMaxIter() + "\n" + config.getInitialVelocity() + "\n";
-            static_data_sb.insert(0,header);
-            dynamic_data_sb.append("t1\n");
-            grid.printGrid();
-            writeToResources("random_particles_dynamic_data.txt",dynamic_data_sb.toString());
-            writeToResources("random_particles_static_data.txt",static_data_sb.toString());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+            return result;
 
     }
+
+
     public static void writeToResources(String resource, String content){
         String path = "src/main/resources/" + resource;
 

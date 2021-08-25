@@ -37,7 +37,7 @@ public class RandomParticlesGeneratorConfig {
         return hasWalls;
     }
 
-    public double getParticle_radius() {
+    public double getParticleRadius() {
         return particleRadius;
     }
 

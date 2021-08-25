@@ -17,13 +17,14 @@ public class Particle{
 
 
 
-    public Particle(int id,double posX,double posY,double radius,double ETA,double initialVelocity){
+    public Particle(int id,double posX,double posY,double radius,double ETA,double initialVelocity,double direction){
         this.id = id;
         this.radius = radius;
         this.ETA = ETA;
         this.velocity = initialVelocity;
         this.posX = posX;
         this.posY = posY;
+        this.direction = direction;
         this.neighboursDirs = new HashMap<>();
     }
 
