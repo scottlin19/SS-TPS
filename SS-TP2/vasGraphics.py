@@ -58,10 +58,9 @@ if __name__=="__main__":
         y = []
         err = []
         etas = NData['etas']
-        VaIters = len(eta['avgs'])
-        VaFrom = int(VaIters*0.75)
-        
-        for eta in etas: 
+        for eta in etas:
+            VaIters = len(eta['avgs'])
+            VaFrom = int(VaIters*0.75) 
             x.append(eta["eta"])
             mean = np.mean(eta["avgs"][VaFrom:])
             y.append(mean)
@@ -73,3 +72,33 @@ if __name__=="__main__":
     plt.ylabel("Va Promedio")
     plt.legend(bbox_to_anchor=(1.005, 1), loc='upper left', borderaxespad=0.)
     plt.show()
+
+
+     # -------------------------------------------------------------------------------
+
+    f2 = open(sys.argv[2])
+
+    jsonVAsData = json.load(f2)
+
+    for i,data in enumerate(jsonVAsData['data']):
+        eta = data["eta"]
+        x = []
+        y = []
+        err = []
+        densities = data['densities']
+        for density in densities:
+            VaIters = len(density['avgs'])
+            VaFrom = int(VaIters*0.75) 
+            x.append(density["density"])
+            mean = np.mean(density["avgs"][VaFrom:])
+            y.append(mean)
+            std = np.std(density["avgs"][VaFrom:])
+            err.append(std)
+        plt.errorbar(x, y, yerr=err, fmt=shapes[i], label = f'{ETA_UNICODE} = {eta}')
+    plt.title(f"VAs en funcion de la densidad con {iterations} iteraciones")
+    plt.xlabel("densidad")
+    plt.ylabel("Va Promedio")
+    plt.legend(bbox_to_anchor=(1.005, 1), loc='upper left', borderaxespad=0.)
+    plt.show()
+
+    
