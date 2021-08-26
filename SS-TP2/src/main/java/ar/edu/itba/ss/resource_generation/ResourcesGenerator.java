@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 public class ResourcesGenerator {
@@ -72,7 +73,7 @@ public class ResourcesGenerator {
 
             int RC = 0;
 //            boolean hasWalls = false;
-            Random r = new Random();
+            ThreadLocalRandom r = ThreadLocalRandom.current();
             double radiusLimit = 0.7;
             double minRadius = 0.1;
 
@@ -89,6 +90,7 @@ public class ResourcesGenerator {
                 iter++;
                 double posx, posy;
                 double radius = radius_supplier.get();
+
                 posx = L * r.nextDouble();
                 posy = L * r.nextDouble();
                 double direction = r.nextDouble() * 2 * Math.PI;
