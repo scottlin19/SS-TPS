@@ -7,6 +7,9 @@ import numpy as np
 ETA_UNICODE = "\u03B7"
 
 if __name__=="__main__":
+
+    def sort_using_eta(elem):
+        return elem['eta']
     
     f = open(sys.argv[1])
 
@@ -17,7 +20,8 @@ if __name__=="__main__":
     
     dataFor1stGraph = jsonVAsData['data'][2]
     n = dataFor1stGraph["n"]
-    etas = dataFor1stGraph["etas"]
+
+    etas = sorted(dataFor1stGraph["etas"],key=sort_using_eta)
     avgs = etas[2]["avgs"]
     iterations = len(avgs)
 
@@ -68,7 +72,7 @@ if __name__=="__main__":
             err.append(std)
         plt.errorbar(x, y, yerr=err, fmt=shapes[i], label = f'N = {n}')
     plt.title(f"VAs en funcion de {ETA_UNICODE} con {iterations} iteraciones")
-    plt.xlabel(f"{ETA_UNICODE}")
+    plt.xlabel(f"eta")
     plt.ylabel("Va Promedio")
     plt.legend(bbox_to_anchor=(1.005, 1), loc='upper left', borderaxespad=0.)
     plt.show()
@@ -79,8 +83,8 @@ if __name__=="__main__":
     f2 = open(sys.argv[2])
 
     jsonVAsData = json.load(f2)
-
-    for i,data in enumerate(jsonVAsData['data']):
+    data = sorted(jsonVAsData['data'],key=sort_using_eta)
+    for i,data in enumerate(data):
         eta = data["eta"]
         x = []
         y = []
