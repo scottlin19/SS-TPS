@@ -1,6 +1,7 @@
 {
-  "to_run": "simulation",
-  "static_file": "random_particles_static_data.txt",
-  "dynamic_file": "random_particles_dynamic_data.txt",
-  "benchmark_iterations": 10
+  "toRun": "simulation",
+  "staticFile": "random_particles_static_data.txt",
+  "dynamicFile": "random_particles_dynamic_data.txt",
+  "outputFile": "simulation2.exyz",
+  "benchmarkIterations": 10
 }

@@ -12,7 +12,18 @@ public class RandomParticlesGeneratorConfig {
     private int maxIter;
     private double initialVelocity;
     private double particleRadius;
-
+    private String fileName;
+    public RandomParticlesGeneratorConfig(String fileName,int N, int L, double RC, boolean hasWalls, double ETA, int maxIter, double initialVelocity, double particleRadius){
+        this.fileName = fileName;
+        this.N = N;
+        this.L = L;
+        this.RC = RC;
+        this.hasWalls = hasWalls;
+        this.ETA = ETA;
+        this.maxIter = maxIter;
+        this.initialVelocity = initialVelocity;
+        this.particleRadius = particleRadius;
+    }
 
     public RandomParticlesGeneratorConfig(int N, int L, double RC, boolean hasWalls, double ETA, int maxIter, double initialVelocity, double particleRadius){
         this.N = N;

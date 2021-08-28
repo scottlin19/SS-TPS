@@ -1,10 +1,11 @@
 {
-  "N": 300,
+  "N": 4000,
   "L": 7,
-  "RC": 0.5,
+  "RC": 0.3,
   "hasWalls": false,
-  "ETA": 4,
+  "ETA": 0.1,
   "maxIter": 1000,
   "initialVelocity": 0.03,
-  "particleRadius": 0
+  "particleRadius": 0,
+  "file": "simulation2"
 }

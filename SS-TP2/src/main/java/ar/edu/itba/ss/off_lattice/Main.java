@@ -1,4 +1,4 @@
-package ar.edu.itba.ss;
+package ar.edu.itba.ss.off_lattice;
 
 import ar.edu.itba.ss.cim.CimConfig;
 import ar.edu.itba.ss.off_lattice.OffLattice;
@@ -23,11 +23,11 @@ public class Main {
         try {
             bufferedReader = new BufferedReader(new FileReader(config_url.getFile()));
             CimConfig config = new Gson().fromJson(bufferedReader, CimConfig.class);
-            String static_file = config.getStatic_file();
-            String dynamic_file = config.getDynamic_file();
+            String static_file = config.getStaticFile();
+            String dynamic_file = config.getDynamicFile();
             OffLattice offLattice = new OffLattice(static_file, dynamic_file);
             offLattice.simulate();
-            offLattice.saveResults("simulation.exyz");
+            offLattice.saveResults(config.getOutputFile());
 
         }
         catch(FileNotFoundException e){
