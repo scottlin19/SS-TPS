@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,14 +31,9 @@ public class OutputFile {
             sb.append(snapshots.get(0).size()).append("\n\n");
             for(ParticleDTO dto: snapshot){
                 double direction = dto.getDirection() < 0 ?  2*Math.PI - Math.abs(dto.getDirection()) : dto.getDirection();
-                boolean isFirstHalf = direction < Math.PI;
-                double colorProportion = isFirstHalf ? direction / Math.PI : (direction-Math.PI) / Math.PI;
-
-                double redProportion = isFirstHalf ? 1 - colorProportion : colorProportion;
-                double greenProportion = 1-redProportion/4;
-                double blueProportion = 1-redProportion;
-
-                sb.append(dto.getPosX()).append(" ").append(dto.getPosY()).append(" ").append(direction).append(" ").append(redProportion).append(" ").append(greenProportion).append(" ").append(blueProportion).append("\n");
+                double colorProportion = direction / (2*Math.PI);
+                Color color = Color.getHSBColor((float) colorProportion,0.7f,0.7f);
+                sb.append(dto.getPosX()).append(" ").append(dto.getPosY()).append(" ").append(direction).append(" ").append((double)color.getRed()/255).append(" ").append((double)color.getGreen()/255).append(" ").append((double)color.getBlue()/255).append("\n");
             }
         }
         try {

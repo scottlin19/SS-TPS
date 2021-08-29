@@ -11,11 +11,11 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Benchmark {
+public class BenchmarkRunner {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         double noiseStep = 0.1;
-        double maxNoise = 7;
+        double maxNoise = 6;
         int varyEtaIterations = 1500;
         double density = 4.0;
         double RC = 1;
@@ -26,12 +26,12 @@ public class Benchmark {
         double maxDensity = 5;
         int varyDensityIterations = 1500;
         int L = 20;
-        List<Double> etas = Arrays.asList(0.1,2.0,5.0);
+        List<Double> etas = Arrays.asList(0.1,1.0,5.0);
         CompletableFuture<Map<Double,Map<Double,List<Double>>>> c2 = CompletableFuture.supplyAsync(()->varyDensity(maxDensity,densityStep,varyDensityIterations,L,RC,initialVelocity,etas));
 
         CompletableFuture<Void> combined = c1.thenCombineAsync(c2, (data, data2)->{
-            OutputFile.createEtaBenchmarkOutputFile(data, "benchmark_varyEta3.json",varyEtaIterations,RC,density);
-            OutputFile.createDensityBenchmarkOutputFile(data2, "benchmark_varyDensity3.json",varyDensityIterations,RC,L);
+            OutputFile.createEtaBenchmarkOutputFile(data, "benchmark_varyEta5.json",varyEtaIterations,RC,density);
+            OutputFile.createDensityBenchmarkOutputFile(data2, "benchmark_varyDensity5.json",varyDensityIterations,RC,L);
             return null;
         });
         combined.get();
@@ -41,14 +41,12 @@ public class Benchmark {
 
         double particleRadius = 0;
         List<Double> densities = IntStream.range(1,(int)(maxDensity*(1/step) + 1)).mapToDouble(i-> i*step).boxed().collect(Collectors.toList());
-        System.out.println("densities: "+densities);
+        System.out.println("VD) densities: "+densities);
 
         int surface = (int)Math.pow(L,2);
         List<Integer> Ns = densities.stream().map(d-> (int)(d*surface)).collect(Collectors.toList());
         System.out.println(densities);
-        System.out.println("Ns: "+Ns);
-
-
+        System.out.println("VD) Ns: "+Ns);
 
         Map<Double,Map<Double,List<Double>>> data = new HashMap<>();
            /* Map<Integer,Map<Double, List<Double>>> data
@@ -80,7 +78,7 @@ public class Benchmark {
 //        List<Integer> Ns = Arrays.asList(32,64,256,1024,4096,16384);
 
         List<Integer> Ls = Ns.stream().map(N-> (int)Math.sqrt(N/density)).collect(Collectors.toList());
-        System.out.println("Ls: "+Ls);
+        System.out.println("VE) Ls: "+Ls);
        // System.out.println("Ls: "+Ls);
 
         Map<Integer,Map<Double,List<Double>>> data = new HashMap<>();
