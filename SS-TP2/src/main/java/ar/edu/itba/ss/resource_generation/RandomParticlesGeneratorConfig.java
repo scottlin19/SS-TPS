@@ -1,20 +1,18 @@
 package ar.edu.itba.ss.resource_generation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RandomParticlesGeneratorConfig {
-    private int N;
-    private int L;
-    private double RC;
-    private boolean hasWalls;
-    private double ETA;
-    private int maxIter;
-    private double initialVelocity;
-    private double particleRadius;
-    private String fileName;
-    public RandomParticlesGeneratorConfig(String fileName,int N, int L, double RC, boolean hasWalls, double ETA, int maxIter, double initialVelocity, double particleRadius){
-        this.fileName = fileName;
+    private final int N;
+    private final int L;
+    private final double RC;
+    private final boolean hasWalls;
+    private final double ETA;
+    private final int maxIter;
+    private final double initialVelocity;
+    private final double particleRadius;
+    private final String outputFile;
+
+
+    public RandomParticlesGeneratorConfig(int N, int L, double RC, boolean hasWalls, double ETA, int maxIter, double initialVelocity, double particleRadius, String outputFile){
         this.N = N;
         this.L = L;
         this.RC = RC;
@@ -23,17 +21,11 @@ public class RandomParticlesGeneratorConfig {
         this.maxIter = maxIter;
         this.initialVelocity = initialVelocity;
         this.particleRadius = particleRadius;
+        this.outputFile = outputFile;
     }
 
-    public RandomParticlesGeneratorConfig(int N, int L, double RC, boolean hasWalls, double ETA, int maxIter, double initialVelocity, double particleRadius){
-        this.N = N;
-        this.L = L;
-        this.RC = RC;
-        this.hasWalls = hasWalls;
-        this.ETA = ETA;
-        this.maxIter = maxIter;
-        this.initialVelocity = initialVelocity;
-        this.particleRadius = particleRadius;
+    public String getOutputFile() {
+        return outputFile;
     }
 
     public int getL() {

@@ -28,6 +28,7 @@ public class OffLattice {
     // Contruct OffLattice from provided values (for benchmarking usage)
     public OffLattice(List<Particle> particles, int L, int maxM, double RC, boolean hasWalls, int maxIterations, double ETA){
         this.particles = particles;
+
         this.sd = new StaticData(L, maxM, RC, hasWalls, maxIterations, ETA);
         this.snapshots = new ArrayList<>();
     }

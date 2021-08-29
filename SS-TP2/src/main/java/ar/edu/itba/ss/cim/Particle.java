@@ -2,6 +2,7 @@ package ar.edu.itba.ss.cim;
 
 import java.sql.Array;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class Particle{
@@ -58,7 +59,7 @@ public class Particle{
     }
 
     private double randomNoise(){
-        Random r = new Random();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
         return r.nextDouble()*ETA - ETA/2;
     }
 

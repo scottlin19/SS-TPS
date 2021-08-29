@@ -15,12 +15,12 @@ public class Benchmark {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         double noiseStep = 0.1;
-        double maxNoise = 5;
+        double maxNoise = 7;
         int varyEtaIterations = 1500;
         double density = 4.0;
         double RC = 1;
         double initialVelocity = 0.03;
-        List<Integer> Ns = Arrays.asList(32,64,256,512,1024);
+        List<Integer> Ns = Arrays.asList(36,100,400,1024);
         CompletableFuture<Map<Integer,Map<Double,List<Double>>>> c1 = CompletableFuture.supplyAsync(()->varyETA(maxNoise,noiseStep,varyEtaIterations,density,RC,initialVelocity,Ns));
         double densityStep = 0.1;
         double maxDensity = 5;
@@ -30,8 +30,8 @@ public class Benchmark {
         CompletableFuture<Map<Double,Map<Double,List<Double>>>> c2 = CompletableFuture.supplyAsync(()->varyDensity(maxDensity,densityStep,varyDensityIterations,L,RC,initialVelocity,etas));
 
         CompletableFuture<Void> combined = c1.thenCombineAsync(c2, (data, data2)->{
-            OutputFile.createEtaBenchmarkOutputFile(data, "benchmark_varyEta.json",varyEtaIterations,RC,density);
-            OutputFile.createDensityBenchmarkOutputFile(data2, "benchmark_varyDensity.json",varyDensityIterations,RC,L);
+            OutputFile.createEtaBenchmarkOutputFile(data, "benchmark_varyEta3.json",varyEtaIterations,RC,density);
+            OutputFile.createDensityBenchmarkOutputFile(data2, "benchmark_varyDensity3.json",varyDensityIterations,RC,L);
             return null;
         });
         combined.get();
@@ -60,7 +60,7 @@ public class Benchmark {
             System.out.println("--------------------------" + eta + "--------------------------");
             for (int j = 0; j < densities.size(); j++) {
                 System.out.println("DENSITY = " + densities.get(j));
-                RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(Ns.get(j), L, RC, false, eta, iterations, initialVelocity, particleRadius);
+                RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(Ns.get(j), L, RC, false, eta, iterations, initialVelocity, particleRadius, null);
                 List<Particle> particles = ResourcesGenerator.generateParticles(config);
                 OffLattice ol = new OffLattice(particles, L, (int) Math.floor(L / RC), RC, config.getHasWalls(), iterations, eta);
                 ol.simulate();
@@ -80,6 +80,7 @@ public class Benchmark {
 //        List<Integer> Ns = Arrays.asList(32,64,256,1024,4096,16384);
 
         List<Integer> Ls = Ns.stream().map(N-> (int)Math.sqrt(N/density)).collect(Collectors.toList());
+        System.out.println("Ls: "+Ls);
        // System.out.println("Ls: "+Ls);
 
         Map<Integer,Map<Double,List<Double>>> data = new HashMap<>();
@@ -91,7 +92,7 @@ public class Benchmark {
             data.put(N,new HashMap<>());
             System.out.println("--------------------------" + N + "--------------------------");
             for(Double eta: etas){
-                RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N,Ls.get(i),RC,false,eta,iterations,initialVelocity,particleRadius);
+                RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N,Ls.get(i),RC,false,eta,iterations,initialVelocity,particleRadius, null);
                 List<Particle> particles = ResourcesGenerator.generateParticles(config);
                 OffLattice ol = new OffLattice(particles,Ls.get(i), (int) Math.floor(Ls.get(i)/RC),RC, config.getHasWalls(), iterations,eta);
                 ol.simulate();

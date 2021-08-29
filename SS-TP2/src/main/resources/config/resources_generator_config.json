@@ -7,5 +7,5 @@
   "maxIter": 1000,
   "initialVelocity": 0.03,
   "particleRadius": 0,
-  "file": "simulation2"
+  "outputFile": "simulation3.exyz"
 }

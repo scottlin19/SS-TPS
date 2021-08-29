@@ -78,6 +78,7 @@ public class ResourcesGenerator {
             double minRadius = 0.1;
 
             int M = (int) Math.floor((L / (RC + 2 * (radiusLimit + minRadius))));
+
 //            double cellLong  = (double)L/M;
             Grid grid = new Grid(L, M, RC, false, new ArrayList<>());
             int i = 0;
