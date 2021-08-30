@@ -60,7 +60,7 @@ public class Particle{
 
     private double randomNoise(){
 
-        return ThreadLocalRandom.current().nextDouble(- ETA/2, ETA/2);
+        return ThreadLocalRandom.current().nextDouble()*ETA - ETA/2;
     }
 
     public void clearNeighbours() {
