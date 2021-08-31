@@ -2,6 +2,7 @@ package ar.edu.itba.ss.off_lattice;
 
 import ar.edu.itba.ss.cim.Particle;
 import ar.edu.itba.ss.commons.OutputFile;
+import ar.edu.itba.ss.commons.ParticleDTO;
 import ar.edu.itba.ss.resource_generation.RandomParticlesGeneratorConfig;
 import ar.edu.itba.ss.resource_generation.ResourcesGenerator;
 
@@ -62,7 +63,7 @@ public class BenchmarkRunner {
                 List<Particle> particles = ResourcesGenerator.generateParticles(config);
                 OffLattice ol = new OffLattice(particles, L, (int) Math.floor(L / RC), RC, config.getHasWalls(), iterations, eta);
                 ol.simulate();
-                data.get(eta).put(densities.get(j), ol.getVAs());
+                data.get(eta).put(densities.get(j), toVA(ol.getSnapshotsData()));
             }
 
         }
@@ -94,12 +95,24 @@ public class BenchmarkRunner {
                 List<Particle> particles = ResourcesGenerator.generateParticles(config);
                 OffLattice ol = new OffLattice(particles,Ls.get(i), (int) Math.floor(Ls.get(i)/RC),RC, config.getHasWalls(), iterations,eta);
                 ol.simulate();
-                data.get(N).put(eta,ol.getVAs());
+                data.get(N).put(eta, toVA(ol.getSnapshotsData()));
             }
 
         }
         return data;
     }
 
-
+    private static List<Double> toVA(List<List<ParticleDTO>> particleListList){
+        List<Double> VAs = new ArrayList<>();
+        for(List<ParticleDTO> particleDTOList : particleListList){
+            double counterX = 0;
+            double counterY = 0;
+            for(ParticleDTO particle : particleDTOList){
+                counterX += Math.cos(particle.getDirection());
+                counterY += Math.sin(particle.getDirection());
+            }
+            VAs.add((1.0/ particleDTOList.size()) * Math.sqrt(Math.pow(counterX,2) + Math.pow(counterY,2)));
+        }
+        return VAs;
+    }
 }

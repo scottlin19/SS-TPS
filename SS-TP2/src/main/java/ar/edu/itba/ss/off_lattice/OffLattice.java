@@ -68,7 +68,7 @@ public class OffLattice {
 
     /////////////////////////////////////////////////////////
 
-    public List<Double> getVAs() {
-        return snapshots.stream().map(GridSnapshot::getVA).collect(Collectors.toList());
+    public List<List<ParticleDTO>> getSnapshotsData() {
+        return snapshots.stream().map(GridSnapshot::getParticlesData).collect(Collectors.toList());
     }
 }
