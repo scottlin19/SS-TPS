@@ -134,7 +134,7 @@ def runBenchmarkGraphs(varyEta, varyDensity):
         if str(density) == "0.1"or str(density) == "2.0"  or str(density) == "5.0" or str(density) == "10.0":
             vas = data["vas"]
             VaIters = len(vas)
-            plt.plot(VaIters, vas[],'o', label = f'{RO_UNICODE} = {str(density)}')
+            plt.plot(VaIters, vas,'o', label = f'{RO_UNICODE} = {str(density)}')
 
     plt.xlabel(f"Iteraciones")
     plt.ylabel("Polarización")
@@ -143,6 +143,7 @@ def runBenchmarkGraphs(varyEta, varyDensity):
     plt.grid()
     plt.savefig('results/VDFT.png')
     plt.show()
+
 def runSimulation(sim_file):
     f = open(sim_file)
 
