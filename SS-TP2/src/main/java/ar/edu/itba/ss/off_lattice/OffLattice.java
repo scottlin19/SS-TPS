@@ -58,6 +58,7 @@ public class OffLattice {
     // Guarda a archivo XYZ
     public void saveResults(String fileName){
         OutputFile.createOutputFile(snapshots.stream().map(GridSnapshot::getParticlesData).collect(Collectors.toList()), fileName);
+        OutputFile.createJsonOutputFile(snapshots.stream().map(GridSnapshot::getParticlesData).collect(Collectors.toList()), "simulation.json");
     }
 
     //Guarda archivo para los VAs en Json

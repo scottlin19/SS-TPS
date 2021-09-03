@@ -44,6 +44,40 @@ public class OutputFile {
             e.printStackTrace();
         }
     }
+
+    public static void createJsonOutputFile(List<List<ParticleDTO>> snapshots,String fileName){
+        File directory = new File(RESULTS_DIRECTORY);
+        if (!directory.exists()){
+            if(!directory.mkdir()){
+                System.out.println("Couldn't create directory results, exiting...");
+                System.exit(-1);
+            }
+        }
+        JsonObject resp = new JsonObject();
+        JsonArray datasJson = new JsonArray();
+        for(List<ParticleDTO> snapshot: snapshots){
+            JsonObject iteration = new JsonObject();
+            JsonArray particles = new JsonArray();
+            for(ParticleDTO dto: snapshot){
+                JsonObject particleHolder = new JsonObject();
+                particleHolder.addProperty("x",dto.getPosX());
+                particleHolder.addProperty("y",dto.getPosY());
+                particleHolder.addProperty("direction",dto.getDirection());
+                particles.add(particleHolder);
+            }
+            iteration.add("particles", particles);
+            datasJson.add(iteration);
+        }
+        resp.add("data",datasJson);
+        try {
+            FileWriter fw = new FileWriter(RESULTS_DIRECTORY + fileName);
+            fw.write(new Gson().toJson(resp));
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
    /* Map<Integer,Map<Double, Map<String,List<Double>>>> data
         N-> (Noise-> ({ "avgs": lista Vas,
                         "stds": lista desviaciones estandar
