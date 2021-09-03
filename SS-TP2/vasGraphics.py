@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt
 import json 
 import sys
 import numpy as np
-
+import math
 
 ETA_UNICODE = "\u03B7"
 RO_UNICODE = "\u03C1"
 
-if __name__=="__main__":
-
+def runBenchmarkGraphs(varyEta, varyDensity):
     def sort_using_eta(elem):
         return elem['eta']
 
@@ -19,7 +18,7 @@ if __name__=="__main__":
     def sort_using_RO(elem):
         return elem['density']
     
-    f = open(sys.argv[1])
+    f = open(varyEta)
 
     font = {
             'weight' : 'normal',
@@ -92,7 +91,7 @@ if __name__=="__main__":
 
 
 
-    f2 = open(sys.argv[2])
+    f2 = open(varyDensity)
 
     jsonVAsData = json.load(f2)
     data = sorted(jsonVAsData['data'],key=sort_using_eta)
@@ -144,4 +143,38 @@ if __name__=="__main__":
     plt.grid()
     plt.savefig('results/VDFT.png')
     plt.show()
+def runSimulation(sim_file):
+    f = open(sim_file)
+
+    jsonData = json.load(f)
+    data = jsonData["data"]
+    iterations = len(data)
+    vas = []
+    for iteration_data in data:
+        particles = iteration_data["particles"]
+        amount = len(particles)
+        counterX = 0
+        counterY = 0
+        for particle in particles:
+            counterX += math.cos(particle["direction"])
+            counterY += math.sin(particle["direction"])
+        vas.append((1.0/amount) * math.sqrt((counterX ** 2) + (counterY**2)))
+    plt.xlabel("Iteración")
+    # plt.ylim(0, 1.4)
+    plt.ylabel("Polarización")
+    plt.plot(range(iterations), vas, "o")
+    plt.show()
+
+
+if __name__=="__main__":
+    mode = sys.argv[1]
+    if mode == "s":
+        runSimulation(sys.argv[2])
+    elif mode == "b":
+        runBenchmarkGraphs(sys.argv[2], sys.argv[3])
+    else:
+        print("First argument must be \"s\" for simulation or \"b\" for benchmark")
+        exit(-1)
+    
+
     
