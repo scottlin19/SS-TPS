@@ -14,8 +14,18 @@ if __name__=="__main__":
 
     def sort_using_N(elem):
         return elem['n']
+
+    
+    def sort_using_RO(elem):
+        return elem['density']
     
     f = open(sys.argv[1])
+
+    font = {
+            'weight' : 'normal',
+            'size'   : 20}
+
+    plt.rc('font', **font)
 
     jsonVAsData = json.load(f)
 
@@ -23,8 +33,7 @@ if __name__=="__main__":
     # -------Grafico de VA en funcion de la cantidad de iteraciones-----------------
     
 
-    graphic_index = 3
-
+    graphic_index = 0
     VAiters = jsonVAsData["iterations"]
     VaData = sorted(jsonVAsData['data'],key=sort_using_N)
     dataFirstGraphic =  VaData[graphic_index]
@@ -43,13 +52,11 @@ if __name__=="__main__":
  
     for (i,eta) in enumerate(etas):
         
-        if i  > 0  and  (i ==1   or  i % 20 == 0):
-            vas = eta["vas"]
-            x = range(VAiters)
-            y = vas      
-            plt.plot(x, y, "o", label = f'{ETA_UNICODE} = {eta["eta"]}')
+        if i  > 0  and  (i ==1   or  i % 20 == 0):   
+            plt.plot(range(VAiters), eta["vas"], "o", label = f'{ETA_UNICODE} = {eta["eta"]}')
 
     plt.legend(loc='upper right', borderaxespad=0.)
+    plt.grid()
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=5)
     # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.savefig('results/VETA1.png')
@@ -65,7 +72,7 @@ if __name__=="__main__":
         y = []
         err = []
         etas = NData['etas']
-        VaFrom = int(VAiters*0.9) 
+        VaFrom = int(VAiters*0.8) 
         for eta in etas:
             
             x.append(eta["eta"])
@@ -78,11 +85,12 @@ if __name__=="__main__":
     plt.xlabel(f"Amplitud del ruido")
     plt.ylabel("Polarización")
     plt.legend(loc='upper right', borderaxespad=0.)
+    plt.grid()
     plt.savefig('results/VETA.png')
+  
     plt.show()
 
 
-     # -------------------------------------------------------------------------------
 
     f2 = open(sys.argv[2])
 
@@ -96,20 +104,44 @@ if __name__=="__main__":
         y = []
         err = []
         densities = data['densities']
-        VaFrom = int(VaIters*0.9) 
+        VaFrom = int(VaIters*0.5) 
         for density in densities:
         
             x.append(density["density"])
-            mean = np.mean(density["vas"][VaFrom:])
+            mean = np.mean(density["vas"])
             y.append(mean)
-            std = np.std(density["vas"][VaFrom:])
+            std = np.std(density["vas"])
             err.append(std)
         plt.errorbar(x, y, yerr=err, fmt=shapes[i], label = f'{ETA_UNICODE} = {eta}')
     #plt.title(f"VAs en funcion de la densidad con {VaIters} iteraciones con {ETA_UNICODE} constante")
     plt.xlabel(f"Densidad de partículas")
     plt.ylabel("Polarización")
     plt.legend( loc='upper right', borderaxespad=0.)
+    
+    plt.grid()
     plt.savefig('results/VD.png')
     plt.show()
 
+# ----------------------------------------------------------------------
+   
+    dataETA1 = sorted(jsonVAsData['data'],key=sort_using_eta)[1]
+    print("eta: "+ str(dataETA1["eta"]))
+    densities = sorted(dataETA1["densities"],key=sort_using_RO)
+    plt.ylim(0, 1.3)
+  
+    for i,data in enumerate(densities):
+        density = data["density"]
+       # print("density: "+str(density))
+        if str(density) == "0.1"or str(density) == "2.0"  or str(density) == "5.0" or str(density) == "10.0":
+            vas = data["vas"]
+            VaIters = len(vas)
+            plt.plot(VaIters, vas[],'o', label = f'{RO_UNICODE} = {str(density)}')
+
+    plt.xlabel(f"Iteraciones")
+    plt.ylabel("Polarización")
+    plt.legend( loc='upper right', borderaxespad=0.)
+    
+    plt.grid()
+    plt.savefig('results/VDFT.png')
+    plt.show()
     
