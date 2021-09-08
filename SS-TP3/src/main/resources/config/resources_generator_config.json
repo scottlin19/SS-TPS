@@ -1,0 +1,10 @@
+{
+  "N": 120,
+  "L": 16,
+  "RC": 1,
+  "ETA": 6,
+  "maxIter": 1500,
+  "initialVelocity": 0.03,
+  "particleRadius": 0,
+  "outputFile": "simulationETA6N1024.exyz"
+}
