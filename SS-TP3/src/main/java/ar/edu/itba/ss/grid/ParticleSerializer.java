@@ -1,10 +1,8 @@
-package ar.edu.itba.ss.cim;
+package ar.edu.itba.ss.grid;
 
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ParticleSerializer implements JsonSerializer<Particle> {
     @Override

@@ -2,55 +2,60 @@ package ar.edu.itba.ss.resource_generation;
 
 public class RandomParticlesGeneratorConfig {
     private final int N;
-    private final int L;
-    private final double RC;
-    private final double ETA;
+    private final double L;
     private final int maxIter;
-    private final double initialVelocity;
-    private final double particleRadius;
+    private final double maxVelocity;
+    private final double smallParticleRadius;
+    private final double bigMass;
+    private final double smallMass;
+    private final double bigParticleRadius;
     private final String outputFile;
 
-
-    public RandomParticlesGeneratorConfig(int N, int L, double RC, double ETA, int maxIter, double initialVelocity, double particleRadius, String outputFile){
-        this.N = N;
-        this.L = L;
-        this.RC = RC;
-        this.ETA = ETA;
+    public RandomParticlesGeneratorConfig(int n, double l, int maxIter, double maxVelocity, double smallParticleRadius, double bigParticleRadius, double bigMass,double smallMass,String outputFile) {
+        N = n;
+        L = l;
         this.maxIter = maxIter;
-        this.initialVelocity = initialVelocity;
-        this.particleRadius = particleRadius;
+        this.maxVelocity = maxVelocity;
+        this.smallParticleRadius = smallParticleRadius;
+        this.bigParticleRadius = bigParticleRadius;
+        this.bigMass = bigMass;
+        this.smallMass = smallMass;
         this.outputFile = outputFile;
     }
 
-    public String getOutputFile() {
-        return outputFile;
+    public double getBigMass(){
+        return bigMass;
     }
 
-    public int getL() {
-        return L;
-    }
-
-    public double getRC() {
-        return RC;
-    }
-
-    public double getParticleRadius() {
-        return particleRadius;
+    public double getSmallMass(){
+        return smallMass;
     }
 
     public int getN() {
         return N;
     }
 
-    public double getETA() {
-        return ETA;
+    public double getL() {
+        return L;
     }
 
     public int getMaxIter() {
         return maxIter;
     }
 
-    public double getInitialVelocity() {
-        return initialVelocity;
+    public double getMaxVelocity() {
+        return maxVelocity;
+    }
+
+    public double getSmallParticleRadius() {
+        return smallParticleRadius;
+    }
+
+    public double getBigParticleRadius() {
+        return bigParticleRadius;
+    }
+
+    public String getOutputFile() {
+        return outputFile;
     }
 }

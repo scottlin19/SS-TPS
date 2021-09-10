@@ -1,14 +1,11 @@
 package ar.edu.itba.ss.resource_generation;
 
-import ar.edu.itba.ss.cim.Grid;
-import ar.edu.itba.ss.cim.Particle;
-import com.google.gson.Gson;
+import ar.edu.itba.ss.brownian_motion.BrownianMotion;
+import ar.edu.itba.ss.grid.Particle;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Supplier;
 
 public class ResourcesGenerator {
 
@@ -52,65 +49,52 @@ public class ResourcesGenerator {
             throw new NullPointerException("Config can't be null.");
         }
 
-            final List<int[]> directions = new ArrayList<>() {
-                {
-                    // add(new int[]{0, 0});
-                    add(new int[]{-1, 0});
-                    add(new int[]{-1, 1});
-                    add(new int[]{0, 1});
-                    add(new int[]{1, 1});
-                    add(new int[]{1, 0});
-                    add(new int[]{0, -1});
-                    add(new int[]{-1, -1});
-                    add(new int[]{1, -1});
 
-
-                }
-            };
             int N = config.getN();
-            int L = config.getL();
-
-            int RC = 0;
-//            boolean hasWalls = false;
+            double L = config.getL();
             ThreadLocalRandom r = ThreadLocalRandom.current();
-            double radiusLimit = 0.7;
-            double minRadius = 0.2;
-
-            int M = (int) Math.floor((L / (RC + 2 * (radiusLimit + minRadius))));
 
 //            double cellLong  = (double)L/M;
-            Grid grid = new Grid(L, M, RC, true, new ArrayList<>());
             int i = 0;
             int iter = 0;
-            Particle bigParticle = new Particle(i++, (double)L/2, (double)L/2, radiusLimit, 2, 0 ,0);
-            grid.addParticle(bigParticle);
-//            Supplier<Double> radius_supplier = config.getParticleRadius() < 0 ? () -> r.nextDouble() * radiusLimit + minRadius : config::getParticleRadius;
+            Particle bigParticle = new Particle(i++, L/2, L/2, config.getBigParticleRadius(), config.getBigMass(), 0 ,0);
 
             List<Particle> result = new ArrayList<>();
+            result.add(bigParticle);
+            double smallRadius =  config.getSmallParticleRadius();
+            double smallMass = config.getSmallMass();
             while (i < N && iter < MAX_ITER) {
                 iter++;
                 double posx, posy;
                 double velx, vely;
 
-                posx = L * r.nextDouble();
-                posy = L * r.nextDouble();
-                velx = r.nextDouble() * 4 - 2;
-                vely = Math.sqrt(4-Math.pow(velx,2));
-                Particle particle = new Particle(i, posx, posy, minRadius, 0.7, velx, vely);
-
-                int[] index = grid.addParticle(particle);
-                grid.addNeighboursForParticle(directions, particle, index[0], index[1]);
-                if (particle.hasNeighbours()) {
-                    grid.removeParticle(particle);
-                } else {
+                posx = 0.01+smallRadius + (L-2*smallRadius-0.01) * r.nextDouble();
+                posy = 0.01+smallRadius + (L-2*smallRadius-0.01) * r.nextDouble();
+                double maxVel = config.getMaxVelocity();
+                velx = r.nextDouble() * 2* maxVel -  maxVel;
+                double maxVelY = Math.sqrt(2*maxVel-Math.pow(velx,2));
+                vely = r.nextDouble()*maxVelY;
+                Particle particle = new Particle(i, posx, posy, smallRadius, smallMass, velx, vely);
+                if(!hasNeighbours(particle,result)){
+                    result.add(particle);
                     i++;
                     iter = 0;
-                    result.add(particle);
-
                 }
+
             }
             return result;
 
+    }
+
+    private static boolean hasNeighbours(Particle p1, List<Particle> particles){
+
+        for(Particle p2 : particles){
+            double dist = Math.sqrt(Math.pow(p1.getPosX() - p2.getPosX(),2) + Math.pow(p1.getPosY() - p2.getPosY(),2)) - p1.getRadius() - p2.getRadius();
+            if(dist <= 0){
+                return true;
+            }
+        }
+        return false;
     }
 
 

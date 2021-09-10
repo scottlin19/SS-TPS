@@ -1,6 +1,6 @@
 package ar.edu.itba.ss.commons;
 
-import ar.edu.itba.ss.cim.Particle;
+import ar.edu.itba.ss.grid.Particle;
 
 
 import java.io.File;
@@ -128,31 +128,7 @@ public class StaticData {
         return N;
     }
 
-    public Double getRC() {
-        return RC;
-    }
-
-    public int getMaxM() {
-        return MAX_M;
-    }
-
-    public Boolean getHasWalls() {
-        return hasWalls;
-    }
-
-    public int getMAX_M() {
-        return MAX_M;
-    }
-
     public Integer getMaxIterations() {
         return maxIterations;
-    }
-
-    public double getInitialVelocity() {
-        return initialVelocity;
-    }
-
-    public double getETA() {
-        return ETA;
     }
 }

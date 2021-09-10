@@ -1,7 +1,8 @@
 package ar.edu.itba.ss.brownian_motion;
 
-import ar.edu.itba.ss.cim.CimConfig;
-import ar.edu.itba.ss.cim.Particle;
+import ar.edu.itba.ss.commons.OutputFile;
+import ar.edu.itba.ss.grid.CimConfig;
+import ar.edu.itba.ss.grid.Particle;
 import ar.edu.itba.ss.resource_generation.RandomParticlesGeneratorConfig;
 import ar.edu.itba.ss.resource_generation.ResourcesGenerator;
 import com.google.gson.Gson;
@@ -11,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SimulationRunner {
     public static void main(String[] args) {
@@ -34,7 +34,7 @@ public class SimulationRunner {
             CimConfig config = new Gson().fromJson(bufferedReader, CimConfig.class);
             String static_file = config.getStaticFile();
             String dynamic_file = config.getDynamicFile();
-            BrownianMotion brownianMotion = new BrownianMotion();
+//            BrownianMotion brownianMotion = new BrownianMotion();
 //            OffLattice offLattice = new OffLattice(static_file, dynamic_file);
 //            offLattice.simulate();
 //            offLattice.saveResults(config.getOutputFile());
@@ -56,13 +56,18 @@ public class SimulationRunner {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(config_url.getFile()));
             RandomParticlesGeneratorConfig config = new Gson().fromJson(bufferedReader, RandomParticlesGeneratorConfig.class);
             List<Particle> particles = ResourcesGenerator.generateParticles(config);
-//            OffLattice ol = new OffLattice(particles, config.getL(), (int) Math.floor(config.getL() / config.getRC()), config.getRC(), config.getHasWalls(), config.getMaxIter(), config.getETA());
-//            ol.simulate();
+            Particle bigParticle = particles.get(0);
+            BrownianMotion bm = new BrownianMotion(particles, config.getL(), bigParticle);
+            bm.simulate(new BigParticleCutCondition(bigParticle));
+
+            OutputFile.createOutputFile(bm.getSnapshots(),config.getOutputFile());
 //            ol.saveResults(config.getOutputFile());
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
+
 }
 
 

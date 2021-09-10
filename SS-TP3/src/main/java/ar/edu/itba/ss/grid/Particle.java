@@ -1,14 +1,8 @@
-package ar.edu.itba.ss.cim;
+package ar.edu.itba.ss.grid;
 
-import ar.edu.itba.ss.brownian_motion.WallCollisionEvent;
+import ar.edu.itba.ss.brownian_motion.Event;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
-import java.sql.Array;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class Particle{
 
@@ -34,42 +28,77 @@ public class Particle{
         double dX = p1.getPosX() - p2.getPosX();
         double dY = p1.getPosY() - p2.getPosY();
         Point2D.Double dR = new Point2D.Double(dX,dY);
-        Point2D.Double dV= new Point2D.Double(p1.getVelX()- p2.getVelX(),p1.getPosX() - p2.getVelX());
-        double theta = p1.getRadius() + p2.getRadius();
-        double J = 2*p1.getMass()*p2.getMass()*(dV.x*dR.x + dV.y*dR.y)/theta*(p1.getMass()+p2.getMass());
-        Point2D.Double Jv = new Point2D.Double(J*dX/theta,J*dY/theta);
+        Point2D.Double dV = new Point2D.Double(p1.getVelX()- p2.getVelX(),p1.getPosX() - p2.getVelX());
+        double sigma = p1.getRadius() + p2.getRadius();
+        double J = 2*p1.getMass()*p2.getMass()*(dV.x*dR.x + dV.y*dR.y)/sigma*(p1.getMass()+p2.getMass());
+        Point2D.Double Jv = new Point2D.Double(J*dX/sigma,J*dY/sigma);
 
+        System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p1.getId(),p1.getVelX(),p1.getVelY());
         p1.setVelX(p1.getVelX() + Jv.x/p1.getMass());
         p1.setVelY(p1.getVelY() + Jv.y/p1.getMass());
-
+        System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p1.getId(),p1.getVelX(),p1.getVelY());
+        System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p2.getId(),p2.getVelX(),p2.getVelY());
         p2.setVelX(p2.getVelX() - Jv.x/p2.getMass());
         p2.setVelY(p2.getVelY() - Jv.y/p2.getMass());
+        System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p2.getId(),p2.getVelX(),p2.getVelY());
 
     }
 
-    public static void updateWallCollision(Particle p, WallCollisionEvent.Direction direction) {
-        if (direction == WallCollisionEvent.Direction.X){
+    public static void updateWallCollision(Particle p, Event.Direction direction) {
+        if (direction == Event.Direction.X){
             p.setVelX(p.getVelX() * -1);
         }else{
             p.setVelY(p.getVelY() * -1);
         }
     }
+    public double getWallCollisionTime(double L, Event.Direction direction){
+        double tc = 0;
 
-    public double getCollisionTime(Particle p){
-        Point2D.Double dR = new Point2D.Double(posX - p.getPosX(),posY - p.getPosY());
-        Point2D.Double dV= new Point2D.Double(velX- p.getVelX(),velY - p.getVelX());
+
+        switch(direction){
+            case X:
+                if(velX > 0){
+                    tc = (L - radius - posX)/velX;
+                }else if(velX < 0){
+                    tc = (radius - posX)/velX;
+                }else{
+                    return Double.POSITIVE_INFINITY;
+                }
+                break;
+            case Y:
+                if(velY > 0){
+                    tc = (L - radius - posY)/velY;
+                }else if(velY < 0){
+                    tc = (radius - posY)/velY;
+                }else{
+                    return Double.POSITIVE_INFINITY;
+                }
+                break;
+
+        }
+
+
+        return tc;
+    }
+
+    public double getParticleCollisionTime(Particle p){
+        Point2D.Double dR = new Point2D.Double(p.getPosX()-posX, p.getPosY()-posY);
+        Point2D.Double dV= new Point2D.Double(p.getVelX()-velX,p.getVelY()-velY);
         double VR = dV.x * dR.x + dV.y * dR.y;
         if(VR >= 0){
             return Double.POSITIVE_INFINITY; //INFINITE
         }
-        double VV = dV.x * dV.x + dV.y * dV.y;
-        double RR = dR.x * dR.x + dR.y * dV.y;
-        double theta = radius + p.getRadius();
-        double d = Math.pow(VR,2) - VV*(RR - Math.pow(theta,2));
+        double VV = Math.pow(dV.x,2) + Math.pow(dV.y,2);
+        double RR = Math.pow(dR.x,2) + Math.pow(dR.y,2);
+        double sigma = radius + p.getRadius();
+        double d = Math.pow(VR,2) - VV*(RR - Math.pow(sigma,2));
 
         if(d < 0){
             return Double.POSITIVE_INFINITY; //INFINITE
         }
+        //System.out.printf("dVx: %f, dVy: %f, dRx: %f, dRy: %f, VR: %f, VV: %f, RR: %f, sigma: %f, d: %f, output: %f\n",dV.x,dV.y, dR.x,dR.y,VR, VV,RR,sigma,d,- (VR + Math.sqrt(d))/VV);
+        // raiz d > VR esta mal eso en modulo
+        //System.out.printf("VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",VR,d,Math.sqrt(d),VR + Math.sqrt(d));
         return - (VR + Math.sqrt(d))/VV;
     }
 

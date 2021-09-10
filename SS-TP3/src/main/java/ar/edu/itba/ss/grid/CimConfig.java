@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.cim;
+package ar.edu.itba.ss.grid;
 
 public class CimConfig {
     private final String toRun;
