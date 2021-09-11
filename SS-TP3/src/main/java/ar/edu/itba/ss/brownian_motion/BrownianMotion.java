@@ -35,12 +35,12 @@ public class BrownianMotion {
 
     public void simulate(CutCondition cutCondition){
         Event e = null;
-        for(int i = 0; i < 10; i++){
-            update();
-        }
-//        while(!cutCondition.cut(e)){
-//            e = update();
+//        for(int i = 0; i < 5; i++){
+//            update();
 //        }
+        while(!cutCondition.cut(e)){
+            e = update();
+        }
     }
 
     private void snapshot(Event event){
@@ -64,7 +64,6 @@ public class BrownianMotion {
 
         Particle p1 = e.getP1();
         Particle p2 = e.getP2();
-        double eTime = e.getTime();
         if(p2 == null){
             System.out.println("WALL COLLISION: EVENTO DE P1: " + p1.getId());
         }
@@ -74,7 +73,7 @@ public class BrownianMotion {
 
         //PASO 3: Updeteamos posiciones de particulas
         System.out.println("");
-        particles.forEach(p ->  p.update(eTime));
+        particles.forEach(p ->  p.update(tc));
         System.out.println("Updated times: "+particles);
         // PASO 4: Sacar snapshot
         snapshot(e);
@@ -88,9 +87,9 @@ public class BrownianMotion {
         events.forEach(ev -> ev.updateTime(tc));
 
         // PASO 6: Calculamos los eventos para las particulas que participaron en la colision
-        calculateEventForParticle(p1);
+        calculateEventForParticle(p1,p2);
         if(p2 != null){
-            calculateEventForParticle(p2);
+            calculateEventForParticle(p2,p1);
         }
 
         return e;
@@ -100,12 +99,12 @@ public class BrownianMotion {
     public void calculateEvents(){
 
         for(Particle p1: particles){
-            calculateEventForParticle(p1); //no cheuear con la que me acabo de colisionar re alpedo
+            calculateEventForParticle(p1,null);
         }
     }
 
-    public void calculateEventForParticle(Particle p){
-        System.out.println("CALCULO EVENT PARA "+p.getId());
+    public void calculateEventForParticle(Particle p, Particle exclude){
+        System.out.println("CALCULO EVENT PARA " + p);
         double tcParticle = Double.POSITIVE_INFINITY;
         Event.Direction dir;
 
@@ -122,7 +121,7 @@ public class BrownianMotion {
         }
         Particle cParticle = null;
         for(Particle p2 : particles){
-            if(!p.equals(p2)){ // no me anda el cerebelo si dontCheck da null quiero que entre :sno entiendo
+            if(!p.equals(p2) && !p2.equals(exclude)){
                 double t = p.getParticleCollisionTime(p2);
                     if(t < 0){
                         System.out.printf("T da negativo: X1: %f Y1: %f X2: %f Y2: %f  \n",p.getPosX(),p.getPosY(),p2.getPosX(),p2.getPosY());
