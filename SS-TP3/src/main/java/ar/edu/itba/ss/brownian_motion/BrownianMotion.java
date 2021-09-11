@@ -35,9 +35,13 @@ public class BrownianMotion {
 
     public void simulate(CutCondition cutCondition){
         Event e = null;
-        while(!cutCondition.cut(e)){
-            e = update();
+        for(int i = 0; i < 100; i++){
+            update();
         }
+
+//        while(!cutCondition.cut(e)){
+//            e = update();
+//        }
     }
 
     private void snapshot(Event event){
@@ -71,7 +75,7 @@ public class BrownianMotion {
         //PASO 3: Updeteamos posiciones de particulas
         System.out.println("");
         particles.forEach(p ->  p.update(eTime));
-
+        System.out.println("Updated times: "+particles);
         // PASO 4: Sacar snapshot
         snapshot(e);
         // PASO 5: Aplicamos operador de colision con las particulas del evento

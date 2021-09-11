@@ -27,8 +27,10 @@ public class Event implements Comparable<Event>{
 
     public void update(){
         if(isWallCollision()){ // Is wall collision
+            System.out.println("es wall collision");
             Particle.updateWallCollision(p1,direction);
         }else{
+            System.out.println("es particle collision");
             Particle.updateParticleCollision(p1,p2);
         }
     }
@@ -54,7 +56,12 @@ public class Event implements Comparable<Event>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Event event = (Event) o;
-        return Double.compare(event.time, time) == 0;
+        if(p2 == null){
+            return Double.compare(event.time, time) == 0 && p1.equals(event.p1) && direction == event.direction;
+        }else{
+            return Double.compare(event.time, time) == 0 && p1.equals(event.p1)  && p2.equals(event.p2);
+        }
+
     }
 
     @Override

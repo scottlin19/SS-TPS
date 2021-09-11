@@ -28,9 +28,9 @@ public class Particle{
         double dX = p1.getPosX() - p2.getPosX();
         double dY = p1.getPosY() - p2.getPosY();
         Point2D.Double dR = new Point2D.Double(dX,dY);
-        Point2D.Double dV = new Point2D.Double(p1.getVelX()- p2.getVelX(),p1.getPosX() - p2.getVelX());
+        Point2D.Double dV = new Point2D.Double(p1.getVelX()- p2.getVelX(),p1.getVelY() - p2.getVelY());
         double sigma = p1.getRadius() + p2.getRadius();
-        double J = 2*p1.getMass()*p2.getMass()*(dV.x*dR.x + dV.y*dR.y)/sigma*(p1.getMass()+p2.getMass());
+        double J = 2*p1.getMass()*p2.getMass()*(dV.x*dR.x + dV.y*dR.y)/(sigma*(p1.getMass()+p2.getMass()));
         Point2D.Double Jv = new Point2D.Double(J*dX/sigma,J*dY/sigma);
 
         System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p1.getId(),p1.getVelX(),p1.getVelY());
@@ -45,21 +45,23 @@ public class Particle{
     }
 
     public static void updateWallCollision(Particle p, Event.Direction direction) {
+        System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p.getId(),p.getVelX(),p.getVelY());
         if (direction == Event.Direction.X){
             p.setVelX(p.getVelX() * -1);
         }else{
             p.setVelY(p.getVelY() * -1);
         }
+        System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p.getId(),p.getVelX(),p.getVelY());
     }
     public double getWallCollisionTime(double L, Event.Direction direction){
         double tc = 0;
-
-
         switch(direction){
             case X:
                 if(velX > 0){
+                    System.out.println("choco con pared derecha");
                     tc = (L - radius - posX)/velX;
                 }else if(velX < 0){
+                    System.out.println("choco con pared izq");
                     tc = (radius - posX)/velX;
                 }else{
                     return Double.POSITIVE_INFINITY;
@@ -67,8 +69,11 @@ public class Particle{
                 break;
             case Y:
                 if(velY > 0){
+
+                    System.out.println("choco con pared abajo");
                     tc = (L - radius - posY)/velY;
                 }else if(velY < 0){
+                    System.out.println("choco con pared arriba");
                     tc = (radius - posY)/velY;
                 }else{
                     return Double.POSITIVE_INFINITY;
@@ -82,14 +87,14 @@ public class Particle{
     }
 
     public double getParticleCollisionTime(Particle p){
-        Point2D.Double dR = new Point2D.Double(p.getPosX()-posX, p.getPosY()-posY);
-        Point2D.Double dV= new Point2D.Double(p.getVelX()-velX,p.getVelY()-velY);
-        double VR = dV.x * dR.x + dV.y * dR.y;
+        Point2D.Double dR = new Point2D.Double(p.getPosX()-posX, p.getPosY()-posY); //  ΔR
+        Point2D.Double dV= new Point2D.Double(p.getVelX()-velX,p.getVelY()-velY); //  ΔV
+        double VR = dV.x * dR.x + dV.y * dR.y;//   ΔV*ΔR = ΔVx*Δx +  ΔVy*Δy
         if(VR >= 0){
             return Double.POSITIVE_INFINITY; //INFINITE
         }
-        double VV = Math.pow(dV.x,2) + Math.pow(dV.y,2);
-        double RR = Math.pow(dR.x,2) + Math.pow(dR.y,2);
+        double VV = Math.pow(dV.x,2) + Math.pow(dV.y,2); //  ΔV*ΔV  =  ΔVx^2  +  ΔVy^2
+        double RR = Math.pow(dR.x,2) + Math.pow(dR.y,2);//   ΔR*ΔR  =  Δx^2  +  Δy^2
         double sigma = radius + p.getRadius();
         double d = Math.pow(VR,2) - VV*(RR - Math.pow(sigma,2));
 
@@ -98,13 +103,15 @@ public class Particle{
         }
         //System.out.printf("dVx: %f, dVy: %f, dRx: %f, dRy: %f, VR: %f, VV: %f, RR: %f, sigma: %f, d: %f, output: %f\n",dV.x,dV.y, dR.x,dR.y,VR, VV,RR,sigma,d,- (VR + Math.sqrt(d))/VV);
         // raiz d > VR esta mal eso en modulo
-        //System.out.printf("VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",VR,d,Math.sqrt(d),VR + Math.sqrt(d));
+        System.out.printf("VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",VR,d,Math.sqrt(d),VR + Math.sqrt(d));
         return - (VR + Math.sqrt(d))/VV;
     }
 
     public void update(double time){
+        System.out.println("PREV POS p+ "+id + " X: "+posX + " Y: "+posY);
         posX += time * velX;
         posY += time * velY;
+        System.out.println("NUEVA POS p+ "+id + " X: "+posX + " Y: "+posY);
     }
 
 
@@ -163,11 +170,11 @@ public class Particle{
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Particle: " + id + "{" +
-                "posX=" + posX +
-                ", posY=" + posY+", radius= "+radius+", neighbours= [");
 
-        return sb.append("]}").toString();
+
+        return "Particle: " + id + "{" +
+                "posX=" + posX +
+                ", posY=" + posY+", radius= "+radius;
     }
 
     @Override
