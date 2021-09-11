@@ -56,12 +56,21 @@ public class Event implements Comparable<Event>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Event event = (Event) o;
-        if(p2 == null){
-            return Double.compare(event.time, time) == 0 && p1.equals(event.p1) && direction == event.direction;
-        }else{
-            return Double.compare(event.time, time) == 0 && p1.equals(event.p1)  && p2.equals(event.p2);
+
+        // if events are of different type
+        if((p2 == null && event.getP2() != null) || (p2 != null && event.getP2() != null)){
+            return false;
+        }
+        boolean ret = Double.compare(event.time, time) == 0;
+
+        if(p2 == null && direction != null){
+            ret = ret && p1.equals(event.p1) && direction.equals(event.direction);
+        }
+        else{
+            ret = ret &&  (p1.equals(event.p1) && p2.equals(event.p2)) || (p1.equals(event.p2) && p2.equals(event.p1));
         }
 
+        return ret;
     }
 
     @Override

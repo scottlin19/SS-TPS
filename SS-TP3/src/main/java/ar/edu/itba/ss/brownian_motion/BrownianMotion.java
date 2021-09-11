@@ -35,10 +35,9 @@ public class BrownianMotion {
 
     public void simulate(CutCondition cutCondition){
         Event e = null;
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 5; i++){
             update();
         }
-
 //        while(!cutCondition.cut(e)){
 //            e = update();
 //        }
@@ -50,6 +49,7 @@ public class BrownianMotion {
 
     // For every particle --> get Tc
     public Event update(){
+        System.out.println("---------------- UPDATE -------------------");
         if(events.isEmpty()){
             calculateEvents();
         }
