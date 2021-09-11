@@ -12,7 +12,7 @@ public class SimulationSnapshot {
     private final Event event;
 
     public SimulationSnapshot(List<Particle> particles, Event event){
-        this.particlesData = new ArrayList<>(particles);
+        this.particlesData = particles.stream().map(p -> new Particle(p.getId(),p.getPosX(),p.getPosY(),p.getRadius(), p.getMass(),p.getVelX(),p.getVelY())).collect(Collectors.toList());
         this.event = event;
     }
 

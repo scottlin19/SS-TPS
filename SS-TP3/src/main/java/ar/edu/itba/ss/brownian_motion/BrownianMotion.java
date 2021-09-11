@@ -35,7 +35,7 @@ public class BrownianMotion {
 
     public void simulate(CutCondition cutCondition){
         Event e = null;
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < 10; i++){
             update();
         }
 //        while(!cutCondition.cut(e)){
