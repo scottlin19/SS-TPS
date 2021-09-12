@@ -65,7 +65,7 @@ public class SimulationRunner {
             bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
 
             OutputFile.createOutputFile(bm,config.getOutputFile(), OutputTypeEnum.EXYZ);
-            OutputFile.createOutputFile(bm,"simulation.json", OutputTypeEnum.JSON);
+            OutputFile.createOutputFile(bm,"simulation", OutputTypeEnum.JSON);
 //            ol.saveResults(config.getOutputFile());
 
         } catch (FileNotFoundException e) {

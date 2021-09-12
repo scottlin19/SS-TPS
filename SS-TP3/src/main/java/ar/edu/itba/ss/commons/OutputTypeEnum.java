@@ -49,6 +49,7 @@ public enum OutputTypeEnum {
                 List<Particle> eventParticles = event.getParticles();
                 JsonArray eventParticlesData = new JsonArray();
                 eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
+                eventData.add("collisionedParticles",eventParticlesData);
                 iteration.add("event", eventData);
                 JsonArray particlesData = new JsonArray();
                 particles.forEach(p -> particlesData.add(particleAsJson(p)));
