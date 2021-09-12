@@ -1,5 +1,6 @@
 package ar.edu.itba.ss.commons;
 
+import ar.edu.itba.ss.brownian_motion.BrownianMotion;
 import ar.edu.itba.ss.grid.Particle;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,16 +11,12 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class OutputFile {
 
     private static final String RESULTS_DIRECTORY = "results/";
 
-    public static void createOutputFile(List<SimulationSnapshot> simulationSnapshots, String fileName){
+    public static void createOutputFile(BrownianMotion bm, String outPath, OutputTypeEnum outputType){
         File directory = new File(RESULTS_DIRECTORY);
         if (!directory.exists()){
             if(!directory.mkdir()){
@@ -27,17 +24,11 @@ public class OutputFile {
                 System.exit(-1);
             }
         }
-        StringBuilder sb = new StringBuilder();
-        List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
-        for(List<Particle> snapshot: snapshots){
-            sb.append(snapshots.get(0).size()).append("\n\n");
-            for(Particle p: snapshot){
-                sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
-            }
-        }
+        String formattedOutput = outputType.formatOutput(bm);
+
         try {
-            FileWriter fw = new FileWriter(RESULTS_DIRECTORY + fileName);
-            fw.write(sb.toString());
+            FileWriter fw = new FileWriter(RESULTS_DIRECTORY + outputType.addExtension(outPath));
+            fw.write(formattedOutput);
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();

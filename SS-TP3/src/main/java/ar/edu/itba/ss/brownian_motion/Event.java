@@ -2,6 +2,9 @@ package ar.edu.itba.ss.brownian_motion;
 
 import ar.edu.itba.ss.grid.Particle;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Event implements Comparable<Event>{
@@ -27,12 +30,16 @@ public class Event implements Comparable<Event>{
 
     public void update(){
         if(isWallCollision()){ // Is wall collision
-            System.out.println("es wall collision");
+           // System.out.println("es wall collision");
             Particle.updateWallCollision(p1,direction);
         }else{
-            System.out.println("es particle collision");
+            //System.out.println("es particle collision");
             Particle.updateParticleCollision(p1,p2);
         }
+    }
+
+    public List<Particle> getParticles(){
+        return p2 == null ? List.of(p1) : Arrays.asList(p1,p2);
     }
 
     public void updateTime(double time){
@@ -49,6 +56,10 @@ public class Event implements Comparable<Event>{
 
     public boolean isParticleCollision(){
         return p2 != null && direction == null;
+    }
+
+    public Particle getCollisionedWithParticle(Particle p){
+        return p.equals(p1) ? p2 : (p.equals(p2) ? p1 : null);
     }
 
     @Override
@@ -98,5 +109,15 @@ public class Event implements Comparable<Event>{
     public enum Direction{
         X,
         Y
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "time=" + time +
+                ", p1=" + p1 +
+                ", p2=" + p2 +
+                ", direction=" + direction +
+                '}';
     }
 }

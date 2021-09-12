@@ -93,7 +93,7 @@ public class StaticData {
         double maxRadius = initParticles(sc,particles);
         MAX_M = (int) Math.floor((L/(RC + 2*maxRadius)));
 
-        System.out.println("L = "+L+" M = "+MAX_M+" RC = "+RC+" N= "+N + " hasWalls= " + hasWalls);
+        //System.out.println("L = "+L+" M = "+MAX_M+" RC = "+RC+" N= "+N + " hasWalls= " + hasWalls);
 //        this.grid = new Grid(L,M,RC,hasWalls);
     }
 

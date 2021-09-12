@@ -24,15 +24,15 @@ public class Particle{
     }
 
     public static void updateParticleCollision(Particle p1, Particle p2){
-        double dX = p1.getPosX() - p2.getPosX();
-        double dY = p1.getPosY() - p2.getPosY();
+        double dX = p2.getPosX() - p1.getPosX();
+        double dY = p2.getPosY() - p1.getPosY();
         Point2D.Double dR = new Point2D.Double(dX,dY);
-        Point2D.Double dV = new Point2D.Double(p1.getVelX()- p2.getVelX(),p1.getVelY() - p2.getVelY());
+        Point2D.Double dV = new Point2D.Double(p2.getVelX()- p1.getVelX(),p2.getVelY() - p1.getVelY());
         double sigma = p1.getRadius() + p2.getRadius();
         double m1 = p1.getMass();
         double m2 = p2.getMass();
         double J = 2.0*m1*m2*(dV.x*dR.x + dV.y*dR.y)/(sigma*(m1+m2));
-        System.out.println("J: "+J);
+
         Point2D.Double Jv = new Point2D.Double(J*dX/sigma,J*dY/sigma);
 
         p1.setVelX(p1.getVelX() + Jv.x/m1);
@@ -45,23 +45,23 @@ public class Particle{
     }
 
     public static void updateWallCollision(Particle p, Event.Direction direction) {
-        System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p.getId(),p.getVelX(),p.getVelY());
+       // System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p.getId(),p.getVelX(),p.getVelY());
         if (direction == Event.Direction.X){
             p.setVelX(p.getVelX() * -1);
         }else{
             p.setVelY(p.getVelY() * -1);
         }
-        System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p.getId(),p.getVelX(),p.getVelY());
+       // System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p.getId(),p.getVelX(),p.getVelY());
     }
     public double getWallCollisionTime(double L, Event.Direction direction){
         double tc = 0;
         switch(direction){
             case X:
                 if(velX > 0){
-                    System.out.println("choco con pared derecha");
+                   // System.out.println("choco con pared derecha");
                     tc = (L - radius - posX)/velX;
                 }else if(velX < 0){
-                    System.out.println("choco con pared izq");
+                    //System.out.println("choco con pared izq");
                     tc = (radius - posX)/velX;
                 }else{
                     return Double.POSITIVE_INFINITY;
@@ -70,10 +70,10 @@ public class Particle{
             case Y:
                 if(velY > 0){
 
-                    System.out.println("choco con pared abajo");
+                    //System.out.println("choco con pared abajo");
                     tc = (L - radius - posY)/velY;
                 }else if(velY < 0){
-                    System.out.println("choco con pared arriba");
+                   // System.out.println("choco con pared arriba");
                     tc = (radius - posY)/velY;
                 }else{
                     return Double.POSITIVE_INFINITY;
@@ -101,18 +101,18 @@ public class Particle{
         if(d < 0){
             return Double.POSITIVE_INFINITY; //INFINITE
         }
-        System.out.printf("dVx: %f, dVy: %f, dRx: %f, dRy: %f, VR: %f, VV: %f, RR: %f, sigma: %f, d: %f, output: %f\n",dV.x,dV.y, dR.x,dR.y,VR, VV,RR,sigma,d,- (VR + Math.sqrt(d))/VV);
+       // System.out.printf("dVx: %f, dVy: %f, dRx: %f, dRy: %f, VR: %f, VV: %f, RR: %f, sigma: %f, d: %f, output: %f\n",dV.x,dV.y, dR.x,dR.y,VR, VV,RR,sigma,d,- (VR + Math.sqrt(d))/VV);
         // raiz d > VR esta mal eso en modulo
-        System.out.printf("Colision(p1:%d,p2:%d): VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",getId(),p.getId(),VR,d,Math.sqrt(d),VR + Math.sqrt(d));
+       // System.out.printf("Colision(p1:%d,p2:%d): VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",getId(),p.getId(),VR,d,Math.sqrt(d),VR + Math.sqrt(d));
         return - (VR + Math.sqrt(d))/VV;
     }
 
     public void update(double time){
-        System.out.println("-");
-        System.out.println("PREV POS p: "+id + ", X: "+posX + ", Y: "+posY);
+
+      //  System.out.println("PREV POS p: "+id + ", X: "+posX + ", Y: "+posY + "radius: "+radius);
         posX += time * velX;
         posY += time * velY;
-        System.out.println("NUEVA POS p: "+id + ", X: "+posX + ", Y: "+posY);
+       // System.out.println("NUEVA POS p: "+id + ", X: "+posX + ", Y: "+posY+ "radius: "+radius);
     }
 
 

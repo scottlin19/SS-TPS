@@ -4,23 +4,28 @@ public class RandomParticlesGeneratorConfig {
     private final int N;
     private final double L;
     private final int maxIter;
-    private final double maxVelocity;
+    private final double maxVelocity,minVelocity;
     private final double smallParticleRadius;
     private final double bigMass;
     private final double smallMass;
     private final double bigParticleRadius;
     private final String outputFile;
 
-    public RandomParticlesGeneratorConfig(int n, double l, int maxIter, double maxVelocity, double smallParticleRadius, double bigParticleRadius, double bigMass,double smallMass,String outputFile) {
+    public RandomParticlesGeneratorConfig(int n, double l, int maxIter,double minVelocity, double maxVelocity, double smallParticleRadius, double bigParticleRadius, double bigMass,double smallMass,String outputFile) {
         N = n;
         L = l;
         this.maxIter = maxIter;
+        this.minVelocity = minVelocity;
         this.maxVelocity = maxVelocity;
         this.smallParticleRadius = smallParticleRadius;
         this.bigParticleRadius = bigParticleRadius;
         this.bigMass = bigMass;
         this.smallMass = smallMass;
         this.outputFile = outputFile;
+    }
+
+    public double getMinVelocity() {
+        return minVelocity;
     }
 
     public double getBigMass(){

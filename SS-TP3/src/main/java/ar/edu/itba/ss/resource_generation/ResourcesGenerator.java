@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ResourcesGenerator {
 
-    private static final int MAX_ITER = 50000;
+
 //    public static void main(String[] args) {
 //        // pass the path to the file as a parameter
 //        URL config_url = ResourcesGenerator.class.getClassLoader().getResource("config/resources_generator_config.json");
@@ -57,13 +57,13 @@ public class ResourcesGenerator {
 //            double cellLong  = (double)L/M;
             int i = 0;
             int iter = 0;
-           // Particle bigParticle = new Particle(i++, L/2, L/2, config.getBigParticleRadius(), config.getBigMass(), 0 ,0);
+            Particle bigParticle = new Particle(i++, L/2, L/2, config.getBigParticleRadius(), config.getBigMass(), 0 ,0);
 
             List<Particle> result = new ArrayList<>();
-           // result.add(bigParticle);
+            result.add(bigParticle);
             double smallRadius =  config.getSmallParticleRadius();
             double smallMass = config.getSmallMass();
-            while (i < N && iter < MAX_ITER) {
+            while (i < N && iter < config.getMaxIter()) {
                 iter++;
                 double posx, posy;
                 double velx, vely;
