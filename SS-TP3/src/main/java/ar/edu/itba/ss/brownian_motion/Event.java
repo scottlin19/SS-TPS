@@ -10,6 +10,7 @@ import java.util.Objects;
 public class Event implements Comparable<Event>{
 
     private double time;
+    private long relativeTime;
     private final Particle p1;
     private final Particle p2;
     private final Direction direction;
@@ -19,6 +20,7 @@ public class Event implements Comparable<Event>{
         this.p1 = p1;
         this.p2 = p2;
         this.direction = null;
+        this.relativeTime = 0;
     }
 
     public Event(double time, Particle p1, Direction direction){
@@ -26,6 +28,14 @@ public class Event implements Comparable<Event>{
         this.p1 = p1;
         this.p2 = null;
         this.direction = direction;
+    }
+
+    public long getRelativeTime() {
+        return relativeTime;
+    }
+
+    public void setRelativeTime(long relativeTime) {
+        this.relativeTime = relativeTime;
     }
 
     public void update(){

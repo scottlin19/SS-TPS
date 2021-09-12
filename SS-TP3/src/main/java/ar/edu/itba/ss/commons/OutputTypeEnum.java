@@ -6,6 +6,8 @@ import ar.edu.itba.ss.grid.Particle;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -40,21 +42,26 @@ public enum OutputTypeEnum {
             resp.addProperty("totalCollisions", bm.getCollisions());
             resp.addProperty("totalTime", bm.getTimeElapsed().toMillis());
             JsonArray data = new JsonArray();
-            for(SimulationSnapshot snapshot: simulationSnapshots){
-                JsonObject iteration = new JsonObject();
-                List<Particle> particles = snapshot.getParticles();
-                Event event = snapshot.getEvent();
-                JsonObject eventData = new JsonObject();
-                eventData.addProperty("time",event.getTime());
-                List<Particle> eventParticles = event.getParticles();
-                JsonArray eventParticlesData = new JsonArray();
-                eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
-                iteration.add("event", eventData);
-                JsonArray particlesData = new JsonArray();
-                particles.forEach(p -> particlesData.add(particleAsJson(p)));
-                iteration.add("particles", particlesData);
-                data.add(iteration);
-            }
+            int step = 5;
+            IntStream.range(0, simulationSnapshots.size())
+                    .filter(n -> n % step == 0)
+                    .forEach(n ->{
+                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
+                        JsonObject iteration = new JsonObject();
+                        List<Particle> particles = snapshot.getParticles();
+                        Event event = snapshot.getEvent();
+                        JsonObject eventData = new JsonObject();
+                        eventData.addProperty("time",event.getTime());
+                        List<Particle> eventParticles = event.getParticles();
+                        JsonArray eventParticlesData = new JsonArray();
+                        eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
+                        iteration.add("event", eventData);
+                        JsonArray particlesData = new JsonArray();
+                        particles.forEach(p -> particlesData.add(particleAsJson(p)));
+                        iteration.add("particles", particlesData);
+                        data.add(iteration);
+                    });
+
             resp.add("data",data);
             return resp.toString();
         }

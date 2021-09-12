@@ -1,18 +1,10 @@
 package ar.edu.itba.ss.commons;
 
 import ar.edu.itba.ss.brownian_motion.BrownianMotion;
-import ar.edu.itba.ss.grid.Particle;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 public class OutputFile {
+    public static final int DEFAULT_BUFFER_SIZE = 4096*2;
 
     private static final String RESULTS_DIRECTORY = "results/";
 
@@ -24,14 +16,30 @@ public class OutputFile {
                 System.exit(-1);
             }
         }
-        String formattedOutput = outputType.formatOutput(bm);
+
 
         try {
-            FileWriter fw = new FileWriter(RESULTS_DIRECTORY + outputType.addExtension(outPath));
-            fw.write(formattedOutput);
-            fw.close();
+            String formattedOutput = outputType.formatOutput(bm);
+            File f = new File(RESULTS_DIRECTORY + outputType.addExtension(outPath));
+
+            InputStream targetStream = new ByteArrayInputStream(formattedOutput.getBytes());
+            copyInputStreamToFile(targetStream,f);
+            targetStream.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    private static void copyInputStreamToFile(InputStream inputStream, File file)
+            throws IOException {
+
+        // append = false
+        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+            int read;
+            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
+
+            while ((read = inputStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
         }
     }
 
