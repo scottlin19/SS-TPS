@@ -1,7 +1,6 @@
 package ar.edu.itba.ss.grid;
 
 import ar.edu.itba.ss.brownian_motion.Event;
-
 import java.awt.geom.Point2D;
 
 public class Particle{
@@ -30,17 +29,18 @@ public class Particle{
         Point2D.Double dR = new Point2D.Double(dX,dY);
         Point2D.Double dV = new Point2D.Double(p1.getVelX()- p2.getVelX(),p1.getVelY() - p2.getVelY());
         double sigma = p1.getRadius() + p2.getRadius();
-        double J = 2*p1.getMass()*p2.getMass()*(dV.x*dR.x + dV.y*dR.y)/(sigma*(p1.getMass()+p2.getMass()));
+        double m1 = p1.getMass();
+        double m2 = p2.getMass();
+        double J = 2.0*m1*m2*(dV.x*dR.x + dV.y*dR.y)/(sigma*(m1+m2));
+        System.out.println("J: "+J);
         Point2D.Double Jv = new Point2D.Double(J*dX/sigma,J*dY/sigma);
 
-        System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p1.getId(),p1.getVelX(),p1.getVelY());
-        p1.setVelX(p1.getVelX() + Jv.x/p1.getMass());
-        p1.setVelY(p1.getVelY() + Jv.y/p1.getMass());
-        System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p1.getId(),p1.getVelX(),p1.getVelY());
-        System.out.printf("Prev velocities de %d:  vx: %f vy: %f\n",p2.getId(),p2.getVelX(),p2.getVelY());
-        p2.setVelX(p2.getVelX() - Jv.x/p2.getMass());
-        p2.setVelY(p2.getVelY() - Jv.y/p2.getMass());
-        System.out.printf("Nuevas velocities de %d:  vx: %f vy: %f\n",p2.getId(),p2.getVelX(),p2.getVelY());
+        p1.setVelX(p1.getVelX() + Jv.x/m1);
+        p1.setVelY(p1.getVelY() + Jv.y/m1);
+
+        p2.setVelX(p2.getVelX() - Jv.x/m2);
+        p2.setVelY(p2.getVelY() - Jv.y/m2);
+
 
     }
 
@@ -101,7 +101,7 @@ public class Particle{
         if(d < 0){
             return Double.POSITIVE_INFINITY; //INFINITE
         }
-        //System.out.printf("dVx: %f, dVy: %f, dRx: %f, dRy: %f, VR: %f, VV: %f, RR: %f, sigma: %f, d: %f, output: %f\n",dV.x,dV.y, dR.x,dR.y,VR, VV,RR,sigma,d,- (VR + Math.sqrt(d))/VV);
+
         // raiz d > VR esta mal eso en modulo
         System.out.printf("VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",VR,d,Math.sqrt(d),VR + Math.sqrt(d));
         return - (VR + Math.sqrt(d))/VV;

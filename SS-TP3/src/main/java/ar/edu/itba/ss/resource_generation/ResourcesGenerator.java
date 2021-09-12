@@ -57,10 +57,10 @@ public class ResourcesGenerator {
 //            double cellLong  = (double)L/M;
             int i = 0;
             int iter = 0;
-            Particle bigParticle = new Particle(i++, L/2, L/2, config.getBigParticleRadius(), config.getBigMass(), 0 ,0);
+           // Particle bigParticle = new Particle(i++, L/2, L/2, config.getBigParticleRadius(), config.getBigMass(), 0 ,0);
 
             List<Particle> result = new ArrayList<>();
-            result.add(bigParticle);
+           // result.add(bigParticle);
             double smallRadius =  config.getSmallParticleRadius();
             double smallMass = config.getSmallMass();
             while (i < N && iter < MAX_ITER) {

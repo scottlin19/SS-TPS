@@ -35,7 +35,7 @@ public class BrownianMotion {
 
     public void simulate(CutCondition cutCondition){
         Event e = null;
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 100; i++){
             update();
         }
 //        while(!cutCondition.cut(e)){
@@ -88,9 +88,9 @@ public class BrownianMotion {
         events.forEach(ev -> ev.updateTime(tc));
 
         // PASO 6: Calculamos los eventos para las particulas que participaron en la colision
-        calculateEventForParticle(p1);
+        calculateEventForParticle(p1,p2);
         if(p2 != null){
-            calculateEventForParticle(p2);
+            calculateEventForParticle(p2,p1);
         }
 
         return e;
@@ -100,11 +100,11 @@ public class BrownianMotion {
     public void calculateEvents(){
 
         for(Particle p1: particles){
-            calculateEventForParticle(p1); //no cheuear con la que me acabo de colisionar re alpedo
+            calculateEventForParticle(p1,null); //no cheuear con la que me acabo de colisionar re alpedo
         }
     }
 
-    public void calculateEventForParticle(Particle p){
+    public void calculateEventForParticle(Particle p,Particle dontCheck){
         System.out.println("CALCULO EVENT PARA "+p.getId());
         double tcParticle = Double.POSITIVE_INFINITY;
         Event.Direction dir;
@@ -122,10 +122,13 @@ public class BrownianMotion {
         }
         Particle cParticle = null;
         for(Particle p2 : particles){
-            if(!p.equals(p2)){ // no me anda el cerebelo si dontCheck da null quiero que entre :sno entiendo
+            if(!p.equals(p2) && !p2.equals(dontCheck)){
+                if(dontCheck != null){
+                    System.out.printf("Dont check = %d, p = %d\n",dontCheck.getId(),p.getId());
+                }
                 double t = p.getParticleCollisionTime(p2);
                     if(t < 0){
-                        System.out.printf("T da negativo: X1: %f Y1: %f X2: %f Y2: %f  \n",p.getPosX(),p.getPosY(),p2.getPosX(),p2.getPosY());
+                        System.out.printf("T da negativo: %f  \n",t);
                     }
                     if(t < tcParticle){
                         tcParticle = t;
