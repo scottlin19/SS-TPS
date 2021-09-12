@@ -101,17 +101,18 @@ public class Particle{
         if(d < 0){
             return Double.POSITIVE_INFINITY; //INFINITE
         }
-
+        System.out.printf("dVx: %f, dVy: %f, dRx: %f, dRy: %f, VR: %f, VV: %f, RR: %f, sigma: %f, d: %f, output: %f\n",dV.x,dV.y, dR.x,dR.y,VR, VV,RR,sigma,d,- (VR + Math.sqrt(d))/VV);
         // raiz d > VR esta mal eso en modulo
-        System.out.printf("VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",VR,d,Math.sqrt(d),VR + Math.sqrt(d));
+        System.out.printf("Colision(p1:%d,p2:%d): VR = %f , d = %f sqrt(d) = %f , VR +  SQRT(D) =  %f  \n",getId(),p.getId(),VR,d,Math.sqrt(d),VR + Math.sqrt(d));
         return - (VR + Math.sqrt(d))/VV;
     }
 
     public void update(double time){
-        System.out.println("PREV POS p+ "+id + " X: "+posX + " Y: "+posY);
+        System.out.println("-");
+        System.out.println("PREV POS p: "+id + ", X: "+posX + ", Y: "+posY);
         posX += time * velX;
         posY += time * velY;
-        System.out.println("NUEVA POS p+ "+id + " X: "+posX + " Y: "+posY);
+        System.out.println("NUEVA POS p: "+id + ", X: "+posX + ", Y: "+posY);
     }
 
 
@@ -167,14 +168,17 @@ public class Particle{
     }
 
 
-
     @Override
     public String toString() {
-
-
-        return "Particle: " + id + "{" +
-                "posX=" + posX +
-                ", posY=" + posY+", radius= "+radius;
+        return "Particle{" +
+                "id=" + id +
+                ", posX=" + posX +
+                ", posY=" + posY +
+                ", velX=" + velX +
+                ", velY=" + velY +
+                ", radius=" + radius +
+                ", mass=" + mass +
+                '}';
     }
 
     @Override

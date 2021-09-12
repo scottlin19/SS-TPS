@@ -63,7 +63,7 @@ public class Event implements Comparable<Event>{
         }
         boolean ret = Double.compare(event.time, time) == 0;
 
-        if(p2 == null && direction != null){
+        if(isWallCollision()){
             ret = ret && p1.equals(event.p1) && direction.equals(event.direction);
         }
         else{
