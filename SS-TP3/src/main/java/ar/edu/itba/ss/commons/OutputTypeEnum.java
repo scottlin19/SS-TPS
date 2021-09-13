@@ -19,13 +19,16 @@ public enum OutputTypeEnum {
         public String formatOutput(BrownianMotion bm) {
             List<SimulationSnapshot> simulationSnapshots = bm.getSnapshots();
             StringBuilder sb = new StringBuilder();
-            List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
-            for(List<Particle> snapshot: snapshots){
-                sb.append(snapshots.get(0).size()).append("\n\n");
-                for(Particle p: snapshot){
-                    sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
-                }
-            }
+            IntStream.range(0, simulationSnapshots.size())
+                    .filter(n -> n % STEP == 0)
+                    .forEach(n ->{
+                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
+                        List<Particle> particles = snapshot.getParticles();
+                        sb.append(particles.size()).append("\n\n");
+                        for(Particle p: particles){
+                            sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
+                        }
+                    });
             return sb.toString();
         }
 
@@ -42,9 +45,8 @@ public enum OutputTypeEnum {
             resp.addProperty("totalCollisions", bm.getCollisions());
             resp.addProperty("totalTime", bm.getTimeElapsed().toMillis());
             JsonArray data = new JsonArray();
-            int step = 5;
             IntStream.range(0, simulationSnapshots.size())
-                    .filter(n -> n % step == 0)
+                    .filter(n -> n % STEP == 0)
                     .forEach(n ->{
                         SimulationSnapshot snapshot = simulationSnapshots.get(n);
                         JsonObject iteration = new JsonObject();
@@ -84,6 +86,7 @@ public enum OutputTypeEnum {
         }
     };
 
+    private static final int STEP = 5;
     public abstract String formatOutput(BrownianMotion bm);
     public abstract String addExtension(String outPath);
 }

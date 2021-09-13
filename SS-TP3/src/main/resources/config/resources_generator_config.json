@@ -1,5 +1,5 @@
 {
-  "N": 100,
+  "N": 20,
   "L": 6 ,
   "maxIter": 5000,
   "maxVelocity": 2,
@@ -8,5 +8,5 @@
   "bigParticleRadius": 0.7,
   "smallMass": 0.9,
   "bigMass": 2,
-  "outputFile": "simulationN100.exyz"
+  "outputFile": "simulation"
 }
