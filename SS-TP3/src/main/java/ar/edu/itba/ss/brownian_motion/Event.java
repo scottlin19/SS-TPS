@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Event implements Comparable<Event>{
 
     private double time;
-
+    private double relativeTime;
     private final Particle p1;
     private final Particle p2;
     private final Direction direction;
@@ -30,6 +30,17 @@ public class Event implements Comparable<Event>{
         this.direction = direction;
     }
 
+    public void setTime(double time) {
+        this.time = time;
+    }
+
+    public double getRelativeTime() {
+        return relativeTime;
+    }
+
+    public void setRelativeTime(double relativeTime) {
+        this.relativeTime = relativeTime;
+    }
 
     public void update(){
         if(isWallCollision()){ // Is wall collision
