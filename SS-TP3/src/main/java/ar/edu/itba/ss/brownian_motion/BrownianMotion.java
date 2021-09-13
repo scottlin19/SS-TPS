@@ -22,6 +22,7 @@ public class BrownianMotion {
     private long collisions;
     private Instant start, end;
     private Duration timeElapsed;
+    private SimulationResult result;
 
 
     // Contruct OffLattice from provided values (for benchmarking usage)
@@ -44,6 +45,16 @@ public class BrownianMotion {
         end = Instant.now();
         timeElapsed = Duration.between(start,end);
         System.out.println("Simulation terminated.");
+        createResult();
+    }
+
+    private void createResult(){
+        double totalTime = snapshots.stream().mapToDouble(s-> s.getEvent().getTime()).sum();
+        result = new SimulationResult(collisions,totalTime,snapshots);
+    }
+
+    public SimulationResult getResult() {
+        return result;
     }
 
     private void snapshot(Event event){

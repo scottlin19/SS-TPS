@@ -8,5 +8,5 @@
   "bigParticleRadius": 0.7,
   "smallMass": 0.9,
   "bigMass": 2,
-  "outputFile": "simulationN100.exyz"
+  "outputFile": "simulationN100"
 }

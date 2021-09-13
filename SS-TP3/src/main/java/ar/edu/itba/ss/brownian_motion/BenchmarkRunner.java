@@ -26,9 +26,9 @@ public class BenchmarkRunner {
         double minVelocity = 0,maxVelocity = 2.0;
         double smallRadius =  0.2,bigRadius = 0.7;
         double smallMass = 0.9,bigMass = 2;
-        CompletableFuture<Map<String,BrownianMotion>> c1 = CompletableFuture.supplyAsync(()->varyN(L,maxIter,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass));
+        CompletableFuture<Map<String,SimulationResult>> c1 = CompletableFuture.supplyAsync(()->varyN(L,maxIter,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass));
 
-        CompletableFuture<Map<String,BrownianMotion>> c2 = CompletableFuture.supplyAsync(()->varyVelocity(L,maxIter,N,smallRadius,bigRadius,bigMass,smallMass));
+        CompletableFuture<Map<String,SimulationResult>> c2 = CompletableFuture.supplyAsync(()->varyVelocity(L,maxIter,N,smallRadius,bigRadius,bigMass,smallMass));
 
         CompletableFuture<Void> combined = c1.thenCombineAsync(c2, (data, data2)->{
             createFiles(data);
@@ -39,8 +39,8 @@ public class BenchmarkRunner {
 
     }
 
-    private static void createFiles(Map<String,BrownianMotion>  data){
-        for(Map.Entry<String,BrownianMotion> entry : data.entrySet()){
+    private static void createFiles(Map<String,SimulationResult>  data){
+        for(Map.Entry<String,SimulationResult> entry : data.entrySet()){
             OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.EXYZ);
             OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.JSON);
         }
@@ -48,11 +48,11 @@ public class BenchmarkRunner {
 
 
 
-    private static Map<String,BrownianMotion> varyN(double L, int maxIter, double minVelocity, double maxVelocity, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
+    private static Map<String,SimulationResult> varyN(double L, int maxIter, double minVelocity, double maxVelocity, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
 
         List<Integer> Ns = Arrays.asList(100,125,150);
         List<String>  outputFiles  =  Ns.stream().map(n-> String.format("ej1/simulationN%dV%f-%f",n,minVelocity,maxVelocity)).collect(Collectors.toList());
-        Map<String,BrownianMotion> results = new HashMap<>();
+        Map<String,SimulationResult> results = new HashMap<>();
         for (int i  = 0 ; i < Ns.size(); i++){
             RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(Ns.get(i),L,maxIter,minVelocity,maxVelocity,smallParticleRadius,bigParticleRadius,bigMass,smallMass, outputFiles.get(i));
             List<Particle> particles =  ResourcesGenerator.generateParticles(config);
@@ -61,15 +61,15 @@ public class BenchmarkRunner {
             CutCondition bigParticlecc= new BigParticleCutCondition(bigBoi);
             CutCondition maxEventscc = new MaxEventsCutCondition(10000);
             bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
-            results.put(config.getOutputFile(),bm);
+            results.put(config.getOutputFile(),bm.getResult());
 
         }
         return results;
     }
-    private static Map<String,BrownianMotion> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
+    private static Map<String,SimulationResult> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
         List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,1.0),new Pair<>(1.0,2.0),new Pair<>(2.0,3.0));
         List<String>  outputFiles  =  velocities.stream().map(p-> String.format("ej3/simulationN%dV%f-%f",N,p.getLeft(),p.getRight())).collect(Collectors.toList());
-        Map<String,BrownianMotion> results = new HashMap<>();
+        Map<String,SimulationResult> results = new HashMap<>();
         for (int i  = 0 ; i < velocities.size(); i++){
             RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N,L,maxIter,velocities.get(0).getLeft(),velocities.get(0).getRight(),smallParticleRadius,bigParticleRadius,bigMass,smallMass, outputFiles.get(i));
             List<Particle> particles =  ResourcesGenerator.generateParticles(config);
@@ -78,7 +78,7 @@ public class BenchmarkRunner {
             CutCondition bigParticlecc= new BigParticleCutCondition(bigBoi);
             CutCondition maxEventscc = new MaxEventsCutCondition(10000);
             bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
-            results.put(config.getOutputFile(),bm);
+            results.put(config.getOutputFile(),bm.getResult());
 
         }
         return results;

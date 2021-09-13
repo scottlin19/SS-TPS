@@ -2,22 +2,27 @@ package ar.edu.itba.ss.commons;
 
 import ar.edu.itba.ss.brownian_motion.BrownianMotion;
 import ar.edu.itba.ss.brownian_motion.Event;
+import ar.edu.itba.ss.brownian_motion.SimulationResult;
 import ar.edu.itba.ss.grid.Particle;
 
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public enum OutputTypeEnum {
+
     EXYZ{
         @Override
-        public String formatOutput(BrownianMotion bm) {
-            List<SimulationSnapshot> simulationSnapshots = bm.getSnapshots();
+        public void createFile(SimulationResult result,String outPath)  {
+            List<SimulationSnapshot> simulationSnapshots = result.getSnapshots();
             StringBuilder sb = new StringBuilder();
             List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
             for(List<Particle> snapshot: snapshots){
@@ -26,7 +31,16 @@ public enum OutputTypeEnum {
                     sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
                 }
             }
-            return sb.toString();
+            File f = new File(addExtension(outPath));
+            InputStream targetStream = new ByteArrayInputStream(sb.toString().getBytes());
+            try {
+                copyInputStreamToFile(targetStream,f);
+                targetStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
         }
 
         @Override
@@ -36,34 +50,17 @@ public enum OutputTypeEnum {
     },
     JSON{
         @Override
-        public String formatOutput(BrownianMotion bm) {
-            List<SimulationSnapshot> simulationSnapshots = bm.getSnapshots();
-            JsonObject resp = new JsonObject();
-            resp.addProperty("totalCollisions", bm.getCollisions());
-            resp.addProperty("totalTime", bm.getTimeElapsed().toMillis());
-            JsonArray data = new JsonArray();
-            int step = 5;
-            IntStream.range(0, simulationSnapshots.size())
-                    .filter(n -> n % step == 0)
-                    .forEach(n ->{
-                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
-                        JsonObject iteration = new JsonObject();
-                        List<Particle> particles = snapshot.getParticles();
-                        Event event = snapshot.getEvent();
-                        JsonObject eventData = new JsonObject();
-                        eventData.addProperty("time",event.getTime());
-                        List<Particle> eventParticles = event.getParticles();
-                        JsonArray eventParticlesData = new JsonArray();
-                        eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
-                        iteration.add("event", eventData);
-                        JsonArray particlesData = new JsonArray();
-                        particles.forEach(p -> particlesData.add(particleAsJson(p)));
-                        iteration.add("particles", particlesData);
-                        data.add(iteration);
-                    });
+        public void createFile(SimulationResult result,String outPath) {
+            try {
 
-            resp.add("data",data);
-            return resp.toString();
+                ObjectMapper mapper = new ObjectMapper();
+                // convert book object to JSON file
+                mapper.writeValue(Paths.get(addExtension(outPath)).toFile(), result);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
         }
 
         @Override
@@ -83,7 +80,20 @@ public enum OutputTypeEnum {
             return particleData;
         }
     };
-
-    public abstract String formatOutput(BrownianMotion bm);
+    public final int DEFAULT_BUFFER_SIZE = 4096*2;
+    public abstract void createFile(SimulationResult result,String outPath);
     public abstract String addExtension(String outPath);
+    void copyInputStreamToFile(InputStream inputStream, File file)
+            throws IOException {
+
+        // append = false
+        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+            int read;
+            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
+
+            while ((read = inputStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+        }
+    }
 }
