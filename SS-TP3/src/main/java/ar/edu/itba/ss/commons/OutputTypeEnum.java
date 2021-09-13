@@ -19,16 +19,23 @@ public enum OutputTypeEnum {
         public String formatOutput(BrownianMotion bm) {
             List<SimulationSnapshot> simulationSnapshots = bm.getSnapshots();
             StringBuilder sb = new StringBuilder();
-            IntStream.range(0, simulationSnapshots.size())
-                    .filter(n -> n % STEP == 0)
-                    .forEach(n ->{
-                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
-                        List<Particle> particles = snapshot.getParticles();
-                        sb.append(particles.size()).append("\n\n");
-                        for(Particle p: particles){
-                            sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
-                        }
-                    });
+            List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
+            for(List<Particle> snapshot: snapshots){
+                sb.append(snapshots.get(0).size()).append("\n\n");
+                for(Particle p: snapshot){
+                    sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
+                }
+            }
+//            IntStream.range(0, simulationSnapshots.size())
+//                    .filter(n -> n % STEP == 0)
+//                    .forEach(n ->{
+//                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
+//                        List<Particle> particles = snapshot.getParticles();
+//                        sb.append(particles.size()).append("\n\n");
+//                        for(Particle p: particles){
+//                            sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
+//                        }
+//                    });
             return sb.toString();
         }
 
@@ -45,24 +52,39 @@ public enum OutputTypeEnum {
             resp.addProperty("totalCollisions", bm.getCollisions());
             resp.addProperty("totalTime", bm.getTimeElapsed().toMillis());
             JsonArray data = new JsonArray();
-            IntStream.range(0, simulationSnapshots.size())
-                    .filter(n -> n % STEP == 0)
-                    .forEach(n ->{
-                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
-                        JsonObject iteration = new JsonObject();
-                        List<Particle> particles = snapshot.getParticles();
-                        Event event = snapshot.getEvent();
-                        JsonObject eventData = new JsonObject();
-                        eventData.addProperty("time",event.getTime());
-                        List<Particle> eventParticles = event.getParticles();
-                        JsonArray eventParticlesData = new JsonArray();
-                        eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
-                        iteration.add("event", eventData);
-                        JsonArray particlesData = new JsonArray();
-                        particles.forEach(p -> particlesData.add(particleAsJson(p)));
-                        iteration.add("particles", particlesData);
-                        data.add(iteration);
-                    });
+            for(SimulationSnapshot snapshot: simulationSnapshots){
+                JsonObject iteration = new JsonObject();
+                List<Particle> particles = snapshot.getParticles();
+                Event event = snapshot.getEvent();
+                JsonObject eventData = new JsonObject();
+                eventData.addProperty("time",event.getTime());
+                List<Particle> eventParticles = event.getParticles();
+                JsonArray eventParticlesData = new JsonArray();
+                eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
+                iteration.add("event", eventData);
+                JsonArray particlesData = new JsonArray();
+                particles.forEach(p -> particlesData.add(particleAsJson(p)));
+                iteration.add("particles", particlesData);
+                data.add(iteration);
+            }
+//            IntStream.range(0, simulationSnapshots.size())
+//                    .filter(n -> n % STEP == 0)
+//                    .forEach(n ->{
+//                        SimulationSnapshot snapshot = simulationSnapshots.get(n);
+//                        JsonObject iteration = new JsonObject();
+//                        List<Particle> particles = snapshot.getParticles();
+//                        Event event = snapshot.getEvent();
+//                        JsonObject eventData = new JsonObject();
+//                        eventData.addProperty("time",event.getTime());
+//                        List<Particle> eventParticles = event.getParticles();
+//                        JsonArray eventParticlesData = new JsonArray();
+//                        eventParticles.forEach(ep -> eventParticlesData.add(particleAsJson(ep)));
+//                        iteration.add("event", eventData);
+//                        JsonArray particlesData = new JsonArray();
+//                        particles.forEach(p -> particlesData.add(particleAsJson(p)));
+//                        iteration.add("particles", particlesData);
+//                        data.add(iteration);
+//                    });
 
             resp.add("data",data);
             return resp.toString();
