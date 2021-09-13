@@ -2,6 +2,7 @@ package ar.edu.itba.ss.brownian_motion;
 
 import ar.edu.itba.ss.commons.OutputFile;
 import ar.edu.itba.ss.commons.OutputTypeEnum;
+import ar.edu.itba.ss.commons.SimulationSnapshot;
 import ar.edu.itba.ss.grid.CimConfig;
 import ar.edu.itba.ss.grid.Particle;
 import ar.edu.itba.ss.resource_generation.RandomParticlesGeneratorConfig;
@@ -14,6 +15,8 @@ import java.io.FileReader;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SimulationRunner {
     public static void main(String[] args) {
@@ -61,7 +64,7 @@ public class SimulationRunner {
             Particle bigParticle = particles.get(0);
             BrownianMotion bm = new BrownianMotion(particles, config.getL(), bigParticle);
             CutCondition bigParticlecc= new BigParticleCutCondition(bigParticle);
-            CutCondition maxEventscc = new MaxEventsCutCondition(10000);
+            CutCondition maxEventscc = new MaxEventsCutCondition(20000);
             bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
 
             OutputFile.createOutputFile(bm.getResult(),config.getOutputFile(), OutputTypeEnum.EXYZ);
