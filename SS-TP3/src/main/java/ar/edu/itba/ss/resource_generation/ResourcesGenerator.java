@@ -70,10 +70,11 @@ public class ResourcesGenerator {
 
                 posx = 0.01+smallRadius + (L-2*smallRadius-0.01) * r.nextDouble();
                 posy = 0.01+smallRadius + (L-2*smallRadius-0.01) * r.nextDouble();
-                double maxVel = config.getMaxVelocity();
-                velx = r.nextDouble() * 2* maxVel -  maxVel;
-                double maxVelY = Math.sqrt(Math.pow(maxVel,2)-Math.pow(velx,2));
-                vely = r.nextDouble() * 2 * maxVelY - maxVelY;
+                double maxModVel = config.getMaxVelocity();
+                double modVel = r.nextDouble() * maxModVel;
+                double ang = r.nextDouble() * 2 * Math.PI;
+                velx = modVel * Math.cos(ang);
+                vely = modVel * Math.sin(ang);
                 Particle particle = new Particle(i, posx, posy, smallRadius, smallMass, velx, vely);
                 if(!hasNeighbours(particle,result)){
                     result.add(particle);
