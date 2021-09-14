@@ -42,7 +42,7 @@ public class BenchmarkRunner {
     private static void createFiles(Map<String,SimulationResult>  data){
         for(Map.Entry<String,SimulationResult> entry : data.entrySet()){
             OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.EXYZ);
-            OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.JSON);
+            //OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.JSON);
         }
     }
 
@@ -67,6 +67,24 @@ public class BenchmarkRunner {
         return results;
     }
     private static Map<String,SimulationResult> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
+        List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,5.0),new Pair<>(0.5,1.0),new Pair<>(1.0,2.0),new Pair<>(4.0,6.0));
+//        List<String>  outputFiles  =  velocities.stream().map(p-> String.format("ej3/simulationN%dV%f-%f",N,p.getLeft(),p.getRight())).collect(Collectors.toList());
+        Map<String,SimulationResult> results = new HashMap<>();
+        for (Pair<Double, Double> velocity : velocities) {
+            RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N, L, maxIter, velocities.get(0).getLeft(), velocities.get(0).getRight(), smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
+            List<Particle> particles = ResourcesGenerator.generateParticles(config);
+            Particle bigBoi = particles.get(0);
+            BrownianMotion bm = new BrownianMotion(particles, L, bigBoi);
+            CutCondition bigParticlecc = new BigParticleCutCondition(bigBoi);
+            CutCondition maxEventscc = new MaxEventsCutCondition(maxIter);
+            bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
+            results.put(String.format("ej3/simulationN%dV%d-%d", particles.size(), velocity.getLeft().intValue(), velocity.getRight().intValue()), bm.getResult());
+
+        }
+        return results;
+    }
+
+    private static Map<String,SimulationResult> DCM(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
         List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,5.0),new Pair<>(0.5,1.0),new Pair<>(1.0,2.0),new Pair<>(4.0,6.0));
 //        List<String>  outputFiles  =  velocities.stream().map(p-> String.format("ej3/simulationN%dV%f-%f",N,p.getLeft(),p.getRight())).collect(Collectors.toList());
         Map<String,SimulationResult> results = new HashMap<>();

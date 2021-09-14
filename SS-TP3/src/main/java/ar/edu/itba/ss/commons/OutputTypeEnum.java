@@ -12,16 +12,15 @@ public enum OutputTypeEnum {
         @Override
         public void createFile(SimulationResult result,String outPath)  {
             List<SimulationSnapshot> simulationSnapshots = result.getSnapshots();
-            StringBuilder sb = new StringBuilder();
+//            StringBuilder sb = new StringBuilder();
             List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
-            for(List<Particle> snapshot: snapshots){
-                sb.append(snapshots.get(0).size()).append("\n\n");
-                for(Particle p: snapshot){
-                    sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
-                }
-            }
+//            for(List<Particle> snapshot: snapshots){
+//                sb.append(snapshots.get(0).size()).append("\n\n");
+//                for(Particle p: snapshot){
+//                    sb.append(p.getPosX()).append(" ").append(p.getPosY()).append(" ").append(p.getVelX()).append(" ").append(p.getVelY()).append(" ").append(p.getMass()).append(" ").append(p.getRadius()).append("\n");
+//                }
+//            }
             try(final BufferedWriter writer = new BufferedWriter(new FileWriter(addExtension(outPath)))){
-
                 for(List<Particle> snapshot: snapshots){
                     writer.write(snapshots.get(0).size()+"\n\n");
                     for(Particle p: snapshot){

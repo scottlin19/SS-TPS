@@ -19,7 +19,8 @@ public class BrownianMotion {
     private final List<Particle> particles;
     private Particle bigBoi;
     private Set<Event> events;
-    private long collisions;
+    private long totalCollisions;
+    private double totalTime;
     private Instant start, end;
     private Duration timeElapsed;
     private SimulationResult result;
@@ -32,7 +33,8 @@ public class BrownianMotion {
         this.snapshots = new ArrayList<>();
         this.events = new TreeSet<>();
         this.bigBoi = bigBoi;
-        this.collisions = 0;
+        this.totalCollisions = 0;
+        this.totalTime = 0;
     }
 
     public void simulate(Predicate<Event> cutConditions){
@@ -50,7 +52,7 @@ public class BrownianMotion {
 
     private void createResult(){
         double totalTime = snapshots.stream().mapToDouble(s-> s.getEvent().getTime()).sum();
-        result = new SimulationResult(collisions,totalTime,snapshots);
+        result = new SimulationResult(totalCollisions,totalTime,snapshots);
     }
 
     public SimulationResult getResult() {
@@ -69,15 +71,15 @@ public class BrownianMotion {
         }
         // PASO 2: Choose first event with lower Tc
         Event e = events.stream().findFirst().orElse(null);
-        collisions++;
-        events.remove(e);
-        // System.out.println("POLLED EVENT: "+e);
-        //System.out.println("EVENT LIST: "+events);
         if(e == null){
             throw new IllegalStateException();
-            // Throw something
         }
+        events.remove(e);
+
         double tc = e.getTime();
+        totalCollisions++;
+        totalTime+=tc;
+        e.setRelativeTime(totalTime);
 
         Particle p1 = e.getP1();
         Particle p2 = e.getP2();
@@ -110,8 +112,8 @@ public class BrownianMotion {
     }
 
 
-    public long getCollisions() {
-        return collisions;
+    public long getTotalCollisions() {
+        return totalCollisions;
     }
 
     public Duration getTimeElapsed() {
