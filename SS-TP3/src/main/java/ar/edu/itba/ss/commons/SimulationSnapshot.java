@@ -1,7 +1,6 @@
 package ar.edu.itba.ss.commons;
 
 import ar.edu.itba.ss.brownian_motion.Event;
-import ar.edu.itba.ss.grid.Particle;
 
 import java.util.List;
 import java.util.stream.Collectors;

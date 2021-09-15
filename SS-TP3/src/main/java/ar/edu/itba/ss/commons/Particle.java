@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.grid;
+package ar.edu.itba.ss.commons;
 
 import ar.edu.itba.ss.brownian_motion.Event;
 import java.awt.geom.Point2D;

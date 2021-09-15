@@ -1,7 +1,6 @@
 package ar.edu.itba.ss.resource_generation;
 
-import ar.edu.itba.ss.brownian_motion.BrownianMotion;
-import ar.edu.itba.ss.grid.Particle;
+import ar.edu.itba.ss.commons.Particle;
 
 import java.io.*;
 import java.util.*;

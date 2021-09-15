@@ -28,4 +28,6 @@ public class SimulationResult {
     public List<SimulationSnapshot> getSnapshots() {
         return snapshots;
     }
+
+
 }

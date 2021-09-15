@@ -1,8 +1,7 @@
 package ar.edu.itba.ss.brownian_motion;
 
 import ar.edu.itba.ss.commons.SimulationSnapshot;
-import ar.edu.itba.ss.commons.StaticData;
-import ar.edu.itba.ss.grid.Particle;
+import ar.edu.itba.ss.commons.Particle;
 
 import java.time.Duration;
 import java.time.Instant;

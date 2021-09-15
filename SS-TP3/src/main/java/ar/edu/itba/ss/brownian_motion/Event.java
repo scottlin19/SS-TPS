@@ -1,8 +1,7 @@
 package ar.edu.itba.ss.brownian_motion;
 
-import ar.edu.itba.ss.grid.Particle;
+import ar.edu.itba.ss.commons.Particle;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
