@@ -25,7 +25,7 @@ public class BenchmarkRunner {
         CompletableFuture.allOf(
                 CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
                 CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
-                CompletableFuture.supplyAsync(()->DCM(10,20,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
+                CompletableFuture.supplyAsync(()->DCM(1,20,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
                 ).get();
 //        CompletableFuture<Map<String, SimulationResult>> c1 = CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass));
 //
@@ -121,20 +121,25 @@ public class BenchmarkRunner {
         List<Double> clockTimes = DoubleStream.iterate(step, d -> d <= totalTime, d -> d + step).boxed().collect(Collectors.toList());
         int lastIndex = 0;
         List<SimulationSnapshot> clockedEvents = new ArrayList<>();
-        System.out.println("totalTime: "+totalTime+", stepCount= "+ stepCount+", step= "+step+", clockTimes: "+clockTimes);
+        //System.out.println("totalTime: "+totalTime+", stepCount= "+ stepCount+", step= "+step+", clockTimes: "+clockTimes);
         for(Double time: clockTimes){
-            //System.out.println(".Time: "+time);
+           // System.out.println(".Time: "+time);
            double lastTime = 0;
            while(lastIndex < snapshots.size() && lastTime < time) {
                lastTime = snapshots.get(lastIndex++).getEvent().getRelativeTime();
-               //System.out.println(lastIndex-1+") lastTime: "+lastTime);
+
            }
+           //System.out.println(lastIndex-1+") upper lastTime: "+lastTime);
+
            if(lastIndex ==  snapshots.size()){
-               //System.out.println("lastIndex == size");
+              // System.out.println("lastIndex == size");
                clockedEvents.add(snapshots.get(lastIndex-1));
                break;
+           }else if(lastIndex == 0){
+               clockedEvents.add(snapshots.get(0));
+               break;
            }else{
-              // System.out.println("LASTINDEX: "+lastIndex);
+               //System.out.println("LASTINDEX: "+lastIndex);
                SimulationSnapshot upper= snapshots.get(lastIndex-1);
                SimulationSnapshot lower = snapshots.get(lastIndex-2);
                double upperDiff = Math.abs(time - upper.getEvent().getTime());
