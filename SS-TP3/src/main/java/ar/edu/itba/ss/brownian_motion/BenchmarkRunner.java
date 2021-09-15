@@ -25,7 +25,7 @@ public class BenchmarkRunner {
         CompletableFuture.allOf(
                 CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
                 CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
-                CompletableFuture.supplyAsync(()->DCM(1,20,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
+                CompletableFuture.supplyAsync(()->DCM(5,20,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
                 ).get();
 //        CompletableFuture<Map<String, SimulationResult>> c1 = CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass));
 //
@@ -94,31 +94,41 @@ public class BenchmarkRunner {
 
     private static Map<String,SimulationResult> DCM(int simulationIterations,int stepCount,double L, int maxIter,int N,double minVelocity,double maxVelocity, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
 //        List<String>  outputFiles  =  velocities.stream().map(p-> String.format("ej3/simulationN%dV%f-%f",N,p.getLeft(),p.getRight())).collect(Collectors.toList());
-        Map<String,SimulationResult> results = new HashMap<>();
+        Map<String,SimulationResult> mapResults = new HashMap<>();
+        List<SimulationResult> results = new ArrayList<>();
        for(int i = 0; i< simulationIterations; i++){
-           RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N, L, maxIter, minVelocity, maxVelocity, smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
+           RandomParticlesGeneratorConfig config =  new RandomParticlesGeneratorConfig(N, L, maxIter, minVelocity, maxVelocity, smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
+           while(config.getN() != N){
+               config =  new RandomParticlesGeneratorConfig(N, L, maxIter, minVelocity, maxVelocity, smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
+           }
            List<Particle> particles = ResourcesGenerator.generateParticles(config);
            Particle bigBoi = particles.get(0);
            BrownianMotion bm = new BrownianMotion(particles, L, bigBoi);
            CutCondition bigParticlecc = new BigParticleCutCondition(bigBoi);
            CutCondition maxEventscc = new MaxEventsCutCondition(maxIter);
            bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
-           results.put(String.format("ej4/simulation%dN%dV%d-%d",i, particles.size(), (int)minVelocity, (int)maxVelocity), getSnapshotsAtClock(bm.getResult(),stepCount));
+           results.add(bm.getResult());
        }
+       double minTime = results.stream().mapToDouble(SimulationResult::getTotalTime).min().orElseThrow(IllegalStateException::new);
+        for(int i = 0; i < results.size(); i++){
+            mapResults.put(String.format("ej4/simulation%dN%dV%d-%d",i, results.get(i).getSnapshots().get(0).getParticles().size(), (int)minVelocity, (int)maxVelocity), getSnapshotsAtClock(results.get(i),minTime,stepCount));
+        }
 
 
-        return results;
+
+        return mapResults;
     }
 
-    private static SimulationResult getSnapshotsAtClock(SimulationResult from,double stepCount){
+    private static SimulationResult getSnapshotsAtClock(SimulationResult from,double maxTime,double stepCount){
+        System.out.println("maxtime: "+maxTime);
         if(stepCount == 0){
             throw new IllegalArgumentException();
         }
-        double totalTime =from.getTotalTime();
+
         List<SimulationSnapshot> snapshots = from.getSnapshots();
 
-        double step = totalTime/stepCount;
-        List<Double> clockTimes = DoubleStream.iterate(step, d -> d <= totalTime, d -> d + step).boxed().collect(Collectors.toList());
+        double step = maxTime/stepCount;
+        List<Double> clockTimes = DoubleStream.iterate(step, d -> d <= maxTime, d -> d + step).boxed().collect(Collectors.toList());
         int lastIndex = 0;
         List<SimulationSnapshot> clockedEvents = new ArrayList<>();
         //System.out.println("totalTime: "+totalTime+", stepCount= "+ stepCount+", step= "+step+", clockTimes: "+clockTimes);
@@ -153,6 +163,6 @@ public class BenchmarkRunner {
            }
 
         }
-        return new SimulationResult(from.getTotalCollisions(), totalTime,clockedEvents);
+        return new SimulationResult(from.getTotalCollisions(), maxTime,clockedEvents);
     }
 }
