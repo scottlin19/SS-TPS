@@ -25,7 +25,7 @@ public class BenchmarkRunner {
         CompletableFuture.allOf(
                 CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
                 CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
-                CompletableFuture.supplyAsync(()->DCM(5,20,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
+                CompletableFuture.supplyAsync(()->DCM(5,40,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,true))
                 ).get();
 //        CompletableFuture<Map<String, SimulationResult>> c1 = CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass));
 //

@@ -145,7 +145,57 @@ def ej3(jsons):
 ########################## EJERCICIO 4 ##########################
 
 def ej4(jsons):
-    return True
+
+    ##################### Big Boi ############################
+    # Asumimos datos iguales para todos los jsons
+    total = len(jsons[0]['snapshots'])
+    totalTime = jsons[0]['totalTime']
+    clockStep = jsons[0]['totalTime']/total
+    # start_pos = []
+    # for jsonData in jsons:
+    #     start_pos.append((jsonData['snapshots'][0]['particles'][0]['posX'],jsonData['snapshots'][0]['particles'][0]['posY']))
+    promAcum = []
+    desvAcum = []
+    for i in range(int(total/2),total):
+        norms2 = []
+        for j, jsonData in enumerate(jsons):
+            norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - jsonData['snapshots'][0]['particles'][0]['posX'])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - jsonData['snapshots'][0]['particles'][0]['posY'])**2)
+        norms2 = np.array(norms2)
+        promAcum.append(np.mean(norms2))
+        desvAcum.append(np.std(norms2))
+    intervals = np.arange(start=totalTime/2, stop=totalTime, step=clockStep)
+    plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
+    plt.show()
+    
+    ##################### Not Big Boi ############################
+    data = jsons[0]
+    # start_pos = []
+    # for particles in data['snapshots'][0]['particles'][1:]:
+    #     start_pos.append((particles['posX'],particles['posY']))
+    promAcum = []
+    desvAcum = []
+    for i in range(0,total):
+        norms2 = []
+        for j, particles in enumerate(data['snapshots'][i]['particles'][1:]):
+            if i == 0:
+                print(f"origX: {data['snapshots'][0]['particles'][j]['posX']}, newX: {particles['posX']}")
+                print(f"origY: {data['snapshots'][0]['particles'][j]['posY']}, newY: {particles['posY']}")
+            norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j]['posY'])**2)
+        # for j, jsonData in enumerate(jsons):
+        #     norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - start_pos[j][0])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - start_pos[j][1])**2)
+        norms2 = np.array(norms2)
+        promAcum.append(np.mean(norms2))
+        desvAcum.append(np.std(norms2))
+    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
+    plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
+    plt.show()
+# File1 --->  T1, T2, T3, T4
+# T1 ----> P1, P2, P3
+
+# P1 - P10 ^2
+# P2 - P20 ^2
+# P3 - P30 ^2
+# -------------
 
 if __name__ == "__main__":
     choice = sys.argv[1]
