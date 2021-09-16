@@ -23,33 +23,27 @@ public class BenchmarkRunner {
         double smallRadius = 0.2, bigRadius = 0.7;
         double smallMass = 0.9, bigMass = 2;
         CompletableFuture.allOf(
-                CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
-                CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
-                CompletableFuture.supplyAsync(()->DCM(5,40,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,true))
+                CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,false)),
+                CompletableFuture.supplyAsync(() -> varyVelocity(L, maxIter, N, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,false)),
+                CompletableFuture.supplyAsync(()->DCM(5,40,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
                 ).get();
-//        CompletableFuture<Map<String, SimulationResult>> c1 = CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass));
-//
-//        CompletableFuture<Map<String, SimulationResult>> c2 = CompletableFuture.supplyAsync(() -> varyVelocity(L, maxIter, N, smallRadius, bigRadius, bigMass, smallMass));
-//
-//        CompletableFuture<Map<String, SimulationResult>> c3 = CompletableFuture.supplyAsync(()->DCM(10,10,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass));
-
-
-//        CompletableFuture<Void> combined = c1.thenCombineAsync(c2, (data, data2)->{
-//            createFiles(data,true);
-//            createFiles(data2,true);
-//            return null;
-//        });
-//        combined.get();
-
+//        Map<String,SimulationResult> varyNResult =  varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass);
+//        createFiles(varyNResult,true);
+//        Map<String,SimulationResult> varyVelocityResult =  varyVelocity(L, maxIter, N, smallRadius, bigRadius, bigMass, smallMass);
+//        createFiles(varyVelocityResult,true);
+//        Map<String,SimulationResult> DCMResult =  DCM(5,40,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass);
+//        createFiles(DCMResult,true);
+        //CompletableFuture.supplyAsync(()->DCM(5,40,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,true)).get();
 
     }
 
     private static void createFiles(Map<String,SimulationResult>  data,boolean createEXYZ){
         for(Map.Entry<String,SimulationResult> entry : data.entrySet()){
             if(createEXYZ){
+                System.out.printf("Writing %s.exyz\n", entry.getKey());
                 OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.EXYZ);
             }
-
+            System.out.printf("Writing %s.json\n", entry.getKey());
             OutputFile.createOutputFile(entry.getValue(), entry.getKey(), OutputTypeEnum.JSON);
         }
     }
@@ -76,7 +70,6 @@ public class BenchmarkRunner {
     }
     private static Map<String,SimulationResult> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
         List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,5.0),new Pair<>(0.5,1.0),new Pair<>(1.0,2.0),new Pair<>(4.0,6.0));
-//        List<String>  outputFiles  =  velocities.stream().map(p-> String.format("ej3/simulationN%dV%f-%f",N,p.getLeft(),p.getRight())).collect(Collectors.toList());
         Map<String,SimulationResult> results = new HashMap<>();
         for (Pair<Double, Double> velocity : velocities) {
             RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N, L, maxIter, velocities.get(0).getLeft(), velocities.get(0).getRight(), smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
@@ -120,7 +113,7 @@ public class BenchmarkRunner {
     }
 
     private static SimulationResult getSnapshotsAtClock(SimulationResult from,double maxTime,double stepCount){
-        System.out.println("maxtime: "+maxTime);
+
         if(stepCount == 0){
             throw new IllegalArgumentException();
         }
@@ -131,25 +124,27 @@ public class BenchmarkRunner {
         List<Double> clockTimes = DoubleStream.iterate(step, d -> d <= maxTime, d -> d + step).boxed().collect(Collectors.toList());
         int lastIndex = 0;
         List<SimulationSnapshot> clockedEvents = new ArrayList<>();
-        //System.out.println("totalTime: "+totalTime+", stepCount= "+ stepCount+", step= "+step+", clockTimes: "+clockTimes);
+        clockedEvents.add(snapshots.get(0));
+        //ystem.out.println("totalTime: "+maxTime+", stepCount= "+ stepCount+", step= "+step+", clockTimes: "+clockTimes);
         for(Double time: clockTimes){
-           // System.out.println(".Time: "+time);
+
            double lastTime = 0;
            while(lastIndex < snapshots.size() && lastTime < time) {
                lastTime = snapshots.get(lastIndex++).getEvent().getRelativeTime();
 
            }
-           //System.out.println(lastIndex-1+") upper lastTime: "+lastTime);
+
 
            if(lastIndex ==  snapshots.size()){
-              // System.out.println("lastIndex == size");
+
                clockedEvents.add(snapshots.get(lastIndex-1));
                break;
            }else if(lastIndex == 0){
+
                clockedEvents.add(snapshots.get(0));
                break;
            }else{
-               //System.out.println("LASTINDEX: "+lastIndex);
+
                SimulationSnapshot upper= snapshots.get(lastIndex-1);
                SimulationSnapshot lower = snapshots.get(lastIndex-2);
                double upperDiff = Math.abs(time - upper.getEvent().getTime());
