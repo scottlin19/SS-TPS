@@ -176,10 +176,10 @@ def ej4(jsons):
     desvAcum = []
     for i in range(0,total):
         norms2 = []
-        for j, particles in enumerate(data['snapshots'][i]['particles']):
-            print(j)
-            if j > 0:
-                norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j]['posY'])**2)
+        for j, particles in enumerate(data['snapshots'][i]['particles'][1:]):
+            # print(j)
+            # if j > 0:
+            norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j+1]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j+1]['posY'])**2)
         # for j, jsonData in enumerate(jsons):
         #     norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - start_pos[j][0])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - start_pos[j][1])**2)
         norms2 = np.array(norms2)
