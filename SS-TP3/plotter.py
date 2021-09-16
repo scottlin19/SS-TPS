@@ -174,7 +174,7 @@ def ej4(jsons):
     #     start_pos.append((particles['posX'],particles['posY']))
     promAcum = []
     desvAcum = []
-    for i in range(0,total):
+    for i in range(int(total/2),total):
         norms2 = []
         for j, particles in enumerate(data['snapshots'][i]['particles'][1:]):
             # print(j)
@@ -185,7 +185,9 @@ def ej4(jsons):
         norms2 = np.array(norms2)
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
-    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
+    intervals = np.arange(start=totalTime/2, stop=totalTime, step=clockStep)
+    plt.ylabel("DCM")
+    plt.xlabel("Tiempo (s)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
 # File1 --->  T1, T2, T3, T4
