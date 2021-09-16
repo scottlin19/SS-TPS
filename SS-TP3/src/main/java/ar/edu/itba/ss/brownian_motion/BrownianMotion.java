@@ -20,8 +20,6 @@ public class BrownianMotion {
     private Set<Event> events;
     private long totalCollisions;
     private double totalTime;
-    private Instant start, end;
-    private Duration timeElapsed;
     private SimulationResult result;
 
 
@@ -39,12 +37,9 @@ public class BrownianMotion {
     public void simulate(Predicate<Event> cutConditions){
         System.out.println("Starting simulation . . .");
         Event e = null;
-        start = Instant.now();
         while(!cutConditions.test(e)){
             e = update();
         }
-        end = Instant.now();
-        timeElapsed = Duration.between(start,end);
         System.out.println("Simulation terminated.");
         createResult();
     }
@@ -115,9 +110,6 @@ public class BrownianMotion {
         return totalCollisions;
     }
 
-    public Duration getTimeElapsed() {
-        return timeElapsed;
-    }
 
     public void calculateEvents(){
 
