@@ -24,8 +24,8 @@ def ej1(jsons):
         auxMaxColTime = max(list(map(lambda iteration: iteration["event"]["time"],data)))
         if maxColTime < auxMaxColTime:
             maxColTime = auxMaxColTime
-
-    intervals = np.arange(start=0, stop=maxColTime, step=maxColTime/50)
+    bin_size = 0.0005
+    intervals = np.arange(start=0, stop=maxColTime, step=0.0005)
     for jsonData in jsons:
         totalCollisions = jsonData["totalCollisions"]
         data = jsonData["snapshots"]
@@ -43,8 +43,14 @@ def ej1(jsons):
                 if collisionTime <= interval:
                     hits[i-1] += 1
                     break
-
-        plt.plot(intervals, hits/totalCollisions, marker="o", label = f"N={N}")
+        no_match_cells = []
+        for i,hit in enumerate(hits):
+            if hit == 0:
+                no_match_cells.append(i)
+        intervals = np.delete(intervals, no_match_cells)
+        hits = np.delete(hits, no_match_cells)
+        plt.plot(intervals, hits/(totalCollisions*bin_size), marker="o", label = f"N={N}")
+        # plt.scatter(intervals, hits/totalCollisions, label = f"N={N}")
         print(f"--------------------------------------------")
         print(f"For N = {N}")
         #1) Parte 1
@@ -53,10 +59,10 @@ def ej1(jsons):
 
         print("Promedio de tiempos de colisiones: " + str(totalTime/totalCollisions))
     
-    plt.title(f"bin size={maxColTime/50}")
+    # plt.title(f"bin size={maxColTime/50}")
     plt.yscale('log')
     plt.legend(loc='upper right', borderaxespad=0.)
-    plt.xlabel("Tiempos")
+    plt.xlabel("Tiempos (ms)")
     plt.ylabel("Cantidad de colisiones")
     plt.show()
 
@@ -106,8 +112,8 @@ def ej2(jsons):
                         break
         
         # print(intervals)
-        print(f"N={N}: Sum of all probabilities: {np.sum(orig_hits/N)}")
-        print(f"N={N}: Sum of all probabilities: {np.sum(hits/total_velocities)}")
+        # print(f"N={N}: Sum of all probabilities: {np.sum(orig_hits/N)}")
+        # print(f"N={N}: Sum of all probabilities: {np.sum(hits/total_velocities)}")
         if k == 2: plt.plot(intervals,orig_hits/N, marker='o', label=f"orig N={N}", color='red')
         plt.plot(intervals, hits/total_velocities, marker='o', label = f"N={N}")
 
@@ -165,6 +171,8 @@ def ej4(jsons):
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
     intervals = np.arange(start=0, stop=totalTime, step=clockStep)
+    plt.ylabel("DCM")
+    plt.xlabel("Tiempo (s)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
     
@@ -187,6 +195,8 @@ def ej4(jsons):
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
     intervals = np.arange(start=0, stop=totalTime, step=clockStep)
+    plt.ylabel("DCM")
+    plt.xlabel("Tiempo (s)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
 # File1 --->  T1, T2, T3, T4
