@@ -123,22 +123,23 @@ def ej2(jsons):
 
 def ej3(jsons):
     fig, ax = plt.subplots()
-    velocities = [1, 2, 3]
+    velocities = ["[0.5, 1]","[1, 2]","[4, 6]"]
+    color = ["lightblue","orange","red"]
     for k,jsonData in enumerate(jsons):
         data = jsonData["snapshots"]
         
         bigBoisPos = list(map(lambda iteration: (iteration["particles"][0]["posX"],iteration["particles"][0]["posY"]),data))
-            
-        plt.plot(list(map(lambda bigboi: bigboi[0], bigBoisPos)), list(map(lambda bigboi: bigboi[1], bigBoisPos)), label = f"V={velocities[k]}")
-        start = ax.add_artist(plt.Circle((bigBoisPos[0][0],bigBoisPos[0][1]), 0.1, color='green', alpha=0.3))
-        end = ax.add_artist(plt.Circle((bigBoisPos[-1][0],bigBoisPos[-1][1]),  0.1, color='red', alpha=0.3))
+         
+        plt.plot(list(map(lambda bigboi: bigboi[0], bigBoisPos)), list(map(lambda bigboi: bigboi[1], bigBoisPos)), label = f"|V| \u03F5 {velocities[k]}",color=color[k])
+        #start = ax.add_artist(plt.Circle((bigBoisPos[0][0],bigBoisPos[0][1]), 0.7, color='green', alpha=0.3))
+        end = ax.add_artist(plt.Circle((bigBoisPos[-1][0],bigBoisPos[-1][1]),  0.7, color=color[k], alpha=0.3))
 
 
     plt.legend(loc='upper right', borderaxespad=0.)
     plt.xlim(0,6)
     plt.ylim(0,6)
-    plt.xlabel("Pos x")
-    plt.ylabel("Pos y")
+    plt.xlabel("X")
+    plt.ylabel("Y")
     plt.show()
 
 
@@ -156,14 +157,14 @@ def ej4(jsons):
     #     start_pos.append((jsonData['snapshots'][0]['particles'][0]['posX'],jsonData['snapshots'][0]['particles'][0]['posY']))
     promAcum = []
     desvAcum = []
-    for i in range(int(total/2),total):
+    for i in range(0,total):
         norms2 = []
         for j, jsonData in enumerate(jsons):
             norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - jsonData['snapshots'][0]['particles'][0]['posX'])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - jsonData['snapshots'][0]['particles'][0]['posY'])**2)
         norms2 = np.array(norms2)
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
-    intervals = np.arange(start=totalTime/2, stop=totalTime, step=clockStep)
+    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
     
@@ -174,20 +175,18 @@ def ej4(jsons):
     #     start_pos.append((particles['posX'],particles['posY']))
     promAcum = []
     desvAcum = []
-    for i in range(int(total/2),total):
+    for i in range(0,total):
         norms2 = []
-        for j, particles in enumerate(data['snapshots'][i]['particles'][1:]):
-            # print(j)
-            # if j > 0:
-            norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j+1]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j+1]['posY'])**2)
+        for j, particles in enumerate(data['snapshots'][i]['particles']):
+           
+            if j > 0:
+                norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j]['posY'])**2)
         # for j, jsonData in enumerate(jsons):
         #     norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - start_pos[j][0])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - start_pos[j][1])**2)
         norms2 = np.array(norms2)
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
-    intervals = np.arange(start=totalTime/2, stop=totalTime, step=clockStep)
-    plt.ylabel("DCM")
-    plt.xlabel("Tiempo (s)")
+    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
 # File1 --->  T1, T2, T3, T4
