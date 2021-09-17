@@ -170,6 +170,8 @@ def ej4(jsons):
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
     intervals = np.arange(start=0, stop=totalTime, step=clockStep)
+    plt.ylabel("DCM")
+    plt.xlabel("Tiempo (s)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
     
