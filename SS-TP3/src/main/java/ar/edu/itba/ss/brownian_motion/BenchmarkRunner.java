@@ -23,9 +23,9 @@ public class BenchmarkRunner {
         double smallRadius = 0.2, bigRadius = 0.7;
         double smallMass = 0.9, bigMass = 2;
         CompletableFuture.allOf(
-                CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,false)),
-                CompletableFuture.supplyAsync(() -> varyVelocity(L, maxIter, N, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,false)),
-                CompletableFuture.supplyAsync(()->DCM(25,20,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,false))
+                CompletableFuture.supplyAsync(() -> varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
+                CompletableFuture.supplyAsync(() -> varyVelocity(L, maxIter, N, smallRadius, bigRadius, bigMass, smallMass)).thenAccept(data->createFiles(data,true)),
+                CompletableFuture.supplyAsync(()->DCM(5,40,L,maxIter,130,minVelocity,maxVelocity,smallRadius,bigRadius,bigMass,smallMass)).thenAccept(data->createFiles(data,true))
                 ).get();
 //        Map<String,SimulationResult> varyNResult =  varyN(L, maxIter, minVelocity, maxVelocity, smallRadius, bigRadius, bigMass, smallMass);
 //        createFiles(varyNResult,true);
@@ -81,9 +81,8 @@ public class BenchmarkRunner {
         return results;
     }
     private static Map<String,SimulationResult> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
-        List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,0.5),new Pair<>(1.0,2.0),new Pair<>(4.0,6.0));
-        Map<String,SimulationResult> mapResults = new HashMap<>();
-        List<SimulationResult> results =  new ArrayList<>();
+        List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,2.0),new Pair<>(2.0,4.0),new Pair<>(4.0,6.0));
+        Map<String,SimulationResult> results = new HashMap<>();
         for (Pair<Double, Double> velocity : velocities) {
             System.out.println("VEL: "+velocity.getLeft()+" , "+velocity.getRight());
             RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N, L, maxIter,velocity.getLeft(), velocity.getRight(), smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);

@@ -81,7 +81,7 @@ def ej2(jsons):
             curr_max_vel_mod = max(list(map(lambda p: math.sqrt(p['velX']**2 + p['velY']**2),iteration["particles"][1:])))
             if(curr_max_vel_mod > max_mod_vel): 
                 max_mod_vel = curr_max_vel_mod
-
+    bin_size = 0.1
     for k,jsonData in enumerate(jsons):
         totalCollisions = jsonData["totalCollisions"]
         data = jsonData["snapshots"]
@@ -89,7 +89,7 @@ def ej2(jsons):
         totalTime = 0
         lastTime = 0
 
-        intervals = np.arange(start=0, stop=max_mod_vel, step=max_mod_vel/40)
+        intervals = np.arange(start=0, stop=max_mod_vel, step=bin_size)
         hits = np.zeros(len(intervals))
         last_third = math.ceil(len(data) * 2/3)
         N = len(data[0]["particles"][1:])
@@ -114,10 +114,10 @@ def ej2(jsons):
         # print(intervals)
         # print(f"N={N}: Sum of all probabilities: {np.sum(orig_hits/N)}")
         # print(f"N={N}: Sum of all probabilities: {np.sum(hits/total_velocities)}")
-        if k == 2: plt.plot(intervals,orig_hits/N, marker='o', label=f"orig N={N}", color='red')
-        plt.plot(intervals, hits/total_velocities, marker='o', label = f"N={N}")
+        if k == 2: plt.plot(intervals,orig_hits/(N*bin_size), marker='o', label=f"N={N} primera iteracion", color='red')
+        plt.plot(intervals, hits/(total_velocities*bin_size), marker='o', label = f"N={N} ultimo tercio")
 
-    plt.title(f"bin size={max_mod_vel/40}")
+    # plt.title(f"bin size={max_mod_vel/40}")
     plt.legend(loc='upper right', borderaxespad=0.)
     plt.xlabel("Velocidades")
     plt.ylabel("Distribución de probabilidad de velocidades")
@@ -186,9 +186,7 @@ def ej4(jsons):
     for i in range(0,total):
         norms2 = []
         for j, particles in enumerate(data['snapshots'][i]['particles']):
-           
-            if j > 0:
-                norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j]['posY'])**2)
+            norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j+1]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j+1]['posY'])**2)
         # for j, jsonData in enumerate(jsons):
         #     norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - start_pos[j][0])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - start_pos[j][1])**2)
         norms2 = np.array(norms2)
@@ -196,7 +194,7 @@ def ej4(jsons):
         desvAcum.append(np.std(norms2))
     intervals = np.arange(start=0, stop=totalTime, step=clockStep)
     plt.ylabel("DCM")
-    plt.xlabel("Tiempo (s)")
+    plt.xlabel("Tiempo (ms)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
     plt.show()
 # File1 --->  T1, T2, T3, T4
