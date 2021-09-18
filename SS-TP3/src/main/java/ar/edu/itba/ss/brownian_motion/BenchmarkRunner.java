@@ -64,7 +64,8 @@ public class BenchmarkRunner {
 
         List<Integer> Ns = Arrays.asList(100,115,130);
 //        List<String>  outputFiles  =  Ns.stream().map(n-> String.format("ej1/simulationN%dV%d-%d",n,(int) minVelocity,(int) maxVelocity)).collect(Collectors.toList());
-        Map<String,SimulationResult> results = new HashMap<>();
+        Map<String,SimulationResult> mapResults = new HashMap<>();
+        List<SimulationResult> results =  new ArrayList<>();
         for (Integer n : Ns) {
             RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(n, L, maxIter, minVelocity, maxVelocity, smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
             List<Particle> particles = ResourcesGenerator.generateParticles(config);
@@ -73,12 +74,17 @@ public class BenchmarkRunner {
             CutCondition bigParticlecc = new BigParticleCutCondition(bigBoi);
             CutCondition maxEventscc = new MaxEventsCutCondition(maxIter);
             bm.simulate((event) -> bigParticlecc.cut(event) || maxEventscc.cut(event));
-            results.put(String.format("ej1/simulationN%dV%d-%d", particles.size(), (int) minVelocity, (int) maxVelocity), bm.getResult());
+            results.add(bm.getResult());
             //createFiles2(String.format("ej1/simulationN%dV%.2f-%.2f", particles.size(), minVelocity, maxVelocity),bm.getResult(),true);
 
         }
+        double minTime = results.stream().mapToDouble(SimulationResult::getTotalTime).min().orElseThrow(IllegalStateException::new);
+        System.out.println("Vary N Benchmark: MINIMUM TIME = "+minTime);
+        for (SimulationResult result : results) {
+            mapResults.put(String.format("ej1/simulationN%dV%.2f-%.2f", result.getSnapshots().get(0).getParticles().size(), minVelocity, maxVelocity), getEventsUntilTime(result, minTime));
+        }
 
-        return results;
+        return mapResults;
     }
     private static Map<String,SimulationResult> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
         List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,0.5),new Pair<>(1.0,2.0),new Pair<>(4.0,6.0));
