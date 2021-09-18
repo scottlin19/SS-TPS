@@ -82,7 +82,8 @@ public class BenchmarkRunner {
     }
     private static Map<String,SimulationResult> varyVelocity(double L, int maxIter,int N, double smallParticleRadius, double bigParticleRadius, double bigMass, double smallMass){
         List<Pair<Double,Double>> velocities = Arrays.asList(new Pair<>(0.0,2.0),new Pair<>(2.0,4.0),new Pair<>(4.0,6.0));
-        Map<String,SimulationResult> results = new HashMap<>();
+        Map<String,SimulationResult> mapResults = new HashMap<>();
+        List<SimulationResult> results =  new ArrayList<>();
         for (Pair<Double, Double> velocity : velocities) {
             System.out.println("VEL: "+velocity.getLeft()+" , "+velocity.getRight());
             RandomParticlesGeneratorConfig config = new RandomParticlesGeneratorConfig(N, L, maxIter,velocity.getLeft(), velocity.getRight(), smallParticleRadius, bigParticleRadius, bigMass, smallMass, null);
