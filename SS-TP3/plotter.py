@@ -114,14 +114,13 @@ def ej2(jsons):
         # print(intervals)
         # print(f"N={N}: Sum of all probabilities: {np.sum(orig_hits/N)}")
         # print(f"N={N}: Sum of all probabilities: {np.sum(hits/total_velocities)}")
-        if k == 2: plt.plot(intervals,orig_hits/N, marker='o', label=f"N={N} primera iteracion", color='red')
+        plt.plot(intervals,orig_hits/N, marker='o', label=f"N={N} primera iteracion", color='red')
         plt.plot(intervals, hits/total_velocities, marker='o', label = f"N={N} ultimo tercio")
-
-    # plt.title(f"bin size={max_mod_vel/40}")
-    plt.legend(loc='upper right', borderaxespad=0.)
-    plt.xlabel("Velocidades")
-    plt.ylabel("Distribución de probabilidad de velocidades")
-    plt.show()
+        # plt.title(f"bin size={max_mod_vel/40}")
+        plt.legend(loc='upper right', borderaxespad=0.)
+        plt.xlabel("Velocidades (m/s)")
+        plt.ylabel("Distribución de probabilidad de velocidades")
+        plt.show()
 
 
 
@@ -185,7 +184,7 @@ def ej4(jsons):
     desvAcum = []
     for i in range(0,total):
         norms2 = []
-        for j, particles in enumerate(data['snapshots'][i]['particles']):
+        for j, particles in enumerate(data['snapshots'][i]['particles'][1:]):
             norms2.append((particles['posX'] - data['snapshots'][0]['particles'][j+1]['posX'])**2 + (particles['posY'] - data['snapshots'][0]['particles'][j+1]['posY'])**2)
         # for j, jsonData in enumerate(jsons):
         #     norms2.append((jsonData['snapshots'][i]['particles'][0]['posX'] - start_pos[j][0])**2 + (jsonData['snapshots'][i]['particles'][0]['posY'] - start_pos[j][1])**2)
@@ -211,7 +210,6 @@ if __name__ == "__main__":
     pattern = re.compile("\.json$")
     jsons = []
     for fname in list(filter(pattern.search, os.listdir(dir))):
-        print(dir + fname)
         file = open(os.path.join(dir,fname))
         jsons.append(json.load(file))
 
