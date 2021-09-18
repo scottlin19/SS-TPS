@@ -41,7 +41,7 @@ public class Event implements Comparable<Event>{
         this.relativeTime = relativeTime;
     }
 
-    public void update(){
+    public void updateCollision(){
         if(isWallCollision()){ // Is wall collision
            // System.out.println("es wall collision");
             Particle.updateWallCollision(p1,direction);
