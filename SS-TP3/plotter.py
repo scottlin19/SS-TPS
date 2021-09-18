@@ -25,7 +25,7 @@ def ej1(jsons):
         if maxColTime < auxMaxColTime:
             maxColTime = auxMaxColTime
     bin_size = 0.0005
-    intervals = np.arange(start=0, stop=maxColTime, step=0.0005)
+    intervals = np.arange(start=0, stop=maxColTime, step=bin_size)
     for jsonData in jsons:
         totalCollisions = jsonData["totalCollisions"]
         data = jsonData["snapshots"]
@@ -49,7 +49,7 @@ def ej1(jsons):
                 no_match_cells.append(i)
         intervals = np.delete(intervals, no_match_cells)
         hits = np.delete(hits, no_match_cells)
-        plt.plot(intervals, hits/(totalCollisions*bin_size), marker="o", label = f"N={N}")
+        plt.plot(intervals, hits/totalCollisions, marker="o", label = f"N={N}")
         # plt.scatter(intervals, hits/totalCollisions, label = f"N={N}")
         print(f"--------------------------------------------")
         print(f"For N = {N}")
@@ -114,8 +114,8 @@ def ej2(jsons):
         # print(intervals)
         # print(f"N={N}: Sum of all probabilities: {np.sum(orig_hits/N)}")
         # print(f"N={N}: Sum of all probabilities: {np.sum(hits/total_velocities)}")
-        if k == 2: plt.plot(intervals,orig_hits/(N*bin_size), marker='o', label=f"N={N} primera iteracion", color='red')
-        plt.plot(intervals, hits/(total_velocities*bin_size), marker='o', label = f"N={N} ultimo tercio")
+        if k == 2: plt.plot(intervals,orig_hits/N, marker='o', label=f"N={N} primera iteracion", color='red')
+        plt.plot(intervals, hits/total_velocities, marker='o', label = f"N={N} ultimo tercio")
 
     # plt.title(f"bin size={max_mod_vel/40}")
     plt.legend(loc='upper right', borderaxespad=0.)
