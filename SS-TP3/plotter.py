@@ -129,7 +129,7 @@ def ej2(jsons):
 
 def ej3(jsons):
     fig, ax = plt.subplots()
-    velocities = ["[0.5, 1]","[1, 2]","[4, 6]"]
+    velocities = ["[0.5; 1]","[1; 2]","[4; 6]"]
     color = ["lightblue","orange","red"]
     for k,jsonData in enumerate(jsons):
         data = jsonData["snapshots"]
