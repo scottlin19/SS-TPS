@@ -128,7 +128,7 @@ def ej2(jsons):
 
 def ej3(jsons):
     fig, ax = plt.subplots()
-    velocities = ["[0.5, 1]","[1, 2]","[4, 6]"]
+    velocities = ["[0.5, 1)","[1, 2)","[4, 6)"]
     color = ["lightblue","orange","red"]
     for k,jsonData in enumerate(jsons):
         data = jsonData["snapshots"]
@@ -173,6 +173,7 @@ def ej4(jsons):
     plt.ylabel("DCM")
     plt.xlabel("Tiempo (s)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
+    plt.grid()
     plt.show()
     
     ##################### Not Big Boi ############################
@@ -195,6 +196,7 @@ def ej4(jsons):
     plt.ylabel("DCM")
     plt.xlabel("Tiempo (ms)")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
+    plt.grid()
     plt.show()
 # File1 --->  T1, T2, T3, T4
 # T1 ----> P1, P2, P3
