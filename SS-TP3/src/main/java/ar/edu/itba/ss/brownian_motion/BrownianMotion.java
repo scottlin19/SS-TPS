@@ -85,7 +85,7 @@ public class BrownianMotion {
         // PASO 4: Sacar snapshot
         snapshot(e);
         // PASO 5: Aplicamos operador de colision con las particulas del evento
-        e.update();
+        e.updateCollision();
 
         //Eliminamos todos los eventos invalidos
         Set<Particle> invalidParticles = events.stream().filter(ev -> ev.containsParticle(p1) || ev.containsParticle(p2)).map(Event::getParticles).flatMap(Collection::stream).collect(Collectors.toCollection(HashSet::new));

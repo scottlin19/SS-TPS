@@ -129,17 +129,17 @@ def ej2(jsons):
 def ej3(jsons):
     fig, ax = plt.subplots()
     velocities = ["[0.5, 1)","[1, 2)","[4, 6)"]
-    color = ["lightblue","orange","red"]
+    color = ["deepskyblue","orange","red"]
     for k,jsonData in enumerate(jsons):
         data = jsonData["snapshots"]
         
         bigBoisPos = list(map(lambda iteration: (iteration["particles"][0]["posX"],iteration["particles"][0]["posY"]),data))
-         
-        plt.plot(list(map(lambda bigboi: bigboi[0], bigBoisPos)), list(map(lambda bigboi: bigboi[1], bigBoisPos)), label = f"|V| \u03F5 {velocities[k]}",color=color[k])
-        #start = ax.add_artist(plt.Circle((bigBoisPos[0][0],bigBoisPos[0][1]), 0.7, color='green', alpha=0.3))
+        
+        plt.plot(list(map(lambda bigboi: bigboi[0], bigBoisPos)), list(map(lambda bigboi: bigboi[1], bigBoisPos)), label = f"|$V_{0}$| \u03F5 {velocities[k]}",color=color[k])
+       
         end = ax.add_artist(plt.Circle((bigBoisPos[-1][0],bigBoisPos[-1][1]),  0.7, color=color[k], alpha=0.3))
 
-
+    #start = ax.add_artist(plt.Circle((bigBoisPos[0][0],bigBoisPos[0][1]), 0.1, color='green', alpha=1))
     plt.legend(loc='upper right', borderaxespad=0.)
     plt.xlim(0,6)
     plt.ylim(0,6)
