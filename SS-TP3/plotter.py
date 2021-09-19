@@ -4,11 +4,10 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
+import matplotlib.ticker as mticker
 import os
 import re
 
-
-DELTA_TIME = 0.0005
 
 font = {
             'weight' : 'normal',
@@ -62,7 +61,7 @@ def ej1(jsons):
     # plt.title(f"bin size={maxColTime/50}")
     plt.yscale('log')
     plt.legend(loc='upper right', borderaxespad=0.)
-    plt.xlabel("Tiempos (ms)")
+    plt.xlabel("Tiempos (s)")
     plt.ylabel("Cantidad de colisiones")
     plt.show()
 
@@ -81,7 +80,7 @@ def ej2(jsons):
             curr_max_vel_mod = max(list(map(lambda p: math.sqrt(p['velX']**2 + p['velY']**2),iteration["particles"][1:])))
             if(curr_max_vel_mod > max_mod_vel): 
                 max_mod_vel = curr_max_vel_mod
-    bin_size = 0.1
+    bin_size = 0.15
     for k,jsonData in enumerate(jsons):
         totalCollisions = jsonData["totalCollisions"]
         data = jsonData["snapshots"]
@@ -114,13 +113,14 @@ def ej2(jsons):
         # print(intervals)
         # print(f"N={N}: Sum of all probabilities: {np.sum(orig_hits/N)}")
         # print(f"N={N}: Sum of all probabilities: {np.sum(hits/total_velocities)}")
-        plt.plot(intervals,orig_hits/N, marker='o', label=f"N={N} primera iteracion", color='red')
         plt.plot(intervals, hits/total_velocities, marker='o', label = f"N={N} ultimo tercio")
+        if k == 2: 
+            plt.plot(intervals,orig_hits/N, marker='o', label=f"N={N} primera iteracion", color='red')
         # plt.title(f"bin size={max_mod_vel/40}")
         plt.legend(loc='upper right', borderaxespad=0.)
         plt.xlabel("Velocidades (m/s)")
         plt.ylabel("Distribución de probabilidad de velocidades")
-        plt.show()
+    plt.show()
 
 
 
@@ -152,11 +152,17 @@ def ej3(jsons):
 
 def ej4(jsons):
 
-    ##################### Big Boi ############################
-    # Asumimos datos iguales para todos los jsons
     total = len(jsons[0]['snapshots'])
     totalTime = jsons[0]['totalTime']
     clockStep = jsons[0]['totalTime']/total
+    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
+
+    def linear_error(min_xs,intervals):
+        return min_xs*intervals
+
+    ##################### Big Boi ############################
+    # Asumimos datos iguales para todos los jsons
+    
     # start_pos = []
     # for jsonData in jsons:
     #     start_pos.append((jsonData['snapshots'][0]['particles'][0]['posX'],jsonData['snapshots'][0]['particles'][0]['posY']))
@@ -169,13 +175,41 @@ def ej4(jsons):
         norms2 = np.array(norms2)
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
-    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
-    plt.ylabel("DCM")
-    plt.xlabel("Tiempo (s)")
-    plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
-    plt.grid()
-    plt.show()
     
+    
+    errors = []
+    max_prom = max(promAcum)/10
+    xs = np.arange(start=0, stop=max_prom, step=max_prom/100)
+    
+    min_xs = float('inf')
+    min_error = float('inf')
+    
+    for x in xs:
+        _sum = 0.0
+        for j in range(len(intervals)):
+            _sum += (promAcum[j] - intervals[j]*x)**2
+        errors.append(_sum)
+
+        if _sum < min_error:
+            min_error = _sum
+            min_xs = x
+        # print(_sum)
+    
+    plt.figure()
+    plt.ylabel("Error ($m^2$)")
+    plt.xlabel("Pendiente de ajuste ($m^2$/s)")
+    plt.plot(xs, errors)
+    print(f"Min pendiente: {min_xs}")
+
+    plt.figure()
+    plt.ylabel("DCM ($m^2$)")
+    plt.xlabel("Tiempo (s)")
+    plt.plot(intervals,linear_error(min_xs=min_xs,intervals=intervals), label=f"D = {round(min_xs/2,3)}")
+    plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
+    plt.legend(loc='upper left', borderaxespad=0.)
+    plt.show()
+
+
     ##################### Not Big Boi ############################
     data = jsons[0]
     # start_pos = []
@@ -192,12 +226,39 @@ def ej4(jsons):
         norms2 = np.array(norms2)
         promAcum.append(np.mean(norms2))
         desvAcum.append(np.std(norms2))
-    intervals = np.arange(start=0, stop=totalTime, step=clockStep)
-    plt.ylabel("DCM")
-    plt.xlabel("Tiempo (ms)")
+
+
+    errors = []
+    max_prom = max(promAcum)/10
+    xs = np.arange(start=0, stop=max_prom, step=max_prom/100)
+    
+    min_xs = float('inf')
+    min_error = float('inf')
+    
+    for x in xs:
+        _sum = 0.0
+        for j in range(len(intervals)):
+            _sum += (promAcum[j] - intervals[j]*x)**2
+        errors.append(_sum)
+
+        if _sum < min_error:
+            min_error = _sum
+            min_xs = x
+    
+    plt.ylabel("Error ($m^2$)")
+    plt.xlabel("Pendiente de ajuste ($m^2$/s)")
+    plt.plot(xs, errors)
+    print(f"Min pendiente: {min_xs}")
+
+    plt.figure()
+    plt.ylabel("DCM ($m^2$)")
+    plt.xlabel("Tiempo (s)")
+    
+    plt.plot(intervals,linear_error(min_xs=min_xs,intervals=intervals), label=f"D = {round(min_xs/2,3)}")
     plt.errorbar(intervals, promAcum, yerr=desvAcum, marker='o')
-    plt.grid()
+    plt.legend(loc='upper left', borderaxespad=0.)
     plt.show()
+
 # File1 --->  T1, T2, T3, T4
 # T1 ----> P1, P2, P3
 
