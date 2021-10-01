@@ -2,16 +2,16 @@ package ar.edu.itba.ss.commons;
 
 import java.awt.geom.Point2D;
 
-public class Particle{
+public class Particle implements Cloneable{
 
-    private final int id;
-    private double posX, posY;
-    private double velX,velY;
-    private double radius;
-    private final double mass;
-    private final SystemFunctions updatedFunctions;
+    private final int       id;
+    private double          posX, posY;
+    private double          velX,velY;
+    private double          accX,accY;
+    private final double    radius;
+    private final double    mass;
 
-    public Particle(int id,double posX,double posY,double radius, double mass, double velX, double velY, SystemFunctions updatedFunctions){
+    public Particle(int id,double posX,double posY,double radius, double mass, double velX, double velY, double accX, double accY){
         this.id = id;
         this.radius = radius;
         this.mass = mass;
@@ -19,11 +19,16 @@ public class Particle{
         this.posY = posY;
         this.velX = velX;
         this.velY = velY;
-        this.updatedFunctions = updatedFunctions;
+        this.accX = accX;
+        this.accY = accY;
     }
 
     public double getForceX(){
-        return 0;
+        return mass * accX;
+    }
+
+    public double getForceY(){
+        return mass * accY;
     }
 
     public void update(double time){
@@ -78,16 +83,25 @@ public class Particle{
         return radius;
     }
 
-    public void setRadius(double radius) {
-        this.radius = radius;
-    }
-
-
-
     public double getMass() {
         return mass;
     }
 
+    public double getAccX() {
+        return accX;
+    }
+
+    public double getAccY() {
+        return accY;
+    }
+
+    public void setAccX(double accX) {
+        this.accX = accX;
+    }
+
+    public void setAccY(double accY) {
+        this.accY = accY;
+    }
 
     @Override
     public String toString() {
@@ -124,4 +138,15 @@ public class Particle{
     }
 
 
+    @Override
+    public Particle clone() {
+        try {
+            Particle clone = (Particle) super.clone();
+            // No tiene objetos mutables dentro, por lo tanto no es necesario cambiar el metodo
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

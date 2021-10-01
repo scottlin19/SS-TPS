@@ -1,5 +1,10 @@
 package ar.edu.itba.ss.sistem1;
 
+import ar.edu.itba.ss.commons.strategies.AnalyticStrategy;
+import ar.edu.itba.ss.commons.strategies.EulerStrategy;
+import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
+import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy;
+
 public class Config {
 
     private final double mass;
@@ -7,19 +12,23 @@ public class Config {
     private final double gamma;
     private final int tf;
     private final double r0;
-    private final double v0;
     private final double deltaT;
+    private final String strategy;
 
-    public Config(double mass, int k, double gamma, int tf, double r0, double v0, double deltaT) {
+    public Config(double mass, int k, double gamma, int tf, double r0, double deltaT,String strategy) {
         this.mass = mass;
         this.k = k;
         this.gamma = gamma;
         this.tf = tf;
         this.r0 = r0;
-        this.v0 = v0;
         this.deltaT = deltaT;
+
+        this.strategy = strategy;
     }
 
+    public String getStrategy(){
+        return strategy;
+    }
     public double getMass() {
         return mass;
     }
@@ -42,9 +51,5 @@ public class Config {
 
     public double getDeltaT() {
         return deltaT;
-    }
-
-    public double getV0() {
-        return v0;
     }
 }

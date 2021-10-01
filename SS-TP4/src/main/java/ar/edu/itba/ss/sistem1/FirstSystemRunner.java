@@ -7,10 +7,13 @@ import java.net.URL;
 
 import com.google.gson.Gson;
 
-import ar.edu.itba.ss.commons.DampedOscillatorFunctions;
-import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy;
+import ar.edu.itba.ss.commons.OutputFile;
+import ar.edu.itba.ss.commons.OutputTypeEnum;
+import ar.edu.itba.ss.commons.SimulationResult;
 
 public class FirstSystemRunner {
+
+    private static final String RESULTS_DIRECTORY = "results/";
 
     public static void main(String[] args) {
         URL config_url = FirstSystemRunner.class.getClassLoader().getResource("config/config.json");
@@ -21,14 +24,15 @@ public class FirstSystemRunner {
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(config_url.getFile()));
             Config config = new Gson().fromJson(bufferedReader, Config.class);
-            DampedOscillator dampedOscillator = new DampedOscillator()
-                .withUpdateStrategy(new VerletOriginalStrategy(config.getDeltaT(), new DampedOscillatorFunctions(config.getR0(), config.getK(), config.getGamma())))
-                .withConfig(config)
-                ;
+            DampedOscillator dampedOscillator = new DampedOscillator(config);
+
             dampedOscillator.simulate();
+            OutputFile.createOutputFile(new SimulationResult(config.getTf(), dampedOscillator.getSnapshots()),  "simulation_" + config.getStrategy(), OutputTypeEnum.JSON);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
     }
+
 }

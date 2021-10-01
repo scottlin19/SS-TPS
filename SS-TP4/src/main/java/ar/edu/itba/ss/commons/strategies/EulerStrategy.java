@@ -1,24 +1,24 @@
 package ar.edu.itba.ss.commons.strategies;
 
 import ar.edu.itba.ss.commons.Particle;
-import ar.edu.itba.ss.commons.SystemFunctions;
-
-public class EulerStrategy extends UpdateStrategy{
 
 
-    public EulerStrategy(double deltaT, SystemFunctions systemFunctions) {
-        super(deltaT,systemFunctions);
-    }
+public class EulerStrategy implements UpdateStrategy{
 
     @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void update(Particle p,double t) {
-        double F =  deltaT/p.getMass() *systemFunctions.f(p,t);
-        double V = p.getVel() + F;
-        double R  = p.getpo
+    public Particle update(Particle past, Particle present, double deltaT, double time) {
+        if(present == null){
+            throw new NullPointerException();
+        }
+        System.out.println("EULER PRESENT: "+present );
+        System.out.println("force x : "  +present.getForceX());
+        Particle future = present.clone();
+        double mass = present.getMass();
+        future.setVelX(present.getVelX() + deltaT * present.getForceX()/mass);
+        future.setVelY(present.getVelY() + deltaT * present.getForceY()/mass);
+        future.setPosX(present.getPosX() + deltaT * future.getVelX() + Math.pow(deltaT,2) * present.getForceX()/ (2*mass));
+        future.setPosY(present.getPosY() + deltaT * future.getVelY() + Math.pow(deltaT,2) * present.getForceY()/ (2*mass));
+        System.out.println("EULER FUTURE: "+future);
+        return future;
     }
 }

@@ -13,37 +13,72 @@ public class DampedOscillatorFunctions extends SystemFunctions {
     }
 
     @Override
-    public double f(Particle p, double t) {
-        return -k * r(p,t) - gamma * r1(p,t);
+    public double fx(Particle p, double t) {
+        return -k * rx(p,t) - gamma * r1x(p,t);
     }
 
     @Override
-    public double r(Particle p, double t) {
+    public double fy(Particle p, double t) {
+        return 0;
+    }
+
+    @Override
+    public double rx(Particle p, double t) {
         return amplitude * Math.exp(-(gamma/(2*p.getMass()))*t) * Math.cos(Math.pow(((k/p.getMass())-(Math.pow(gamma, 2) / (4* Math.pow(p.getMass(), 2)))),0.5) * t);
     }
 
     @Override
-    public double r1(Particle p, double t) {
+    public double ry(Particle p, double t) {
+        return 0;
+    }
+
+    @Override
+    public double r1x(Particle p, double t) {
         return amplitude*(-(gamma/(2*p.getMass())) * Math.exp(-(gamma/(2*p.getMass()))*t) - Math.pow(((k/p.getMass())-(Math.pow(gamma, 2) / (4* Math.pow(p.getMass(), 2)))),0.5) * Math.exp(-(gamma/(2*p.getMass()))*t) * Math.sin(Math.pow(((k/p.getMass())-(Math.pow(gamma, 2) / (4* Math.pow(p.getMass(), 2)))),0.5) * t));
     }
 
     @Override
-    public double r2(Particle p, double t) {
-        return -(k/p.getMass()) * r(p,t); // r0 = 0
+    public double r1y(Particle p, double t) {
+        return 0;
     }
 
     @Override
-    public double r3(Particle p, double t) {
-        return -(k/p.getMass()) * r1(p,t);
+    public double r2x(Particle p, double t) {
+        return -(k/p.getMass()) * rx(p,t); // r0 = 0
     }
 
     @Override
-    public double r4(Particle p, double t) {
-        return -(k/p.getMass()) * r2(p,t);
+    public double r2y(Particle p, double t) {
+        return 0;
     }
 
     @Override
-    public double r5(Particle p, double t) {
-        return -(k/p.getMass()) * r3(p,t);
+    public double r3x(Particle p, double t) {
+        return -(k/p.getMass()) * r1x(p,t);
+    }
+
+    @Override
+    public double r3y(Particle p, double t) {
+        return 0;
+    }
+
+    @Override
+    public double r4x(Particle p, double t) {
+        return -(k/p.getMass()) * r2x(p,t);
+    }
+
+    @Override
+    public double r4y(Particle p, double t) {
+        return 0;
+    }
+
+    @Override
+    public double r5x(Particle p, double t) {
+        return -(k/p.getMass()) * r3x(p,t);
+    }
+
+    @Override
+    public double r5y(Particle p, double t) {
+        return 0;
     }
 }

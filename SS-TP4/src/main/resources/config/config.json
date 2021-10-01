@@ -4,6 +4,6 @@
   "gamma": 100,
   "tf": 5,
   "r0": 1,
-  "v0": 2,
-  "deltaT": 0.5
+  "deltaT": 0.5,
+  "strategy": "verlet"
 }
