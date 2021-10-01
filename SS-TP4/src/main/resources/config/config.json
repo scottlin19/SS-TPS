@@ -5,5 +5,5 @@
   "tf": 5,
   "r0": 1,
   "deltaT": 0.01,
-  "strategy": "beeman"
+  "strategy": "gear"
 }

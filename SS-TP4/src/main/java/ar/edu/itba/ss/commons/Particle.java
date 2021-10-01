@@ -111,6 +111,8 @@ public class Particle implements Cloneable{
             ", posY=" + posY +
             ", velX=" + velX +
             ", velY=" + velY +
+            ", accX=" + accX +
+            ", accY=" + accY +
             ", radius=" + radius +
             ", mass=" + mass +
             '}';
