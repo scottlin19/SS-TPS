@@ -10,7 +10,7 @@ public class VerletOriginalStrategy implements UpdateStrategy{
     private final double gamma;
 
     public VerletOriginalStrategy(Config config){
-        this.euler = new EulerStrategy();
+        this.euler = new EulerStrategy(config);
         this.K = config.getK();
         this.gamma = config.getGamma();
     }
@@ -25,8 +25,8 @@ public class VerletOriginalStrategy implements UpdateStrategy{
             past = euler.update(null,present,-deltaT, time);
         }
         double mass = present.getMass();
-        double newPosX = 2*present.getPosX() - past.getPosX() + Math.pow(deltaT,2) * present.getForceX()/ mass;
-        double newPosY = 2*present.getPosY() - past.getPosY() + Math.pow(deltaT,2) * present.getForceY()/ mass;
+        double newPosX = 2*present.getPosX() - past.getPosX() + Math.pow(deltaT,2) * present.getAccX();
+        double newPosY = 2*present.getPosY() - past.getPosY() + Math.pow(deltaT,2) * present.getAccY();
 
         double newVelX = (newPosX - past.getPosX())/(2*deltaT);
 

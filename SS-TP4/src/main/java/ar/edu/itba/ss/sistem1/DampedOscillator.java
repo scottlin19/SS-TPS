@@ -8,6 +8,7 @@ import ar.edu.itba.ss.commons.Particle;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 import ar.edu.itba.ss.commons.SystemFunctions;
 import ar.edu.itba.ss.commons.strategies.AnalyticStrategy;
+import ar.edu.itba.ss.commons.strategies.BeemanStrategy;
 import ar.edu.itba.ss.commons.strategies.EulerStrategy;
 import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
 import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy;
@@ -30,7 +31,9 @@ public class DampedOscillator {
                 return new VerletOriginalStrategy(config);
 
             case "euler":
-                return new EulerStrategy();
+                return new EulerStrategy(config);
+            case "beeman":
+                return new BeemanStrategy(config);
 
             case "analytic":
                 return new AnalyticStrategy().withFunctions(new DampedOscillatorFunctions(config.getR0(), config.getK(), config.getGamma()));
