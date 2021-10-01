@@ -27,7 +27,7 @@ public class FirstSystemRunner {
             DampedOscillator dampedOscillator = new DampedOscillator(config);
 
             dampedOscillator.simulate();
-            OutputFile.createOutputFile(new SimulationResult(config.getTf(), dampedOscillator.getSnapshots()),  "simulation_" + config.getStrategy(), OutputTypeEnum.JSON);
+            OutputFile.createOutputFile(new SimulationResult(config.getTf(), dampedOscillator.getSnapshots(), config.getStrategy()),  "simulation_" + config.getStrategy(), OutputTypeEnum.JSON);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

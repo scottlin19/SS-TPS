@@ -1,13 +1,18 @@
 package ar.edu.itba.ss.commons.strategies;
 import ar.edu.itba.ss.commons.Particle;
+import ar.edu.itba.ss.sistem1.Config;
 
 public class VerletOriginalStrategy implements UpdateStrategy{
 
 
     private final EulerStrategy euler;
+    private final double K;
+    private final double gamma;
 
-    public VerletOriginalStrategy(){
-        euler = new EulerStrategy();
+    public VerletOriginalStrategy(Config config){
+        this.euler = new EulerStrategy();
+        this.K = config.getK();
+        this.gamma = config.getGamma();
     }
 
     @Override
@@ -18,21 +23,25 @@ public class VerletOriginalStrategy implements UpdateStrategy{
         if(past == null){
             // Resolver con euler
             past = euler.update(null,present,-deltaT, time);
-            System.out.println("With Euler past: " + past);
         }
-        Particle future = present.clone();
-
-        double newPosX = 2*present.getPosX() - past.getPosX() + Math.pow(deltaT,2) * present.getForceX()/ present.getMass(); // aceleración constante?
-        double newPosY = 2*present.getPosY() - past.getPosY() + Math.pow(deltaT,2) * present.getForceY()/ present.getMass();
+        double mass = present.getMass();
+        double newPosX = 2*present.getPosX() - past.getPosX() + Math.pow(deltaT,2) * present.getForceX()/ mass;
+        double newPosY = 2*present.getPosY() - past.getPosY() + Math.pow(deltaT,2) * present.getForceY()/ mass;
 
         double newVelX = (newPosX - past.getPosX())/(2*deltaT);
+
         double newVelY = (newPosY - past.getPosY())/(2*deltaT);
 
         present.setVelX(newVelX);
         present.setVelY(newVelY);
+        Particle future = present.clone();
 
         future.setPosX(newPosX);
         future.setPosY(newPosY);
+
+        future.setAccX((-K * future.getPosX()-gamma *future.getVelX())/mass);// actualizamos la fuerza
+        future.setAccY((-K * future.getPosY()-gamma * future.getVelY())/mass);
+
         return future;
     }
     

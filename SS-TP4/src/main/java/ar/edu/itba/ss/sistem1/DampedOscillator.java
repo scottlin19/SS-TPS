@@ -27,7 +27,7 @@ public class DampedOscillator {
     private UpdateStrategy getStrategy(Config config){
         switch(config.getStrategy()){
             case "verlet":
-                return new VerletOriginalStrategy();
+                return new VerletOriginalStrategy(config);
 
             case "euler":
                 return new EulerStrategy();
@@ -46,18 +46,27 @@ public class DampedOscillator {
         double ax = fx / config.getMass();
         System.out.println("AX= "+ax);
         System.out.println("fx= "+fx);
+        double K = config.getK();
+        double gamma = config.getGamma();
+
         Particle particle = new Particle(0, config.getR0(), 0, 0, config.getMass(), V0, 0, ax, 0);
         Particle past = null;
         Particle future;
+        double mass = particle.getMass();
         double currentTime = 0;
         double tf = config.getTf();
         while(currentTime <= tf){
+            System.out.println("CURRENT TIME: "+currentTime);
             future = updateStrategy.update(past, particle, config.getDeltaT(), currentTime);
 
             System.out.println("Past: " + past + "\nPresent: " + particle + "\nFuture: " + future);
             snapshots.add(new SimulationSnapshot(List.of(particle), currentTime));
+//            future.setAccX((-K * future.getPosX()-gamma * future.getVelX())/mass);// actualizamos la fuerza
+//            future.setAccY((-K * future.getPosY()-gamma * future.getVelY())/mass);
             past = particle;
             particle = future;
+
+            System.out.println("new fx= "+particle.getForceX());
             currentTime += config.getDeltaT();
             System.out.println("#######################################");
         }
