@@ -26,8 +26,8 @@ public class FirstSystemRunner {
             Config config = new Gson().fromJson(bufferedReader, Config.class);
             DampedOscillator dampedOscillator = new DampedOscillator(config);
 
-            dampedOscillator.simulate();
-            OutputFile.createOutputFile(new SimulationResult(config.getTf(), dampedOscillator.getSnapshots(), config.getStrategy()),  "simulation_" + config.getStrategy(), OutputTypeEnum.JSON);
+            double totalTime = dampedOscillator.simulate(config.getDeltaT());
+            OutputFile.createOutputFile(new SimulationResult(totalTime, dampedOscillator.getSnapshots(), config.getStrategy()),  "simulation_" + config.getStrategy(), OutputTypeEnum.JSON);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

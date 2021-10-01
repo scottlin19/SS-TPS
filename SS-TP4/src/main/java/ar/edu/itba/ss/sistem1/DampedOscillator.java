@@ -22,12 +22,18 @@ public class DampedOscillator {
 
     public DampedOscillator(Config config){
         this.config = config;
-        this.updateStrategy = getStrategy(config);
+        this.updateStrategy = getStrategy(config.getStrategy());
         this.snapshots = new ArrayList<>();
     }
 
-    private UpdateStrategy getStrategy(Config config){
-        switch(config.getStrategy()){
+    public DampedOscillator(Config config, String strategy){
+        this.config = config;
+        this.updateStrategy = getStrategy(strategy);
+        this.snapshots = new ArrayList<>();
+    }
+
+    private UpdateStrategy getStrategy(String strategy){
+        switch(strategy){
             case "verlet":
                 return new VerletOriginalStrategy(config);
 
@@ -44,7 +50,8 @@ public class DampedOscillator {
                 throw new IllegalArgumentException();
         }
     }
-    public void simulate(){
+
+    public double simulate(double deltaT){
         double V0 = -config.getR0() * config.getGamma() / (2*config.getMass());
         double fx = -config.getK() * config.getR0() - config.getGamma() * V0;
         double ax = fx / config.getMass();
@@ -53,19 +60,25 @@ public class DampedOscillator {
         Particle future;
         double currentTime = 0;
         double tf = config.getTf();
-
+        int step = config.getStep();
+        int i = 0;
         while(currentTime <= tf){
-            future = updateStrategy.update(past, particle, config.getDeltaT(), currentTime);
+            future = updateStrategy.update(past, particle, deltaT, currentTime);
 
-            System.out.println("Past: " + past + "\nPresent: " + particle + "\nFuture: " + future);
-            snapshots.add(new SimulationSnapshot(List.of(particle), currentTime));
+//            System.out.println("Past: " + past + "\nPresent: " + particle + "\nFuture: " + future);
+
+            if(i % step == 0){
+                snapshots.add(new SimulationSnapshot(List.of(particle), currentTime));
+            }
 
             past = particle;
             particle = future;
 
-            currentTime += config.getDeltaT();
-            System.out.println("#######################################");
+            currentTime += deltaT;
+//            System.out.println("#######################################");
+            i++;
         }
+        return currentTime - deltaT;
     }
 
     public List<SimulationSnapshot> getSnapshots() {

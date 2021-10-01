@@ -12,18 +12,19 @@ public class Config {
     private final double gamma;
     private final int tf;
     private final double r0;
-    private final double deltaT;
     private final String strategy;
+    private final int step;
+    private final double deltaT;
 
-    public Config(double mass, int k, double gamma, int tf, double r0, double deltaT,String strategy) {
+    public Config(double mass, int k, double gamma, int tf, double r0,double deltaT,String strategy, int step) {
         this.mass = mass;
         this.k = k;
         this.gamma = gamma;
         this.tf = tf;
         this.r0 = r0;
         this.deltaT = deltaT;
-
         this.strategy = strategy;
+        this.step = step;
     }
 
     public String getStrategy(){
@@ -49,7 +50,10 @@ public class Config {
         return r0;
     }
 
-    public double getDeltaT() {
+    public double getDeltaT(){
         return deltaT;
+    }
+    public int getStep() {
+        return step;
     }
 }
