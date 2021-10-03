@@ -24,8 +24,8 @@ public enum OutputTypeEnum {
                     writer.write(snapshots.get(0).size()+"\n\n");
                     for(Particle p: snapshot){
 
-                        writer.write(p.getPosX()/1e13+" "+
-                                        p.getPosY()/1e13+" "+
+                        writer.write(p.getPosX()/1e8+" "+
+                                        p.getPosY()/1e8+" "+
                                         p.getVelX()+" "+
                                         p.getVelY()+" "+
                                         p.getMass()+" "+
