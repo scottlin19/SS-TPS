@@ -13,7 +13,7 @@ public class MarsMissionConfig {
     private final double takeoffTime;
 
 
-    private final LocalDateTime startDate;
+    private  LocalDateTime startDate;
     private final double takeOffSpeed;
 
     private final int step;
