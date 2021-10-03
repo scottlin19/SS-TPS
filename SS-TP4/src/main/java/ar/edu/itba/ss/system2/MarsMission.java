@@ -2,23 +2,18 @@ package ar.edu.itba.ss.system2;
 
 import ar.edu.itba.ss.commons.*;
 import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
-import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy;
 import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy2;
-import ar.edu.itba.ss.system1.Config;
-import ar.edu.itba.ss.system1.DampedOscillator;
+
 import ar.edu.itba.ss.system1.FirstSystemRunner;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import jdk.swing.interop.SwingInterOpUtils;
 
+
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,22 +41,22 @@ public class MarsMission {
         this.snapshots = new ArrayList<>();
         this.config = config;
         this.updateStrategy = new VerletOriginalStrategy2();
-        this.mars = new Particle(MARS_ID,-2.426617401833969e8,-3.578836154354768e7,3389.92,6.4171e23,4.435907910045917e0,-2.190044178514185e1,0,0);
-        this.earth = new Particle(EARTH_ID,1.500619962348151e8,2.288499248197072e6,6371.01,5.97219e24,-9.322979134387409e-1,2.966365033636722e1,0,0);
-        this.sun = new Particle(SUN_ID,0,0,10000,1.989e30,0,0,0,0);
+        this.mars = new Particle(MARS_ID,-2.426617401833969e8,-3.578836154354768e7,3389.92,6.4171e23,4.435907910045917e0,-2.190044178514185e1,0,0, Color.red);
+        this.earth = new Particle(EARTH_ID,1.500619962348151e8,2.288499248197072e6,6371.01,5.97219e24,-9.322979134387409e-1,2.966365033636722e1,0,0,Color.blue);
+        this.sun = new Particle(SUN_ID,0,0,10000,1.989e30,0,0,0,0,Color.yellow);
 
-        double shipV0 = config.getTakeOffSpeed();
+
         double sun_earth_ang = Math.atan(this.earth.getPosY() / this.earth.getPosX());
         double ship_vel_x = 7.12 * Math.sin(sun_earth_ang) + earth.getVelX();
         double ship_vel_y = 7.12 * Math.cos(sun_earth_ang) + earth.getVelY();;
-        if(config.getTakeoffTime() == 0){
-            takenOff  = true;
-            ship_vel_x += shipV0 * Math.sin(sun_earth_ang);
-            ship_vel_y += shipV0 * Math.cos(sun_earth_ang);
-        }
+//        if(config.getTakeoffTime() == 0){
+//            takenOff  = true;
+//            ship_vel_x += shipV0 * Math.sin(sun_earth_ang);
+//            ship_vel_y += shipV0 * Math.cos(sun_earth_ang);
+//        }
 
         //calcular primero valores
-        this.spaceship = new Particle(SPACESHIP_ID,this.earth.getPosX() + (1500 + earth.getRadius()) * Math.cos(sun_earth_ang), earth.getPosY() + (1500 + earth.getRadius()) * Math.sin(sun_earth_ang),0,2e5,ship_vel_x,ship_vel_y,0,0);
+        this.spaceship = new Particle(SPACESHIP_ID,this.earth.getPosX() + (1500 + earth.getRadius()) * Math.cos(sun_earth_ang), earth.getPosY() + (1500 + earth.getRadius()) * Math.sin(sun_earth_ang),2000,2e5,ship_vel_x,ship_vel_y,0,0,Color.white);
 
         setAcc(this.mars, List.of(this.earth, this.sun));
         setAcc(this.earth, List.of(this.mars, this.sun));
@@ -112,8 +107,8 @@ public class MarsMission {
 
             if (!takenOff && currentTime >= config.getTakeoffTime()){
                 double dist=Particle.dist(spaceship,earth);
-                spaceship.setVelX(spaceship.getVelX() + config.getTakeOffSpeed()* eX(spaceship,earth,dist) );
-                spaceship.setVelY(spaceship.getVelY() + config.getTakeOffSpeed()* eY(spaceship,earth,dist) );
+                spaceship.setVelX(spaceship.getVelX() + config.getTakeOffSpeed()* eY(spaceship,earth,dist) );
+                spaceship.setVelY(spaceship.getVelY() + config.getTakeOffSpeed()* eX(spaceship,earth,dist) );
                 takenOff = true;
             }
             futureSpaceship = updateStrategy.update(pastSpaceship, spaceship, deltaT, currentTime);
