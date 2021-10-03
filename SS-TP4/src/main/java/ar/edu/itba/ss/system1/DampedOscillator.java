@@ -1,12 +1,10 @@
-package ar.edu.itba.ss.sistem1;
+package ar.edu.itba.ss.system1;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ar.edu.itba.ss.commons.DampedOscillatorFunctions;
 import ar.edu.itba.ss.commons.Particle;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
-import ar.edu.itba.ss.commons.SystemFunctions;
 import ar.edu.itba.ss.commons.strategies.AnalyticStrategy;
 import ar.edu.itba.ss.commons.strategies.BeemanStrategy;
 import ar.edu.itba.ss.commons.strategies.EulerStrategy;

@@ -1,4 +1,6 @@
-package ar.edu.itba.ss.commons;
+package ar.edu.itba.ss.system1;
+
+import ar.edu.itba.ss.commons.Particle;
 
 public abstract class SystemFunctions {
 

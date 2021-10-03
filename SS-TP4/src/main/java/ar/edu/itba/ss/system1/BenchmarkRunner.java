@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.sistem1;
+package ar.edu.itba.ss.system1;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,19 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import ar.edu.itba.ss.commons.OutputFile;
 import ar.edu.itba.ss.commons.OutputTypeEnum;
-import ar.edu.itba.ss.commons.Pair;
 import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
-import ar.edu.itba.ss.commons.strategies.AnalyticStrategy;
-import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
 
 public class BenchmarkRunner {
 

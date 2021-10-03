@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.sistem1;
+package ar.edu.itba.ss.system1;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

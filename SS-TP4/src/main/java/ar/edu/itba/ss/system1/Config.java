@@ -1,9 +1,4 @@
-package ar.edu.itba.ss.sistem1;
-
-import ar.edu.itba.ss.commons.strategies.AnalyticStrategy;
-import ar.edu.itba.ss.commons.strategies.EulerStrategy;
-import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
-import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy;
+package ar.edu.itba.ss.system1;
 
 public class Config {
 

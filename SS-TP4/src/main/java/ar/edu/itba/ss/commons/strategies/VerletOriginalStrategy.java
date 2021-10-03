@@ -1,6 +1,6 @@
 package ar.edu.itba.ss.commons.strategies;
 import ar.edu.itba.ss.commons.Particle;
-import ar.edu.itba.ss.sistem1.Config;
+import ar.edu.itba.ss.system1.Config;
 
 public class VerletOriginalStrategy implements UpdateStrategy{
 
