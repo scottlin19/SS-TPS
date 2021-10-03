@@ -34,7 +34,6 @@ public class DampedOscillator {
         switch(strategy){
             case "verlet":
                 return new VerletOriginalStrategy(config);
-
             case "euler":
                 return new EulerStrategy(config);
             case "beeman":

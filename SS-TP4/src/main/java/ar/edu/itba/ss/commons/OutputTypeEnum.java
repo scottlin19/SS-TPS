@@ -23,12 +23,13 @@ public enum OutputTypeEnum {
                 for(List<Particle> snapshot: snapshots){
                     writer.write(snapshots.get(0).size()+"\n\n");
                     for(Particle p: snapshot){
-                        writer.write(p.getPosX()+" "+
-                                        p.getPosY()+" "+
+
+                        writer.write(p.getPosX()/1e13+" "+
+                                        p.getPosY()/1e13+" "+
                                         p.getVelX()+" "+
                                         p.getVelY()+" "+
                                         p.getMass()+" "+
-                                        p.getRadius()+"\n");
+                                        p.getRadius()/1000+"\n");
                     }
                 }
             } catch (IOException e) {

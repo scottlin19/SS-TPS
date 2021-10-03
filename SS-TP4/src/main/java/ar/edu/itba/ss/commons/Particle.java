@@ -39,6 +39,9 @@ public class Particle implements Cloneable{
         // System.out.println("NUEVA POS p: "+id + ", X: "+posX + ", Y: "+posY+ "radius: "+radius);
     }
 
+    public static double dist(Particle p1, Particle p2){
+        return Math.sqrt(Math.pow(p1.posX - p2.posX,2) + Math.pow(p1.posY - p2.posY,2));
+    }
 
     /* ---------------- GETTERS, SETTERS, EQUALS, HASH, TOSTRING ---------------- */
     public int getId() {

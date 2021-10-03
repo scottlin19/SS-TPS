@@ -2,6 +2,8 @@ package ar.edu.itba.ss.commons.strategies;
 import ar.edu.itba.ss.commons.Particle;
 import ar.edu.itba.ss.system1.Config;
 
+import java.util.function.Function;
+
 public class VerletOriginalStrategy implements UpdateStrategy{
 
 
@@ -39,7 +41,7 @@ public class VerletOriginalStrategy implements UpdateStrategy{
         future.setPosX(newPosX);
         future.setPosY(newPosY);
 
-        future.setAccX((-K * future.getPosX()-gamma *future.getVelX())/mass);// actualizamos la fuerza
+        future.setAccX((-K * future.getPosX()-gamma * future.getVelX())/mass);// actualizamos la fuerza
         future.setAccY((-K * future.getPosY()-gamma * future.getVelY())/mass);
 
         return future;
