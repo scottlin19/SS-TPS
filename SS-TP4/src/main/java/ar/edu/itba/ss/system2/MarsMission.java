@@ -42,26 +42,14 @@ public class MarsMission {
         this.config = config;
         this.updateStrategy = new VerletOriginalStrategy2();
         this.mars = new Particle(MARS_ID,-2.426617401833969e8,-3.578836154354768e7,3389.92,6.4171e23,4.435907910045917e0,-2.190044178514185e1,0,0, Color.red);
+
         this.earth = new Particle(EARTH_ID,1.500619962348151e8,2.288499248197072e6,6371.01,5.97219e24,-9.322979134387409e-1,2.966365033636722e1,0,0,Color.blue);
         this.sun = new Particle(SUN_ID,0,0,10000,1.989e30,0,0,0,0,Color.yellow);
+      //  System.out.println("ANGULO ENTRE TIERRA Y SOL: "+ Math.atan2(earth.getPosY(), earth.getPosX()));
+        setAcc(this.mars, List.of(this.earth, this.sun));//TODO VOLVER
+        setAcc(this.earth, List.of(this.mars, this.sun));//TODO VOLVER
 
-
-        double sun_earth_ang = Math.atan(this.earth.getPosY() / this.earth.getPosX());
-        double ship_vel_x = 7.12 * Math.sin(sun_earth_ang) + earth.getVelX();
-        double ship_vel_y = 7.12 * Math.cos(sun_earth_ang) + earth.getVelY();;
-//        if(config.getTakeoffTime() == 0){
-//            takenOff  = true;
-//            ship_vel_x += shipV0 * Math.sin(sun_earth_ang);
-//            ship_vel_y += shipV0 * Math.cos(sun_earth_ang);
-//        }
-
-        //calcular primero valores
-        this.spaceship = new Particle(SPACESHIP_ID,this.earth.getPosX() + (1500 + earth.getRadius()) * Math.cos(sun_earth_ang), earth.getPosY() + (1500 + earth.getRadius()) * Math.sin(sun_earth_ang),2000,2e5,ship_vel_x,ship_vel_y,0,0,Color.white);
-
-        setAcc(this.mars, List.of(this.earth, this.sun));
-        setAcc(this.earth, List.of(this.mars, this.sun));
-        setAcc(this.spaceship, List.of(this.earth, this.sun, this.mars));
-        System.out.println("INITIAL SPACESHIP: "+spaceship);
+        takenOff = false;
     }
 
     private void setAcc(Particle particle, List<Particle> particles){
@@ -70,22 +58,51 @@ public class MarsMission {
         for(Particle p : particles){
             double dist = Particle.dist(particle,p);
             double fn = calculateGravityForce(particle,p,dist);
-            fx += fn * eX(particle,p, dist);
-            fy += fn * eY(particle,p, dist);
+           // System.out.println("ENx = "+enX(particle,p, dist));
+            fx += fn * enX(particle,p, dist);
+           // System.out.println("ENy = "+enY(particle,p, dist));
+            fy += fn * enY(particle,p, dist);
         }
+      //  System.out.println("new AccX = "+fx/particle.getMass());
         particle.setAccX(fx/particle.getMass());
+       // System.out.println("new AccY = "+fy/particle.getMass());
         particle.setAccY(fy/particle.getMass());
     }
 
-    private double eX(Particle pi, Particle pj,double dist){
+    private double enX(Particle pi, Particle pj,double dist){
         return (pj.getPosX() - pi.getPosX())/dist;
     }
-    private double eY(Particle pi, Particle pj,double dist){
+    private double enY(Particle pi, Particle pj,double dist){
         return (pj.getPosY() - pi.getPosY())/dist;
     }
+    private double etX(Particle pi, Particle pj,double dist){
+        return -enY(pi, pj, dist);
+    }
+    private double etY(Particle pi, Particle pj,double dist){
+        return enX(pi, pj, dist);
+    } //capaz cambia el signo tambien c:
 
     private double calculateGravityForce(Particle pi, Particle pj,double dist){
-        return G*pi.getMass()*pj.getMass()/dist;
+        return G*pi.getMass()*pj.getMass()/Math.pow(dist,2);
+    }
+
+    private void createSpaceship(){
+        System.out.println("CREATE SPACESHIP");
+        double sunEarthDist = Particle.dist(earth,sun);
+        this.spaceship = new Particle(SPACESHIP_ID,
+                this.earth.getPosX() + (1500 + earth.getRadius()) *enX(earth,sun,sunEarthDist),
+                earth.getPosY() + (1500 + earth.getRadius())*enY(earth,sun,sunEarthDist),
+                2000,
+                2e5,
+                0,
+                0,
+                0,0,Color.white);
+
+        double shipEarthDist = Particle.dist(spaceship,earth);
+        this.spaceship.setVelX(earth.getVelX() + Math.abs((7.12 + config.getTakeOffSpeed()))*etX(spaceship,earth,shipEarthDist));
+        this.spaceship.setVelY(earth.getVelY() + Math.abs(7.12 + config.getTakeOffSpeed())*etY(spaceship,earth,shipEarthDist));
+        setAcc(this.spaceship, List.of(this.earth, this.sun, this.mars)); //TODO VOLVER
+
     }
 
 
@@ -106,32 +123,38 @@ public class MarsMission {
         while(currentTime <= maxTime){
 
             if (!takenOff && currentTime >= config.getTakeoffTime()){
-                double dist=Particle.dist(spaceship,earth);
-                spaceship.setVelX(spaceship.getVelX() + config.getTakeOffSpeed()* eY(spaceship,earth,dist) );
-                spaceship.setVelY(spaceship.getVelY() + config.getTakeOffSpeed()* eX(spaceship,earth,dist) );
+                createSpaceship();
                 takenOff = true;
             }
-            futureSpaceship = updateStrategy.update(pastSpaceship, spaceship, deltaT, currentTime);
+
             futureEarth = updateStrategy.update(pastEarth, earth, deltaT, currentTime);
             futureMars = updateStrategy.update(pastMars, mars, deltaT, currentTime);
             System.out.println("####### "+"iteration = "+i+" #######");
             System.out.println("currentTime: "+currentTime + " maxTime: "+maxTime);
             System.out.println("SPACESHIP: "+spaceship+"\nEARTH: "+earth+"\nMARS: "+mars+"\nSUN: "+sun+"\n#####################");
+           // setAcc(futureMars, List.of(futureEarth, this.sun));
+            setAcc(futureEarth, List.of(futureMars, this.sun));//TODO VOLVER
             setAcc(futureMars, List.of(futureEarth, this.sun));
-            setAcc(futureEarth, List.of(futureMars, this.sun));
-            setAcc(futureSpaceship, List.of(futureEarth, this.sun, futureMars));
-
-            if(i % step == 0){
-                snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));
+            if(takenOff){
+                futureSpaceship = updateStrategy.update(pastSpaceship, spaceship, deltaT, currentTime);
+                setAcc(futureSpaceship, List.of(futureEarth,futureMars,this.sun));//TODO VOLVER
+                pastSpaceship = spaceship;
+                spaceship = futureSpaceship;
             }
 
-            pastSpaceship = spaceship;
-            pastEarth = earth;
-            pastMars = mars;
+            if(i % step == 0 ){
+                if (takenOff){
+                    snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));//TODO VOLVER
+                }else{
+                    snapshots.add(new SimulationSnapshot(List.of(earth,mars,sun), currentTime));
+                }
 
-            spaceship = futureSpaceship;
+            }
+           // System.out.println("ANGULO ENTRE TIERRA Y SOL: "+ Math.atan2(earth.getPosY(), earth.getPosX()));
+            pastEarth = earth;
+            pastMars = mars;//TODO VOLVER
             earth = futureEarth;
-            mars = futureMars;
+            mars = futureMars;//TODO VOLVER
 
             currentTime += deltaT;
 
@@ -140,6 +163,8 @@ public class MarsMission {
         return currentTime - deltaT;
 
     }
+
+
     public List<SimulationSnapshot> getSnapshots(){
         return snapshots;
     }

@@ -26,18 +26,16 @@ public class VerletOriginalStrategy2 implements UpdateStrategy{
             // Resolver con euler
             past = euler.update(null,present,-deltaT, time);
         }
-        double mass = present.getMass();
+
         double newPosX = 2*present.getPosX() - past.getPosX() + Math.pow(deltaT,2) * present.getAccX();
         double newPosY = 2*present.getPosY() - past.getPosY() + Math.pow(deltaT,2) * present.getAccY();
 
         double newVelX = (newPosX - past.getPosX())/(2*deltaT);
-
         double newVelY = (newPosY - past.getPosY())/(2*deltaT);
 
         present.setVelX(newVelX);
         present.setVelY(newVelY);
         Particle future = present.clone();
-
         future.setPosX(newPosX);
         future.setPosY(newPosY);
 

@@ -24,12 +24,12 @@ public enum OutputTypeEnum {
                     writer.write(snapshots.get(0).size()+"\n\n");
                     for(Particle p: snapshot){
 
-                        writer.write(p.getPosX()/1e6+" "+
-                                        p.getPosY()/1e6+" "+
+                        writer.write(p.getPosX()+" "+
+                                        p.getPosY()+" "+
                                         p.getVelX()+" "+
                                         p.getVelY()+" "+
                                         p.getMass()+" "+
-                                        p.getRadius()/250+" "+
+                                        p.getRadius()*2500+" "+
                                         p.getColor().getRed()+" "+
                                         p.getColor().getGreen()+" "+
                                         p.getColor().getBlue()+"\n");
