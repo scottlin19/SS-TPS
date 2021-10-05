@@ -5,6 +5,9 @@ import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
 import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy2;
 
 import ar.edu.itba.ss.system1.FirstSystemRunner;
+import ar.edu.itba.ss.system2.cut_conditions.CutCondition;
+import ar.edu.itba.ss.system2.cut_conditions.MaxTimeCutCondition;
+import ar.edu.itba.ss.system2.cut_conditions.MissedMarsCutCondition;
 import com.google.gson.Gson;
 
 
@@ -28,15 +31,16 @@ public class MarsMission {
     private Particle spaceship;
     private Particle mars;
     private Particle earth;
-    private Particle sun;
+    private final Particle sun;
 
     private final UpdateStrategy updateStrategy;
 
     private final MarsMissionConfig config;
 
     private final List<SimulationSnapshot> snapshots;
-
     private boolean takenOff;
+
+    private CutCondition missedMarsCC,maxTimeCC;
     public MarsMission(MarsMissionConfig config){
         this.snapshots = new ArrayList<>();
         this.config = config;
@@ -50,6 +54,8 @@ public class MarsMission {
         setAcc(this.earth, List.of(this.mars, this.sun));//TODO VOLVER
 
         takenOff = false;
+        this.missedMarsCC = new MissedMarsCutCondition(mars);
+        this.maxTimeCC = new MaxTimeCutCondition(config.getMaxTime(),config.getDeltaT());
     }
 
     private void setAcc(Particle particle, List<Particle> particles){
@@ -107,7 +113,6 @@ public class MarsMission {
 
 
     public double simulate(double deltaT){
-        int maxTime = config.getMaxTime();
         double currentTime = 0;
 
         Particle pastMars = null;
@@ -119,10 +124,11 @@ public class MarsMission {
         Particle futureSpaceship;
         int step = config.getStep();
         int i = 0;
+        double takeOffTime = config.getTakeoffTime();
 
-        while(currentTime <= maxTime){
+        while(missedMarsCC.cut(spaceship) && maxTimeCC.cut(spaceship)){
 
-            if (!takenOff && currentTime >= config.getTakeoffTime()){
+            if (!takenOff && currentTime >= takeOffTime){
                 createSpaceship();
                 takenOff = true;
             }
@@ -130,7 +136,7 @@ public class MarsMission {
             futureEarth = updateStrategy.update(pastEarth, earth, deltaT, currentTime);
             futureMars = updateStrategy.update(pastMars, mars, deltaT, currentTime);
             System.out.println("####### "+"iteration = "+i+" #######");
-            System.out.println("currentTime: "+currentTime + " maxTime: "+maxTime);
+            System.out.println("currentTime: "+currentTime);
             System.out.println("SPACESHIP: "+spaceship+"\nEARTH: "+earth+"\nMARS: "+mars+"\nSUN: "+sun+"\n#####################");
            // setAcc(futureMars, List.of(futureEarth, this.sun));
             setAcc(futureEarth, List.of(futureMars, this.sun));//TODO VOLVER

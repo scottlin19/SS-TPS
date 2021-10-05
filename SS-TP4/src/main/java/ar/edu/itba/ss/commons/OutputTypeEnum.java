@@ -29,7 +29,7 @@ public enum OutputTypeEnum {
                                         p.getVelX()+" "+
                                         p.getVelY()+" "+
                                         p.getMass()+" "+
-                                        p.getRadius()*2500+" "+
+                                        p.getRadius()+" "+
                                         p.getColor().getRed()+" "+
                                         p.getColor().getGreen()+" "+
                                         p.getColor().getBlue()+"\n");

@@ -1,5 +1,5 @@
 {
-  "maxTime": 59356800,
+  "maxTime": 31536000,
   "strategy": "verlet",
   "deltaT": 1800,
   "takeOffTime": 0,
