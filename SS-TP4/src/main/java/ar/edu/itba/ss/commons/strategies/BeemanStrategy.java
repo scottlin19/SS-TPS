@@ -55,4 +55,9 @@ public class BeemanStrategy implements UpdateStrategy{
         return future;
 
     }
+
+    @Override
+    public String getName() {
+        return "beeman";
+    }
 }

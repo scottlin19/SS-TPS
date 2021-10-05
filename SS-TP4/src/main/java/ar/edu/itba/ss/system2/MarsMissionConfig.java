@@ -12,26 +12,21 @@ public class MarsMissionConfig {
     private final double deltaT;
     private final double takeoffTime;
 
-
-    private  LocalDateTime startDate;
     private final double takeOffSpeed;
 
     private final int step;
 
 
-    public MarsMissionConfig(int maxTime, String strategy, double deltaT, LocalDateTime startDate, double takeoffTime, double takeOffSpeed, int step){
+    public MarsMissionConfig(int maxTime, String strategy, double deltaT, double takeoffTime, double takeOffSpeed, int step){
         this.maxTime = maxTime;
         this.strategy = strategy;
         this.deltaT = deltaT;
-        this.startDate = LocalDateTime.of(2021,9, 24,0,0,0);
         this.takeoffTime = takeoffTime;
         this.takeOffSpeed = takeOffSpeed;
         this.step = step;
 
     }
-    public LocalDateTime getStartDate(){
-        return startDate;
-    }
+
 
     public double getTakeoffTime(){
         return takeoffTime;

@@ -4,11 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
-
+import ar.edu.itba.ss.commons.writers.JSONWriter;
 import com.google.gson.Gson;
-
-import ar.edu.itba.ss.commons.OutputFile;
-import ar.edu.itba.ss.commons.OutputTypeEnum;
 import ar.edu.itba.ss.commons.SimulationResult;
 
 public class FirstSystemRunner {
@@ -26,8 +23,9 @@ public class FirstSystemRunner {
             Config config = new Gson().fromJson(bufferedReader, Config.class);
             DampedOscillator dampedOscillator = new DampedOscillator(config);
 
-            double totalTime = dampedOscillator.simulate(config.getDeltaT());
-            OutputFile.createOutputFile(new SimulationResult(totalTime, dampedOscillator.getSnapshots(), config.getStrategy()),  "simulation_" + config.getStrategy(), OutputTypeEnum.JSON);
+            SimulationResult result = dampedOscillator.simulate(config.getDeltaT());
+            JSONWriter<SimulationResult> jsonWriter = new JSONWriter<>();
+            jsonWriter.createFile(result,  "simulation_" + config.getStrategy());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

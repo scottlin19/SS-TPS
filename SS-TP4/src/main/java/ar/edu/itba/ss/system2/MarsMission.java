@@ -3,9 +3,10 @@ package ar.edu.itba.ss.system2;
 import ar.edu.itba.ss.commons.*;
 import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
 import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy2;
-
+import ar.edu.itba.ss.commons.writers.XYZWriter;
 import ar.edu.itba.ss.system1.FirstSystemRunner;
 import ar.edu.itba.ss.system2.cut_conditions.CutCondition;
+import ar.edu.itba.ss.system2.cut_conditions.LandedOnMarsCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MaxTimeCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MissedMarsCutCondition;
 import com.google.gson.Gson;
@@ -17,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,15 +34,16 @@ public class MarsMission {
     private Particle mars;
     private Particle earth;
     private final Particle sun;
-
+    private LocalDateTime startDate;
     private final UpdateStrategy updateStrategy;
 
     private final MarsMissionConfig config;
 
     private final List<SimulationSnapshot> snapshots;
     private boolean takenOff;
+    private double marsMinDistance;
 
-    private CutCondition missedMarsCC,maxTimeCC;
+    private final CutCondition missedMarsCC,maxTimeCC,landedOnMarsCC;
     public MarsMission(MarsMissionConfig config){
         this.snapshots = new ArrayList<>();
         this.config = config;
@@ -49,13 +52,15 @@ public class MarsMission {
 
         this.earth = new Particle(EARTH_ID,1.500619962348151e8,2.288499248197072e6,6371.01,5.97219e24,-9.322979134387409e-1,2.966365033636722e1,0,0,Color.blue);
         this.sun = new Particle(SUN_ID,0,0,10000,1.989e30,0,0,0,0,Color.yellow);
-      //  System.out.println("ANGULO ENTRE TIERRA Y SOL: "+ Math.atan2(earth.getPosY(), earth.getPosX()));
-        setAcc(this.mars, List.of(this.earth, this.sun));//TODO VOLVER
-        setAcc(this.earth, List.of(this.mars, this.sun));//TODO VOLVER
+        setAcc(this.mars, List.of(this.earth, this.sun));
+        setAcc(this.earth, List.of(this.mars, this.sun));
 
         takenOff = false;
         this.missedMarsCC = new MissedMarsCutCondition(mars);
         this.maxTimeCC = new MaxTimeCutCondition(config.getMaxTime(),config.getDeltaT());
+        this.landedOnMarsCC = new LandedOnMarsCutCondition();
+        this.marsMinDistance = Double.MAX_VALUE;
+        this.startDate = LocalDateTime.of(2021,9, 24,0,0,0);
     }
 
     private void setAcc(Particle particle, List<Particle> particles){
@@ -112,7 +117,8 @@ public class MarsMission {
     }
 
 
-    public double simulate(double deltaT){
+    public MarsMissionResult simulate(double deltaT,double takeOffTime){
+        System.out.println("Starting mars mission with takeOff Time: "+takeOffTime);
         double currentTime = 0;
 
         Particle pastMars = null;
@@ -124,33 +130,38 @@ public class MarsMission {
         Particle futureSpaceship;
         int step = config.getStep();
         int i = 0;
-        double takeOffTime = config.getTakeoffTime();
 
-        while(missedMarsCC.cut(spaceship) && maxTimeCC.cut(spaceship)){
+
+        while(missedMarsCC.cut(spaceship,mars) && maxTimeCC.cut(spaceship,mars) && landedOnMarsCC.cut(spaceship,mars)){
 
             if (!takenOff && currentTime >= takeOffTime){
+                System.out.println("Taking off...");
                 createSpaceship();
                 takenOff = true;
+                marsMinDistance = Double.min(marsMinDistance,getMarsDistance());
             }
 
             futureEarth = updateStrategy.update(pastEarth, earth, deltaT, currentTime);
             futureMars = updateStrategy.update(pastMars, mars, deltaT, currentTime);
-            System.out.println("####### "+"iteration = "+i+" #######");
-            System.out.println("currentTime: "+currentTime);
-            System.out.println("SPACESHIP: "+spaceship+"\nEARTH: "+earth+"\nMARS: "+mars+"\nSUN: "+sun+"\n#####################");
+         //   System.out.println("####### "+"iteration = "+i+" #######");
+           // System.out.println("currentTime: "+currentTime);
+          //  System.out.println("SPACESHIP: "+spaceship+"\nEARTH: "+earth+"\nMARS: "+mars+"\nSUN: "+sun+"\n#####################");
            // setAcc(futureMars, List.of(futureEarth, this.sun));
-            setAcc(futureEarth, List.of(futureMars, this.sun));//TODO VOLVER
+            setAcc(futureEarth, List.of(futureMars, this.sun));
             setAcc(futureMars, List.of(futureEarth, this.sun));
             if(takenOff){
+
                 futureSpaceship = updateStrategy.update(pastSpaceship, spaceship, deltaT, currentTime);
-                setAcc(futureSpaceship, List.of(futureEarth,futureMars,this.sun));//TODO VOLVER
+                setAcc(futureSpaceship, List.of(futureEarth,futureMars,this.sun));
                 pastSpaceship = spaceship;
                 spaceship = futureSpaceship;
+
+                marsMinDistance = Double.min(marsMinDistance,getMarsDistance());
             }
 
-            if(i % step == 0 ){
+            if(i % step == 0){
                 if (takenOff){
-                    snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));//TODO VOLVER
+                    snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));
                 }else{
                     snapshots.add(new SimulationSnapshot(List.of(earth,mars,sun), currentTime));
                 }
@@ -158,18 +169,36 @@ public class MarsMission {
             }
            // System.out.println("ANGULO ENTRE TIERRA Y SOL: "+ Math.atan2(earth.getPosY(), earth.getPosX()));
             pastEarth = earth;
-            pastMars = mars;//TODO VOLVER
+            pastMars = mars;
             earth = futureEarth;
-            mars = futureMars;//TODO VOLVER
+            mars = futureMars;
 
             currentTime += deltaT;
 
             i++;
         }
-        return currentTime - deltaT;
+        System.out.printf("Simulation finished with minimum distance to mars = %f\n",marsMinDistance);
+        return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance,isSuccessful(),snapshots);
 
     }
 
+
+
+    private double getMarsDistance(){
+        return Math.sqrt(Math.pow(spaceship.getPosX() - mars.getPosX(),2) + Math.pow(spaceship.getPosY() - mars.getPosY(),2));
+
+    }
+
+    public boolean isSuccessful(){
+        if(!takenOff){
+            return false;
+        }
+        return getMarsDistance() <= mars.getRadius();
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
 
     public List<SimulationSnapshot> getSnapshots(){
         return snapshots;
@@ -187,8 +216,9 @@ public class MarsMission {
             MarsMissionConfig config = new Gson().fromJson(bufferedReader, MarsMissionConfig.class);
             MarsMission mm = new MarsMission(config);
 
-            double totalTime = mm.simulate(config.getDeltaT());
-            OutputFile.createOutputFile(new SimulationResult(totalTime, mm.getSnapshots(), config.getStrategy()),  "mars_mission", OutputTypeEnum.EXYZ);
+            MarsMissionResult ms =  mm.simulate(config.getDeltaT(),config.getTakeoffTime());
+            XYZWriter xyzWriter = new XYZWriter();
+            xyzWriter.createFile(ms,  "mars_mission");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

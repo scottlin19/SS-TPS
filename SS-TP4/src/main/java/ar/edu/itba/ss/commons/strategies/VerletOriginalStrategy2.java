@@ -44,4 +44,9 @@ public class VerletOriginalStrategy2 implements UpdateStrategy{
 
         return future;
     }
+
+    @Override
+    public String getName() {
+        return "verlet";
+    }
 }

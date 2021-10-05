@@ -25,6 +25,11 @@ public class AnalyticStrategy implements UpdateStrategy{
         return future;
     }
 
+    @Override
+    public String getName() {
+        return "analytic";
+    }
+
     public AnalyticStrategy withFunctions(SystemFunctions functions){
         this.functions = functions;
         return this;

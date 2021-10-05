@@ -36,4 +36,9 @@ public class EulerStrategy2 implements UpdateStrategy{
 //        System.out.println("EULER FUTURE: "+future);
         return future;
     }
+
+    @Override
+    public String getName() {
+        return "euler";
+    }
 }

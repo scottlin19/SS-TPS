@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ar.edu.itba.ss.commons.Particle;
+import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 import ar.edu.itba.ss.commons.strategies.AnalyticStrategy;
 import ar.edu.itba.ss.commons.strategies.BeemanStrategy;
@@ -48,7 +49,7 @@ public class DampedOscillator {
         }
     }
 
-    public double simulate(double deltaT){
+    public SimulationResult simulate(double deltaT){
         double V0 = -config.getR0() * config.getGamma() / (2*config.getMass());
         double fx = -config.getK() * config.getR0() - config.getGamma() * V0;
         double ax = fx / config.getMass();
@@ -75,7 +76,7 @@ public class DampedOscillator {
 //            System.out.println("#######################################");
             i++;
         }
-        return currentTime - deltaT;
+        return new SimulationResult(currentTime-deltaT,snapshots,updateStrategy.getName());
     }
 
     public List<SimulationSnapshot> getSnapshots() {

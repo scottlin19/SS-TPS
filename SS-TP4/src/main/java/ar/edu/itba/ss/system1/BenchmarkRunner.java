@@ -10,11 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ar.edu.itba.ss.commons.writers.JSONWriter;
 import com.google.gson.Gson;
-
-import ar.edu.itba.ss.commons.OutputFile;
-import ar.edu.itba.ss.commons.OutputTypeEnum;
 import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 
@@ -32,21 +29,14 @@ public class BenchmarkRunner {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(config_url.getFile()));
             Config config = new Gson().fromJson(bufferedReader, Config.class);
             List<SimulationResult> results = ej1_2(config);
-            results.forEach(res -> OutputFile.createOutputFile(res, EJ1_2_RESULTS_DIR + "/simulation_" + res.getMethod(), OutputTypeEnum.JSON));
-
+            JSONWriter<SimulationResult> ej1_2Writer = new JSONWriter<>();
+            results.forEach(res -> ej1_2Writer.createFile(res, EJ1_2_RESULTS_DIR + "/simulation_" + res.getMethod()));
 
             Map<String,DCMResult> dcmResults = ej1_3(config);
-
-            try {
-                for(Map.Entry<String,DCMResult> entry: dcmResults.entrySet()){
-                    ObjectMapper mapper = new ObjectMapper();
-                    mapper.writeValue(new File("results/" + EJ1_3RESULTS_DIR + "/dcms_"+ entry.getKey()+".json"), entry.getValue());
-                }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            JSONWriter<DCMResult> ej1_3Writer = new JSONWriter<>();
+            for(Map.Entry<String,DCMResult> entry: dcmResults.entrySet()){
+                ej1_3Writer.createFile(entry.getValue(),"results/" + EJ1_3RESULTS_DIR + "/dcms_"+ entry.getKey());
             }
-
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -64,8 +54,8 @@ public class BenchmarkRunner {
         }};
         strategies.forEach(strategy -> {
             DampedOscillator oscillator = new DampedOscillator(config,strategy);
-            double totalTime = oscillator.simulate(config.getDeltaT());
-            results.add(new SimulationResult(totalTime, oscillator.getSnapshots(), strategy));
+            SimulationResult result  = oscillator.simulate(config.getDeltaT());
+            results.add(result);
         });
         return results;
     }
@@ -84,8 +74,8 @@ public class BenchmarkRunner {
 
             for (String strategy : strategies) {
                 DampedOscillator oscillator = new DampedOscillator(config, strategy);
-                double totalTime = oscillator.simulate(deltaT);
-                results.add(new SimulationResult(totalTime, oscillator.getSnapshots(), strategy));
+                SimulationResult result = oscillator.simulate(deltaT);
+                results.add(result);
             }
 
             SimulationResult analytic = results.get(0);

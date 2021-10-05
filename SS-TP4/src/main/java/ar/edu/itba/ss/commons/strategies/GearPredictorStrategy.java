@@ -48,6 +48,11 @@ public class GearPredictorStrategy implements UpdateStrategy{
         return future;
     }
 
+    @Override
+    public String getName() {
+        return "gear";
+    }
+
     private double pr(double deltaT){
         return r[0] + r[1] * deltaT + r[2] * Math.pow(deltaT,2)/2 + r[3] * Math.pow(deltaT,3)/6 + r[4] * Math.pow(deltaT,4)/24 + r[5] * Math.pow(deltaT,5)/120;
     }
