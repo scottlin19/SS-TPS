@@ -12,12 +12,16 @@ public class MissedMarsCutCondition extends CutCondition{
     }
 
     @Override
-    public boolean cut(Particle p,Particle mars) {
-        if(p == null){
+    public boolean cut(Particle spaceship,Particle mars) {
+        if(spaceship == null){
             return true;
         }
+        boolean cut = Math.sqrt(Math.pow(spaceship.getPosX(),2) + Math.pow(spaceship.getPosY(),2)) <= marsOrbitRadius+marsRadius;
+        if(!cut){
+            System.out.println("SPACESHIP MISSED MARS, TERMINATING SIMULATION");
+        }
+        return cut;
 
-        return Math.sqrt(Math.pow(p.getPosX(),2) + Math.pow(p.getPosY(),2)) <= marsOrbitRadius+marsRadius;
     }
 
 

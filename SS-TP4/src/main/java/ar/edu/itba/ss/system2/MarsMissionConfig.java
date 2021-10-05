@@ -10,26 +10,26 @@ public class MarsMissionConfig {
     private final int maxTime;
     private final String strategy;
     private final double deltaT;
-    private final double takeoffTime;
+    private final double takeOffTime;
 
     private final double takeOffSpeed;
 
     private final int step;
 
 
-    public MarsMissionConfig(int maxTime, String strategy, double deltaT, double takeoffTime, double takeOffSpeed, int step){
+    public MarsMissionConfig(int maxTime, String strategy, double deltaT, double takeOffTime, double takeOffSpeed, int step){
         this.maxTime = maxTime;
         this.strategy = strategy;
         this.deltaT = deltaT;
-        this.takeoffTime = takeoffTime;
+        this.takeOffTime = takeOffTime;
         this.takeOffSpeed = takeOffSpeed;
         this.step = step;
 
     }
 
 
-    public double getTakeoffTime(){
-        return takeoffTime;
+    public double getTakeOffTime(){
+        return takeOffTime;
     }
 
     public int getMaxTime() {

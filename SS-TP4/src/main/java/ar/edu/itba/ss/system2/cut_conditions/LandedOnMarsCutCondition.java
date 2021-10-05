@@ -11,8 +11,11 @@ public class LandedOnMarsCutCondition extends CutCondition{
         if(spaceship == null){
             return true;
         }
-       // System.out.println("Landed on mars: "+(Math.sqrt(Math.pow(mars.getPosX()-spaceship.getPosX(),2)  + Math.pow(mars.getPosY() - spaceship.getPosY(),2)) < mars.getRadius()));
-        return Math.sqrt(Math.pow(mars.getPosX()-spaceship.getPosX(),2)  + Math.pow(mars.getPosY() - spaceship.getPosY(),2)) >= mars.getRadius();
+        boolean cut = Math.sqrt(Math.pow(mars.getPosX()-spaceship.getPosX(),2)  + Math.pow(mars.getPosY() - spaceship.getPosY(),2)) >= mars.getRadius();
+        if(!cut){
+            System.out.println("SPACESHIP LANDED ON MARS!");
+        }
+        return cut;
     }
 
 

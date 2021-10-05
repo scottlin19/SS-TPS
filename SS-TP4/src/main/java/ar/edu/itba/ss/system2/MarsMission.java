@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.net.URL;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class MarsMission {
     private Particle mars;
     private Particle earth;
     private final Particle sun;
-    private LocalDateTime startDate;
+    private final LocalDateTime startDate;
     private final UpdateStrategy updateStrategy;
 
     private final MarsMissionConfig config;
@@ -98,7 +99,7 @@ public class MarsMission {
     }
 
     private void createSpaceship(){
-        System.out.println("CREATE SPACESHIP");
+        System.out.println("LAUNCHING SPACESHIP");
         double sunEarthDist = Particle.dist(earth,sun);
         this.spaceship = new Particle(SPACESHIP_ID,
                 this.earth.getPosX() + (1500 + earth.getRadius()) *enX(earth,sun,sunEarthDist),
@@ -112,7 +113,7 @@ public class MarsMission {
         double shipEarthDist = Particle.dist(spaceship,earth);
         this.spaceship.setVelX(earth.getVelX() + Math.abs((7.12 + config.getTakeOffSpeed()))*etX(spaceship,earth,shipEarthDist));
         this.spaceship.setVelY(earth.getVelY() + Math.abs(7.12 + config.getTakeOffSpeed())*etY(spaceship,earth,shipEarthDist));
-        setAcc(this.spaceship, List.of(this.earth, this.sun, this.mars)); //TODO VOLVER
+        setAcc(this.spaceship, List.of(this.earth, this.sun, this.mars));
 
     }
 
@@ -135,15 +136,15 @@ public class MarsMission {
         while(missedMarsCC.cut(spaceship,mars) && maxTimeCC.cut(spaceship,mars) && landedOnMarsCC.cut(spaceship,mars)){
 
             if (!takenOff && currentTime >= takeOffTime){
-                System.out.println("Taking off...");
+                System.out.printf("Taking off... (%.0fs)\n",currentTime);
                 createSpaceship();
                 takenOff = true;
-                marsMinDistance = Double.min(marsMinDistance,getMarsDistance());
+                marsMinDistance = Double.min(marsMinDistance,Particle.dist(mars,spaceship));
             }
 
             futureEarth = updateStrategy.update(pastEarth, earth, deltaT, currentTime);
             futureMars = updateStrategy.update(pastMars, mars, deltaT, currentTime);
-         //   System.out.println("####### "+"iteration = "+i+" #######");
+           // System.out.println("####### "+"iteration = "+i+" #######");
            // System.out.println("currentTime: "+currentTime);
           //  System.out.println("SPACESHIP: "+spaceship+"\nEARTH: "+earth+"\nMARS: "+mars+"\nSUN: "+sun+"\n#####################");
            // setAcc(futureMars, List.of(futureEarth, this.sun));
@@ -155,8 +156,7 @@ public class MarsMission {
                 setAcc(futureSpaceship, List.of(futureEarth,futureMars,this.sun));
                 pastSpaceship = spaceship;
                 spaceship = futureSpaceship;
-
-                marsMinDistance = Double.min(marsMinDistance,getMarsDistance());
+                marsMinDistance = Double.min(marsMinDistance,Particle.dist(mars,spaceship));
             }
 
             if(i % step == 0){
@@ -177,23 +177,19 @@ public class MarsMission {
 
             i++;
         }
-        System.out.printf("Simulation finished with minimum distance to mars = %f\n",marsMinDistance);
+        System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n",currentTime,marsMinDistance);
         return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance,isSuccessful(),snapshots);
 
     }
 
 
 
-    private double getMarsDistance(){
-        return Math.sqrt(Math.pow(spaceship.getPosX() - mars.getPosX(),2) + Math.pow(spaceship.getPosY() - mars.getPosY(),2));
-
-    }
 
     public boolean isSuccessful(){
         if(!takenOff){
             return false;
         }
-        return getMarsDistance() <= mars.getRadius();
+        return Particle.dist(mars,spaceship) <= mars.getRadius();
     }
 
     public LocalDateTime getStartDate() {
@@ -216,9 +212,14 @@ public class MarsMission {
             MarsMissionConfig config = new Gson().fromJson(bufferedReader, MarsMissionConfig.class);
             MarsMission mm = new MarsMission(config);
 
-            MarsMissionResult ms =  mm.simulate(config.getDeltaT(),config.getTakeoffTime());
+            MarsMissionResult result =  mm.simulate(config.getDeltaT(),config.getTakeOffTime());
+            if(result.isSuccessful()){
+                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE "+mm.getStartDate().plusSeconds((long) result.getTakeOffTime()).format(DateTimeFormatter.ISO_DATE));
+            }else{
+                System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
+            }
             XYZWriter xyzWriter = new XYZWriter();
-            xyzWriter.createFile(ms,  "mars_mission");
+            xyzWriter.createFile(result,  "results/mars_mission");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

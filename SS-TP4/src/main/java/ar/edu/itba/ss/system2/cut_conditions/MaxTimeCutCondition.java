@@ -15,7 +15,11 @@ public class MaxTimeCutCondition extends CutCondition{
     @Override
     public boolean cut(Particle spaceship, Particle mars) {
         time+=deltaT;
-        return time <= maxTime;
+        boolean cut = time <= maxTime;
+        if(!cut){
+            System.out.println("MAXIMUM TIME REACHED, TERMINATING SIMULATION");
+        }
+        return cut;
 
     }
 }

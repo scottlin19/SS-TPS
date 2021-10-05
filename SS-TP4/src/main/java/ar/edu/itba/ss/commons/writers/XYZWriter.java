@@ -18,7 +18,7 @@ public class XYZWriter implements OutputFileWriter<SimulationResult>{
         List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
         try(final BufferedWriter writer = new BufferedWriter(new FileWriter(addExtension(outPath)))){
             for(List<Particle> snapshot: snapshots){
-                writer.write(snapshots.get(0).size()+"\n\n");
+                writer.write(snapshot.size()+"\n\n");
                 for(Particle p: snapshot){
 
                     writer.write(p.getPosX()+" "+

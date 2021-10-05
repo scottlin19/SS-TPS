@@ -29,9 +29,9 @@ public class BenchmarkRunner {
             MarsMissionConfig config = new Gson().fromJson(bufferedReader, MarsMissionConfig.class);
             List<MarsMissionDistance> results = ej2_1(config);
             JSONWriter<List<MarsMissionDistance>> jsonWriter =new JSONWriter<>();
+            MarsMissionDistance min = results.stream().min(Comparator.comparingInt(o -> (int) o.marsDistance)).get();
+            System.out.printf("Min mars distance: %f with takeOff time = %f",min.getMarsDistance(),min.getTakeOffTime());
 
-            System.out.println("Min mars distance: "+results.stream().map(MarsMissionDistance::getMarsDistance).min(Comparator.naturalOrder()).get());
-            System.out.println("Max mars distance: "+results.stream().map(MarsMissionDistance::getMarsDistance).max(Comparator.naturalOrder()).get());
             jsonWriter.createFile(results, RESULTS_DIRECTORY+EJ2_1_RESULTS_DIR + "simulation_takeOffDate");
 
 
@@ -44,12 +44,9 @@ public class BenchmarkRunner {
     public static List<MarsMissionDistance> ej2_1(MarsMissionConfig config){
         List<MarsMissionDistance> results = new ArrayList<>();
 
-
-        int dayInSeconds = 24*60*60;
-        long maxDays = 2*365*dayInSeconds;
-        int interval = 60*60;
+        int interval = (int) config.getDeltaT();
         List<Long> takeOffTimes = new ArrayList<>();
-        for(long i = 0; i <= maxDays;i+=interval){
+        for(long i = 0; i <= config.getMaxTime();i+=interval){
             takeOffTimes.add(i);
         }
         double deltaT = config.getDeltaT();
@@ -70,8 +67,8 @@ public class BenchmarkRunner {
     }
 
     private static class MarsMissionDistance{
-        private double takeOffTime;
-        private double marsDistance;
+        private final double takeOffTime;
+        private final double marsDistance;
 
         public MarsMissionDistance(double takeOffTime, double marsDistance) {
             this.takeOffTime = takeOffTime;
