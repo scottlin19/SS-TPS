@@ -53,6 +53,22 @@ def ej1_3(jsons):
     plt.show()
 
 
+
+def ej2_1(jsons):
+    for jsonData in jsons:
+        takeOffTime = list(map(lambda data: data['takeOffTime'],jsonData))
+        total = len(takeOffTime)
+        takeOffTime = takeOffTime[:int(total/2)]
+        marsDistance = list(map(lambda data: data['marsDistance'],jsonData))[:int(total/2)]
+        #print(marsDistance)
+        plt.plot(takeOffTime, marsDistance, '-o', label="Distance to Mars")
+        plt.legend()
+        #plt.yscale('log')
+        plt.ylabel('Distance to Mars (Km)')
+        plt.xlabel('Takeoff time (s)')
+        plt.show()
+
+
 def get_jsons_in_folder(dir):
     jsons = []
     pattern = re.compile("\.json$")
@@ -86,6 +102,7 @@ if __name__ == "__main__":
         ej1_3(jsons)
     elif choice == "2":
         jsons = get_jsons_in_folder(dirs[0])
+        ej2_1(jsons)
         # ej2(jsons)
 
 

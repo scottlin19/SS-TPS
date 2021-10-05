@@ -16,8 +16,8 @@ public class MissedMarsCutCondition extends CutCondition{
         if(spaceship == null){
             return true;
         }
-        boolean cut = Math.sqrt(Math.pow(spaceship.getPosX(),2) + Math.pow(spaceship.getPosY(),2)) <= marsOrbitRadius+marsRadius;
-        if(!cut){
+        boolean cut = Math.sqrt(Math.pow(spaceship.getPosX(),2) + Math.pow(spaceship.getPosY(),2)) > marsOrbitRadius+marsRadius;
+        if(cut){
             System.out.println("SPACESHIP MISSED MARS, TERMINATING SIMULATION");
         }
         return cut;

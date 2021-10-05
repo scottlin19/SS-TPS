@@ -133,7 +133,7 @@ public class MarsMission {
         int i = 0;
 
 
-        while(missedMarsCC.cut(spaceship,mars) && maxTimeCC.cut(spaceship,mars) && landedOnMarsCC.cut(spaceship,mars)){
+        while(!missedMarsCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) && !landedOnMarsCC.cut(spaceship,mars)){
 
             if (!takenOff && currentTime >= takeOffTime){
                 System.out.printf("Taking off... (%.0fs)\n",currentTime);
@@ -176,6 +176,11 @@ public class MarsMission {
             currentTime += deltaT;
 
             i++;
+        }
+        if (takenOff){
+            snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));
+        }else{
+            snapshots.add(new SimulationSnapshot(List.of(earth,mars,sun), currentTime));
         }
         System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n",currentTime,marsMinDistance);
         return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance,isSuccessful(),snapshots);

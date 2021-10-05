@@ -1,8 +1,8 @@
 {
   "maxTime": 63072000,
   "strategy": "verlet",
-  "deltaT": 600,
+  "deltaT": 300,
   "takeOffTime": 31284000,
   "takeOffSpeed": 8,
-  "step":18
+  "step":36
 }
