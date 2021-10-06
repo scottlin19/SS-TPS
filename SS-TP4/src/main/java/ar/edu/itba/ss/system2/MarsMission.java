@@ -202,7 +202,7 @@ public class MarsMission {
 
             MarsMissionResult result =  mm.simulate(config.getDeltaT(),config.getTakeOffTime());
             if(result.isSuccessful()){
-                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE "+mm.getStartDate().plusSeconds((long) result.getTakeOffTime()).format(DateTimeFormatter.ISO_DATE));
+                System.out.printf("MISSION SUCCESS: SPACESHIP LANDED ON MARS AT %s WITH TAKEOFF DATE %s\n",mm.getStartDate().plusSeconds((long) result.getTotalTime()).format(DateTimeFormatter.ISO_DATE),mm.getStartDate().plusSeconds((long) result.getTakeOffTime()).format(DateTimeFormatter.ISO_DATE));
             }else{
                 System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
             }
