@@ -45,12 +45,17 @@ public class BenchmarkRunner {
     }
     private static List<Double> calculateEnergy(List<SimulationSnapshot> snapshots){
         List<Double> energies = new ArrayList<>();
+        double G = 6.693e-20;
         for(List<Particle> particles : snapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList())){
             double K = 0;
             double P = 0;
-            for(Particle p: particles){
-                K += 0.5*p.getMass()*(Math.pow(p.getVelX(),2) + Math.pow(p.getVelY(),2));
-
+            for(Particle p1: particles){
+                K += 0.5*p1.getMass()*(Math.pow(p1.getVelX(),2) + Math.pow(p1.getVelY(),2));
+                for(Particle p2: particles){
+                    if(!p1.equals(p2)){
+                        P += -G*p1.getMass()*p2.getMass()/Particle.dist(p1,p2);
+                    }
+                }
             }
             energies.add(K+P);
         }
@@ -105,6 +110,49 @@ public class BenchmarkRunner {
         }
         System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
         return results;
+    }
+
+    public static List<MarsMissionVelocity> ej2_2(MarsMissionConfig config){
+        List<MarsMissionVelocity> results = new ArrayList<>();
+
+        int interval = (int) config.getDeltaT();
+        List<Long> takeOffTimes = new ArrayList<>();
+        for(long i = 0; i <= config.getMaxTime();i+=interval){
+            takeOffTimes.add(i);
+        }
+        double deltaT = config.getDeltaT();
+
+        for(Long takeOffTime: takeOffTimes){
+            System.out.println("TakeOff Time: "+takeOffTime);
+            MarsMission mm = new MarsMission(config);
+            MarsMissionResult result = mm.simulate(deltaT,takeOffTime);
+            results.add(new MarsMissionVelocity(result.getTakeOffSpeed(),result.getTotalTime()));
+            if(result.isSuccessful()){
+                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE "+mm.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE));
+                return results;
+
+            }
+        }
+        System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
+        return results;
+    }
+
+    private static class MarsMissionVelocity{
+        private final double velocity;
+        private final double totalTime;
+
+        public MarsMissionVelocity(double velocity, double totalTime) {
+            this.velocity = velocity;
+            this.totalTime = totalTime;
+        }
+
+        public double getVelocity() {
+            return velocity;
+        }
+
+        public double getTotalTime() {
+            return totalTime;
+        }
     }
 
     private static class MarsMissionEnergy{

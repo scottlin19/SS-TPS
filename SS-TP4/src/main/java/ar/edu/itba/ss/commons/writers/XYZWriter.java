@@ -27,9 +27,9 @@ public class XYZWriter implements OutputFileWriter<SimulationResult>{
                             p.getVelY()+" "+
                             p.getMass()+" "+
                             p.getRadius()+" "+
-                            p.getColor().getRed()+" "+
-                            p.getColor().getGreen()+" "+
-                            p.getColor().getBlue()+"\n");
+                            p.getColor().getR()+" "+
+                            p.getColor().getG()+" "+
+                            p.getColor().getB()+"\n");
                 }
             }
         } catch (IOException e) {

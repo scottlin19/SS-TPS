@@ -68,6 +68,26 @@ def ej2_1(jsons):
         plt.xlabel('Takeoff time (s)')
         plt.show()
 
+def ej2_1_b(json):
+    totalTime = json['totalTime']
+    marsDistance = json['marsDistance']
+    takeOffTime = json['takeOffTime']
+    successful = json['successful']
+    spaceship_vals = []
+    times = []
+    for snapshot in json['snapshots']:
+        spaceship_data = list(filter(lambda particle: particle['id'] == 1, snapshot['particles']))
+        if len(spaceship_data) > 0:
+            spaceship_vals.append(spaceship_data[0])
+            times.append(snapshot['time'])
+    mod_vels = list(map(lambda it: math.sqrt(it['posX']**2 + it['posY']**2), spaceship_vals))
+    plt.plot(times, mod_vels, '-o', label="Modulo de la velocidad de la nave")
+    plt.legend()
+    # plt.yscale('log')
+    plt.ylabel('Modulo de la velocidad de la nave (km/s)')
+    plt.xlabel('Takeoff time (s)')
+    plt.show()
+
 
 def get_jsons_in_folder(dir):
     jsons = []
@@ -103,6 +123,9 @@ if __name__ == "__main__":
     elif choice == "2":
         jsons = get_jsons_in_folder(dirs[0])
         ej2_1(jsons)
-        # ej2(jsons)
+        jsons = get_jsons_in_folder(dirs[1])
+        if(len(jsons) != 1):
+            print(f"folder should contain 1 json for ej2_1b")
+        ej2_1_b(jsons[0])
 
 

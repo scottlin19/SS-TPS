@@ -1,7 +1,5 @@
 package ar.edu.itba.ss.commons;
 
-import java.awt.*;
-import java.awt.geom.Point2D;
 
 public class Particle implements Cloneable{
 
@@ -11,7 +9,40 @@ public class Particle implements Cloneable{
     private double          accX,accY;
     private final double    radius;
     private final double    mass;
-    private final Color color;
+    private final Color     color;
+
+    public static class Color{
+        private int R,G,B;
+        public Color(int R, int G, int B){
+             this.R = R;
+             this.G = G;
+             this.B = B;
+        }
+
+        public int getR() {
+            return R;
+        }
+
+        public void setR(short r) {
+            R = r;
+        }
+
+        public int getG() {
+            return G;
+        }
+
+        public void setG(short g) {
+            G = g;
+        }
+
+        public int getB() {
+            return B;
+        }
+
+        public void setB(short b) {
+            B = b;
+        }
+    }
 
     public Particle(int id,double posX,double posY,double radius, double mass, double velX, double velY, double accX, double accY){
         this.id = id;

@@ -3,6 +3,7 @@ package ar.edu.itba.ss.system2;
 import ar.edu.itba.ss.commons.*;
 import ar.edu.itba.ss.commons.strategies.UpdateStrategy;
 import ar.edu.itba.ss.commons.strategies.VerletOriginalStrategy2;
+import ar.edu.itba.ss.commons.writers.JSONWriter;
 import ar.edu.itba.ss.commons.writers.XYZWriter;
 import ar.edu.itba.ss.system1.FirstSystemRunner;
 import ar.edu.itba.ss.system2.cut_conditions.CutCondition;
@@ -10,9 +11,6 @@ import ar.edu.itba.ss.system2.cut_conditions.LandedOnMarsCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MaxTimeCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MissedMarsCutCondition;
 import com.google.gson.Gson;
-
-
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -49,10 +47,10 @@ public class MarsMission {
         this.snapshots = new ArrayList<>();
         this.config = config;
         this.updateStrategy = new VerletOriginalStrategy2();
-        this.mars = new Particle(MARS_ID,-2.426617401833969e8,-3.578836154354768e7,3389.92,6.4171e23,4.435907910045917e0,-2.190044178514185e1,0,0, Color.red);
+        this.mars = new Particle(MARS_ID,-2.426617401833969e8,-3.578836154354768e7,3389.92,6.4171e23,4.435907910045917e0,-2.190044178514185e1,0,0, new Particle.Color(255,0,0));
 
-        this.earth = new Particle(EARTH_ID,1.500619962348151e8,2.288499248197072e6,6371.01,5.97219e24,-9.322979134387409e-1,2.966365033636722e1,0,0,Color.blue);
-        this.sun = new Particle(SUN_ID,0,0,10000,1.989e30,0,0,0,0,Color.yellow);
+        this.earth = new Particle(EARTH_ID,1.500619962348151e8,2.288499248197072e6,6371.01,5.97219e24,-9.322979134387409e-1,2.966365033636722e1,0,0,new Particle.Color(0,0,255));
+        this.sun = new Particle(SUN_ID,0,0,10000,1.989e30,0,0,0,0,new Particle.Color(255,255,0));
         setAcc(this.mars, List.of(this.earth, this.sun));
         setAcc(this.earth, List.of(this.mars, this.sun));
 
@@ -108,7 +106,7 @@ public class MarsMission {
                 2e5,
                 0,
                 0,
-                0,0,Color.white);
+                0,0,new Particle.Color(255,255,255));
 
         double shipEarthDist = Particle.dist(spaceship,earth);
         this.spaceship.setVelX(earth.getVelX() + Math.abs((7.12 + config.getTakeOffSpeed()))*etX(spaceship,earth,shipEarthDist));
@@ -121,11 +119,9 @@ public class MarsMission {
     public MarsMissionResult simulate(double deltaT,double takeOffTime){
         System.out.println("Starting mars mission with takeOff Time: "+takeOffTime);
         double currentTime = 0;
-
         Particle pastMars = null;
         Particle pastEarth = null;
         Particle pastSpaceship = null;
-
         Particle futureMars;
         Particle futureEarth;
         Particle futureSpaceship;
@@ -133,8 +129,7 @@ public class MarsMission {
         int i = 0;
 
 
-        while(!missedMarsCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) && !landedOnMarsCC.cut(spaceship,mars)){
-
+        while(!landedOnMarsCC.cut(spaceship,mars) && !missedMarsCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) ){
             if (!takenOff && currentTime >= takeOffTime){
                 System.out.printf("Taking off... (%.0fs)\n",currentTime);
                 createSpaceship();
@@ -144,19 +139,18 @@ public class MarsMission {
 
             futureEarth = updateStrategy.update(pastEarth, earth, deltaT, currentTime);
             futureMars = updateStrategy.update(pastMars, mars, deltaT, currentTime);
-           // System.out.println("####### "+"iteration = "+i+" #######");
-           // System.out.println("currentTime: "+currentTime);
-          //  System.out.println("SPACESHIP: "+spaceship+"\nEARTH: "+earth+"\nMARS: "+mars+"\nSUN: "+sun+"\n#####################");
-           // setAcc(futureMars, List.of(futureEarth, this.sun));
             setAcc(futureEarth, List.of(futureMars, this.sun));
             setAcc(futureMars, List.of(futureEarth, this.sun));
+            pastEarth = earth;
+            pastMars = mars;
+            earth = futureEarth;
+            mars = futureMars;
             if(takenOff){
-
                 futureSpaceship = updateStrategy.update(pastSpaceship, spaceship, deltaT, currentTime);
                 setAcc(futureSpaceship, List.of(futureEarth,futureMars,this.sun));
                 pastSpaceship = spaceship;
                 spaceship = futureSpaceship;
-                marsMinDistance = Double.min(marsMinDistance,Particle.dist(mars,spaceship));
+                marsMinDistance = Double.min(marsMinDistance,Particle.dist(spaceship,mars));
             }
 
             if(i % step == 0){
@@ -165,16 +159,8 @@ public class MarsMission {
                 }else{
                     snapshots.add(new SimulationSnapshot(List.of(earth,mars,sun), currentTime));
                 }
-
             }
-           // System.out.println("ANGULO ENTRE TIERRA Y SOL: "+ Math.atan2(earth.getPosY(), earth.getPosX()));
-            pastEarth = earth;
-            pastMars = mars;
-            earth = futureEarth;
-            mars = futureMars;
-
             currentTime += deltaT;
-
             i++;
         }
         if (takenOff){
@@ -182,13 +168,10 @@ public class MarsMission {
         }else{
             snapshots.add(new SimulationSnapshot(List.of(earth,mars,sun), currentTime));
         }
-        System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n",currentTime,marsMinDistance);
-        return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance,isSuccessful(),snapshots);
+        System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n",currentTime,marsMinDistance-mars.getRadius());
+        return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance - mars.getRadius(),isSuccessful(),config.getTakeOffSpeed(),snapshots);
 
     }
-
-
-
 
     public boolean isSuccessful(){
         if(!takenOff){
@@ -224,7 +207,9 @@ public class MarsMission {
                 System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
             }
             XYZWriter xyzWriter = new XYZWriter();
-            xyzWriter.createFile(result,  "results/mars_mission");
+            xyzWriter.createFile(result,  "results/ej2_1b/mars_mission");
+            JSONWriter<MarsMissionResult> jsonWriter = new JSONWriter<>();
+            jsonWriter.createFile(result,"results/ej2_1b/mars_mission");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
