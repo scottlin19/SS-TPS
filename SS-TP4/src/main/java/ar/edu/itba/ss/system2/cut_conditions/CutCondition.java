@@ -4,5 +4,5 @@ import ar.edu.itba.ss.commons.Particle;
 
 public abstract class CutCondition {
 
-    public abstract boolean cut(Particle spaceship,Particle mars);
+    public abstract boolean cut(Particle spaceship,Particle target);
 }

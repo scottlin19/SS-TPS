@@ -6,15 +6,17 @@ import ar.edu.itba.ss.commons.SimulationSnapshot;
 import java.util.List;
 
 
-public class MarsMissionResult extends SimulationResult {
-    private final double marsDistance;
+public class SpaceMissionResult extends SimulationResult {
+    private final String target;
+    private final double targetDistance;
     private final boolean isSuccessful;
     private final double takeOffTime;
     private final double takeOffSpeed;
 
-    public MarsMissionResult(double totalTime,double takeOffTime,double marsDistance,boolean isSuccessful,double takeOffSpeed, List<SimulationSnapshot> snapshots) {
+    public SpaceMissionResult(String target, double totalTime, double takeOffTime, double targetDistance, boolean isSuccessful, double takeOffSpeed, List<SimulationSnapshot> snapshots) {
         super(totalTime, snapshots, "verlet");
-        this.marsDistance = marsDistance;
+        this.target = target;
+        this.targetDistance = targetDistance;
         this.isSuccessful = isSuccessful;
         this.takeOffTime = takeOffTime;
         this.takeOffSpeed  = takeOffSpeed;
@@ -28,8 +30,8 @@ public class MarsMissionResult extends SimulationResult {
         return takeOffTime;
     }
 
-    public double getMarsDistance() {
-        return marsDistance;
+    public double getTargetDistance() {
+        return targetDistance;
     }
 
     public boolean isSuccessful() {

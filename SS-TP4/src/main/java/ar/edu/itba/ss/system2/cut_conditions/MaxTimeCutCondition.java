@@ -13,7 +13,7 @@ public class MaxTimeCutCondition extends CutCondition{
         this.time = 0;
     }
     @Override
-    public boolean cut(Particle spaceship, Particle mars) {
+    public boolean cut(Particle spaceship, Particle target) {
         time+=deltaT;
         boolean cut = time > maxTime;
         if(cut){

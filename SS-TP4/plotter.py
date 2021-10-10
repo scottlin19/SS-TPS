@@ -25,18 +25,21 @@ def mqe(exact, aprox):
 def ej1(jsons, analytic):
     print(analytic)
     analytic_x = list(map(lambda snapshot: snapshot['particles'][0]['posX'], analytic['snapshots']))
+    deltaT = analytic['snapshots'][1]['time'] - analytic['snapshots'][0]['time']
+    print(f"delta T: {deltaT}")
     for jsonData in jsons:
         method = jsonData['method']
         totalTime = jsonData['totalTime']
         Xs = list(map(lambda snapshot: snapshot['particles'][0]['posX'], jsonData['snapshots']))
         times = list(map(lambda snapshot: snapshot['time'], jsonData['snapshots']))
-        plt.figure()
+        # plt.figure()
         plt.plot(times, Xs, '-o', label=f"{method}")
-        plt.plot(times, analytic_x,'-o', label="analytic")
         print(f"Mean Square Difference for {method}: {mqe(analytic_x, Xs)}")
-        plt.legend()
-        plt.ylabel('posición (m)')
-        plt.xlabel('tiempo (s)')
+        
+    plt.plot(times, analytic_x,'-o', label="analytic")    
+    plt.legend()
+    plt.ylabel('posición (m)')
+    plt.xlabel('tiempo (s)')
     plt.show()
 
 def ej1_3(jsons):
@@ -64,8 +67,8 @@ def ej2_1(jsons):
         plt.plot(takeOffTime, marsDistance, '-o', label="Distance to Mars")
         plt.legend()
         #plt.yscale('log')
-        plt.ylabel('Distance to Mars (Km)')
-        plt.xlabel('Takeoff time (s)')
+        plt.ylabel('Distancia a Mars (Km)')
+        plt.xlabel('Tiempo hasta despegue (s)')
         plt.show()
 
 def ej2_1_dt(json):
@@ -89,9 +92,10 @@ def ej2_1_dt(json):
 
 def ej2_1_b(json):
     totalTime = json['totalTime']
-    marsDistance = json['marsDistance']
+    targetDistance = json['targetDistance']
     takeOffTime = json['takeOffTime']
     successful = json['successful']
+    target = json['target']
     spaceship_vals = []
     times = []
     for snapshot in json['snapshots']:
@@ -104,14 +108,14 @@ def ej2_1_b(json):
     plt.legend()
     # plt.yscale('log')
     plt.ylabel('Modulo de la velocidad de la nave (km/s)')
-    plt.xlabel('Takeoff time (s)')
+    plt.xlabel('Tiempo hasta despegue (s)')
     plt.show()
 
     last = json['snapshots'][-1]
     last_mars = list(filter(lambda particle: particle['id'] == 2,last['particles']))[0]
     last_spaceship = list(filter(lambda particle: particle['id'] == 1,last['particles']))[0]
 
-    print(f"Velocidad relativa al llegar a Marte: {math.sqrt(last_spaceship['posX']**2 + last_spaceship['posY']**2) - math.sqrt(last_mars['posX']**2 + last_mars['posY']**2)} km/s")
+    print(f"Velocidad relativa al llegar a {target}: {math.sqrt(last_spaceship['posX']**2 + last_spaceship['posY']**2) - math.sqrt(last_mars['posX']**2 + last_mars['posY']**2)} km/s")
     
 
 def ej2_2(json):
@@ -135,8 +139,8 @@ def ej2_2(json):
         plotData(successfulData, True)
         plotData(unsuccessfulData, False)
         
-        plt.ylabel('Travel Duration (s)')
-        plt.xlabel('Initial Velocity (km/s)')
+        plt.ylabel('Duración del trayecto (s)')
+        plt.xlabel('Velocidad inicial (km/s)')
         plt.show()
 
         
@@ -181,7 +185,7 @@ if __name__ == "__main__":
         ej2_1(jsons)
         jsons = get_jsons_in_folder(dirs[1])
         if(len(jsons) != 1):
-            print(f"folder should contain 1 json for ej2_1b")
+            print(f"folder should contain 1 json for ej2_1b and ej3_1b")
         ej2_1_b(jsons[0])
     
     elif choice == "3":

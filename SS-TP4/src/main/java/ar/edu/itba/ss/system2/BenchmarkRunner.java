@@ -22,34 +22,38 @@ public class BenchmarkRunner {
     private static final String EJ2_1A_RESULTS_DIR = "ej2_1a/";
     private static final String EJ2_1B_RESULTS_DIR = "ej2_1b/";
     private static final String EJ2_2_RESULTS_DIR = "ej2_2/";
+    private static final String EJ3_RESULTS_DIR = "ej3/";
+    private static final String EJ3_1A_RESULTS_DIR = "ej3_1a/";
+
     public static void main(String[] args) {
-        URL config_url = FirstSystemRunner.class.getClassLoader().getResource("config/mars_mission_config.json");
+        URL config_url = FirstSystemRunner.class.getClassLoader().getResource("config/space_mission_config.json");
         if (config_url == null) {
             System.out.println("Config file not found, exiting...");
             return;
         }
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(config_url.getFile()));
-            MarsMissionConfig config = new Gson().fromJson(bufferedReader, MarsMissionConfig.class);
+            SpaceMissionConfig config = new Gson().fromJson(bufferedReader, SpaceMissionConfig.class);
 
-            //            Calculate DT
+            // Calculate DT
 //           JSONWriter<List<MarsMissionEnergy>> mmEnergyWriter =new JSONWriter<>();
 //           List<MarsMissionEnergy> energies = calculateDt(config);
 //           mmEnergyWriter.createFile(energies, RESULTS_DIRECTORY+EJ2_1A_RESULTS_DIR + "simulation_energy");
 
             //Ej2_1a
-//            List<MarsMissionDistance> results2_1 = ej2_1(config);
-//            JSONWriter<List<MarsMissionDistance>> mmDistanceWriter =new JSONWriter<>();
-//            MarsMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.marsDistance)).get();
-//            System.out.printf("Min mars distance: %f with takeOff time = %f",min.getMarsDistance(),min.getTakeOffTime());
-//            mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY+EJ2_1A_RESULTS_DIR + "simulation_takeOffDate");
+            List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
+            JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
+            SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
+            System.out.printf("Min %s distance: %f with takeOff time = %f", config.getTarget(), min.getTargetDistance(), min.getTakeOffTime());
+            String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
+            mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
 
             //Ej2_2
-            List<MarsMissionVelocity> results2_2 = ej2_2(config);
-            JSONWriter<List<MarsMissionVelocity>> mmVelocityWriter =new JSONWriter<>();
-            MarsMissionVelocity minVelocity = results2_2.stream().min(Comparator.comparingInt(o -> (int) o.totalTime)).get();
-            System.out.printf("Min total time: %f with takeOff velocity = %f",minVelocity.getTotalTime(),minVelocity.getVelocity());
-            mmVelocityWriter.createFile(results2_2, RESULTS_DIRECTORY+EJ2_2_RESULTS_DIR + "simulation_takeOffVel");
+//            List<MarsMissionVelocity> results2_2 = ej2_2(config);
+//            JSONWriter<List<MarsMissionVelocity>> mmVelocityWriter =new JSONWriter<>();
+//            MarsMissionVelocity minVelocity = results2_2.stream().min(Comparator.comparingInt(o -> (int) o.totalTime)).get();
+//            System.out.printf("Min total time: %f with takeOff velocity = %f",minVelocity.getTotalTime(),minVelocity.getVelocity());
+//            mmVelocityWriter.createFile(results2_2, RESULTS_DIRECTORY+EJ2_2_RESULTS_DIR + "simulation_takeOffVel");
 
 
 
@@ -58,6 +62,18 @@ public class BenchmarkRunner {
         }
 
     }
+
+    private static AbstractMission instantiateMission(SpaceMissionConfig config){
+        switch (config.getTarget()){
+            case "mars":
+                return new MarsMission(config);
+            case "jupiter":
+                return new JupiterMission(config);
+            default:
+                throw new RuntimeException("Invalid target");
+        }
+    }
+
     private static List<Double> calculateEnergy(List<SimulationSnapshot> snapshots){
         List<Double> energies = new ArrayList<>();
         double G = 6.693e-20;
@@ -77,7 +93,7 @@ public class BenchmarkRunner {
         return energies;
     }
 
-    public static List<MarsMissionEnergy> calculateDt(MarsMissionConfig config){
+    public static List<MarsMissionEnergy> calculateDt(SpaceMissionConfig config){
         List<MarsMissionEnergy> results = new ArrayList<>();
 
         double maxDeltaT = 60*60;
@@ -90,11 +106,12 @@ public class BenchmarkRunner {
 
         for(Double deltaT: deltaTs){
             System.out.println("dT: "+deltaT);
-            MarsMission mm = new MarsMission(config);
-            MarsMissionResult result = mm.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
+            AbstractMission mission = instantiateMission(config);
+//            MarsMission mm = new MarsMission(config);
+            SpaceMissionResult result = (SpaceMissionResult) mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
             results.add(new MarsMissionEnergy(deltaT,calculateEnergy(result.getSnapshots())));
             if(result.isSuccessful()){
-                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE "+mm.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
+                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
                 return results;
             }
         }
@@ -102,8 +119,8 @@ public class BenchmarkRunner {
         return results;
     }
 
-    public static List<MarsMissionDistance> ej2_1(MarsMissionConfig config){
-        List<MarsMissionDistance> results = new ArrayList<>();
+    public static List<SpaceMissionDistance> calculateTakeoffTime(SpaceMissionConfig config){
+        List<SpaceMissionDistance> results = new ArrayList<>();
 
         int interval = (int) config.getDeltaT();
         List<Long> takeOffTimes = new ArrayList<>();
@@ -114,20 +131,21 @@ public class BenchmarkRunner {
 
         for(Long takeOffTime: takeOffTimes){
             System.out.println("TakeOff Time: "+takeOffTime);
-            MarsMission mm = new MarsMission(config);
-            MarsMissionResult result = mm.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
-            results.add(new MarsMissionDistance(result.getTakeOffTime(),result.getMarsDistance()));
+            AbstractMission mission = instantiateMission(config);
+//            MarsMission mm = new MarsMission(config);
+            SpaceMissionResult result = mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
+            results.add(new SpaceMissionDistance(result.getTakeOffTime(),result.getTargetDistance()));
             if(result.isSuccessful()){
-                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE "+mm.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE));
+                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE));
                 return results;
 
             }
         }
-        System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
+        System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND");
         return results;
     }
 
-    public static List<MarsMissionVelocity> ej2_2(MarsMissionConfig config){
+    public static List<MarsMissionVelocity> ej2_2(SpaceMissionConfig config){
         List<MarsMissionVelocity> results = new ArrayList<>();
 
         double takeOffTime  = config.getTakeOffTime();
@@ -141,14 +159,15 @@ public class BenchmarkRunner {
 
         for(Double velocity: velocities){
             System.out.printf("Velocity: %s km/s\n",velocity);
-            MarsMission mm = new MarsMission(config);
-            MarsMissionResult result = mm.simulate(deltaT,takeOffTime,velocity);
+            AbstractMission mission = instantiateMission(config);
+//            MarsMission mm = new MarsMission(config);
+            SpaceMissionResult result = mission.simulate(deltaT,takeOffTime,velocity);
             results.add(new MarsMissionVelocity(result.getTakeOffSpeed(),result.getTotalTime(),result.isSuccessful()));
             if(result.isSuccessful()){
-                System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE "+mm.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
+                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED ON WITH TAKEOFF DATE "+mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
 
             }else{
-                System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS\n");
+                System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND\n");
             }
         }
 
@@ -197,21 +216,21 @@ public class BenchmarkRunner {
         }
     }
 
-    private static class MarsMissionDistance{
+    private static class SpaceMissionDistance{
         private final double takeOffTime;
-        private final double marsDistance;
+        private final double targetDistance;
 
-        public MarsMissionDistance(double takeOffTime, double marsDistance) {
+        public SpaceMissionDistance(double takeOffTime, double targetDistance) {
             this.takeOffTime = takeOffTime;
-            this.marsDistance = marsDistance;
+            this.targetDistance = targetDistance;
         }
 
         public double getTakeOffTime() {
             return takeOffTime;
         }
 
-        public double getMarsDistance() {
-            return marsDistance;
+        public double getTargetDistance() {
+            return targetDistance;
         }
     }
 
