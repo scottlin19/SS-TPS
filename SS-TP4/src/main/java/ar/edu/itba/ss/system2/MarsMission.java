@@ -57,7 +57,9 @@ public class MarsMission {
         takenOff = false;
         this.missedMarsCC = new MissedMarsCutCondition(mars);
         this.maxTimeCC = new MaxTimeCutCondition(config.getMaxTime(),config.getDeltaT());
-        this.landedOnMarsCC = new LandedOnMarsCutCondition();
+
+        int DEIMOS = 23460;
+        this.landedOnMarsCC = new LandedOnMarsCutCondition(DEIMOS);
         this.marsMinDistance = Double.MAX_VALUE;
         this.startDate = LocalDateTime.of(2021,9, 24,0,0,0);
     }
@@ -177,7 +179,7 @@ public class MarsMission {
         if(!takenOff){
             return false;
         }
-        return Particle.dist(mars,spaceship) <= mars.getRadius();
+        return landedOnMarsCC.cut(spaceship, mars);
     }
 
     public LocalDateTime getStartDate() {
