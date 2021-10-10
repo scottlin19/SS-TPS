@@ -33,10 +33,10 @@ def ej1(jsons, analytic):
         Xs = list(map(lambda snapshot: snapshot['particles'][0]['posX'], jsonData['snapshots']))
         times = list(map(lambda snapshot: snapshot['time'], jsonData['snapshots']))
         # plt.figure()
-        plt.plot(times, Xs, '-o', label=f"{method}")
+        plt.plot(times, Xs, label=f"{method}")
         print(f"Mean Square Difference for {method}: {mqe(analytic_x, Xs)}")
-        
-    plt.plot(times, analytic_x,'-o', label="analytic")    
+    
+    plt.plot(times, analytic_x, label="analytic")    
     plt.legend()
     plt.ylabel('posición (m)')
     plt.xlabel('tiempo (s)')
@@ -50,8 +50,8 @@ def ej1_3(jsons):
         dcm = list(map(lambda dcm: dcm['dcm'], dcms))
         plt.plot(deltaTs, dcm, '-o', label=f"{method}")
     plt.legend()
-    plt.yscale('log')
-    plt.ylabel('DCM')
+    # plt.yscale('log')
+    plt.ylabel('ECM ($m^2$)')
     plt.xlabel('delta t (s)')
     plt.show()
 

@@ -34,7 +34,6 @@ public class MarsMission extends AbstractMission{
         Particle futureSpaceship;
         int step = config.getStep();
         int i = 0;
-        Particle target = mars;
 
         while(!landedOnTargetCC.cut(spaceship,mars) && !missedTargetCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) ){
             if (!takenOff && currentTime >= takeOffTime){
@@ -68,17 +67,23 @@ public class MarsMission extends AbstractMission{
             }
 
             if(i % step == 0){
-                if (takenOff){
-                    snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));
-               
+                if (takenOff) {
+                    snapshots.add(new SimulationSnapshot(List.of(spaceship, mars, earth, sun), currentTime));
+                }else{
+                    snapshots.add(new SimulationSnapshot(List.of(mars, earth, sun), currentTime));
+                }
             }
             currentTime += deltaT;
             i++;
         }
-      
-        snapshots.add(new SimulationSnapshot(List.of(spaceship,mars,earth,sun), currentTime));
-        
-        System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n",currentTime,targetMinDistance-mars.getRadius());
+
+        if (takenOff) {
+            snapshots.add(new SimulationSnapshot(List.of(spaceship, mars, earth, sun), currentTime));
+        }else{
+            snapshots.add(new SimulationSnapshot(List.of(mars, earth, sun), currentTime));
+        }
+
+        System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n", currentTime, targetMinDistance - mars.getRadius());
         return new SpaceMissionResult(config.getTarget(), currentTime,takeOffTime,targetMinDistance - mars.getRadius(),isSuccessful(mars),initialVelocity,snapshots);
 
     }
