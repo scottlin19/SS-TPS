@@ -3,6 +3,6 @@
   "strategy": "verlet",
   "deltaT": 300,
   "takeOffTime": 31801800,
-  "takeOffSpeed": 8,
+  "takeOffSpeed": 9,
   "step":36
 }

@@ -30,7 +30,7 @@ public class BenchmarkRunner {
             Config config = new Gson().fromJson(bufferedReader, Config.class);
             List<SimulationResult> results = ej1_2(config);
             JSONWriter<SimulationResult> ej1_2Writer = new JSONWriter<>();
-            results.forEach(res -> ej1_2Writer.createFile(res, EJ1_2_RESULTS_DIR + "/simulation_" + res.getMethod()));
+            results.forEach(res -> ej1_2Writer.createFile(res, "results/" + EJ1_2_RESULTS_DIR + "/simulation_" + res.getMethod()));
 
             Map<String,DCMResult> dcmResults = ej1_3(config);
             JSONWriter<DCMResult> ej1_3Writer = new JSONWriter<>();

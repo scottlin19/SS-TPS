@@ -68,6 +68,25 @@ def ej2_1(jsons):
         plt.xlabel('Takeoff time (s)')
         plt.show()
 
+def ej2_1_dt(json):
+    for jsonData in jsons:
+        deltaT = list(map(lambda data: data['deltaT'],jsonData))
+       
+        #takeOffTime = takeOffTime[:int(total/2)]
+        energy_means = list(map(lambda data: np.mean(data['energies']),jsonData))
+        #print(marsDistance)
+        energies_diff = []
+        for i in range(1,len(energy_means)):
+            energies_diff.append(energy_means[i] - energy_means[i-1])
+
+        plt.plot(deltaT[1:], energies_diff, '-o', label="Energy Standard Deviation")
+        plt.legend()
+        #plt.yscale('log')
+        plt.ylabel('Energy Standard Deviation (?)')
+        plt.xlabel('dT (s)')
+        plt.show()
+
+
 def ej2_1_b(json):
     totalTime = json['totalTime']
     marsDistance = json['marsDistance']
@@ -87,6 +106,40 @@ def ej2_1_b(json):
     plt.ylabel('Modulo de la velocidad de la nave (km/s)')
     plt.xlabel('Takeoff time (s)')
     plt.show()
+
+    last = json['snapshots'][-1]
+    last_mars = list(filter(lambda particle: particle['id'] == 2,last['particles']))[0]
+    last_spaceship = list(filter(lambda particle: particle['id'] == 1,last['particles']))[0]
+
+    print(f"Velocidad relativa al llegar a Marte: {math.sqrt(last_spaceship['posX']**2 + last_spaceship['posY']**2) - math.sqrt(last_mars['posX']**2 + last_mars['posY']**2)} km/s")
+    
+
+def ej2_2(json):
+
+    def plotData(jsonData, successful):
+        initialVelocities = list(map(lambda data: data['velocity'],jsonData))
+        total = len(initialVelocities)
+        travelDuration = list(map(lambda data: data['totalTime'],jsonData))
+        #print(marsDistance)
+        if successful:
+            marker = '-bo'
+        else:
+            marker = '-ro'
+            
+        plt.plot(initialVelocities, travelDuration, marker)
+        #plt.yscale('log')
+
+    for jsonData in jsons:
+        successfulData = list(filter(lambda data: data['successful'],jsonData))
+        unsuccessfulData = list(filter(lambda data: not data['successful'],jsonData))
+        plotData(successfulData, True)
+        plotData(unsuccessfulData, False)
+        
+        plt.ylabel('Travel Duration (s)')
+        plt.xlabel('Initial Velocity (km/s)')
+        plt.show()
+
+        
 
 
 def get_jsons_in_folder(dir):
@@ -121,11 +174,18 @@ if __name__ == "__main__":
         jsons = get_jsons_in_folder(dirs[1])
         ej1_3(jsons)
     elif choice == "2":
+       # jsons = get_jsons_in_folder(dirs[0])
+        #ej2_1_dt(jsons)
+        
         jsons = get_jsons_in_folder(dirs[0])
         ej2_1(jsons)
         jsons = get_jsons_in_folder(dirs[1])
         if(len(jsons) != 1):
             print(f"folder should contain 1 json for ej2_1b")
         ej2_1_b(jsons[0])
+    
+    elif choice == "3":
+        jsons = get_jsons_in_folder(dirs[0])
+        ej2_2(jsons)
 
 

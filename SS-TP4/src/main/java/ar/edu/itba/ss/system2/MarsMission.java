@@ -96,7 +96,7 @@ public class MarsMission {
         return G*pi.getMass()*pj.getMass()/Math.pow(dist,2);
     }
 
-    private void createSpaceship(){
+    private void createSpaceship(double initialVelocity){
         System.out.println("LAUNCHING SPACESHIP");
         double sunEarthDist = Particle.dist(earth,sun);
         this.spaceship = new Particle(SPACESHIP_ID,
@@ -109,14 +109,14 @@ public class MarsMission {
                 0,0,new Particle.Color(255,255,255));
 
         double shipEarthDist = Particle.dist(spaceship,earth);
-        this.spaceship.setVelX(earth.getVelX() + Math.abs((7.12 + config.getTakeOffSpeed()))*etX(spaceship,earth,shipEarthDist));
-        this.spaceship.setVelY(earth.getVelY() + Math.abs(7.12 + config.getTakeOffSpeed())*etY(spaceship,earth,shipEarthDist));
+        this.spaceship.setVelX(earth.getVelX() + Math.abs((7.12 + initialVelocity))*etX(spaceship,earth,shipEarthDist));
+        this.spaceship.setVelY(earth.getVelY() + Math.abs(7.12 + initialVelocity)*etY(spaceship,earth,shipEarthDist));
         setAcc(this.spaceship, List.of(this.earth, this.sun, this.mars));
 
     }
 
 
-    public MarsMissionResult simulate(double deltaT,double takeOffTime){
+    public MarsMissionResult simulate(double deltaT,double takeOffTime,double initialVelocity){
         System.out.println("Starting mars mission with takeOff Time: "+takeOffTime);
         double currentTime = 0;
         Particle pastMars = null;
@@ -132,7 +132,7 @@ public class MarsMission {
         while(!landedOnMarsCC.cut(spaceship,mars) && !missedMarsCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) ){
             if (!takenOff && currentTime >= takeOffTime){
                 System.out.printf("Taking off... (%.0fs)\n",currentTime);
-                createSpaceship();
+                createSpaceship(initialVelocity);
                 takenOff = true;
                 marsMinDistance = Double.min(marsMinDistance,Particle.dist(mars,spaceship));
             }
@@ -169,7 +169,7 @@ public class MarsMission {
             snapshots.add(new SimulationSnapshot(List.of(earth,mars,sun), currentTime));
         }
         System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n",currentTime,marsMinDistance-mars.getRadius());
-        return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance - mars.getRadius(),isSuccessful(),config.getTakeOffSpeed(),snapshots);
+        return new MarsMissionResult(currentTime,takeOffTime,marsMinDistance - mars.getRadius(),isSuccessful(),initialVelocity,snapshots);
 
     }
 
@@ -177,7 +177,7 @@ public class MarsMission {
         if(!takenOff){
             return false;
         }
-        return Particle.dist(mars,spaceship) <= mars.getRadius();
+        return Particle.dist(mars,spaceship) <= mars.getRadius() + 23000;
     }
 
     public LocalDateTime getStartDate() {
@@ -200,16 +200,16 @@ public class MarsMission {
             MarsMissionConfig config = new Gson().fromJson(bufferedReader, MarsMissionConfig.class);
             MarsMission mm = new MarsMission(config);
 
-            MarsMissionResult result =  mm.simulate(config.getDeltaT(),config.getTakeOffTime());
+            MarsMissionResult result =  mm.simulate(config.getDeltaT(),config.getTakeOffTime(),config.getTakeOffSpeed());
             if(result.isSuccessful()){
                 System.out.printf("MISSION SUCCESS: SPACESHIP LANDED ON MARS AT %s WITH TAKEOFF DATE %s\n",mm.getStartDate().plusSeconds((long) result.getTotalTime()).format(DateTimeFormatter.ISO_DATE),mm.getStartDate().plusSeconds((long) result.getTakeOffTime()).format(DateTimeFormatter.ISO_DATE));
             }else{
                 System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
             }
             XYZWriter xyzWriter = new XYZWriter();
-            xyzWriter.createFile(result,  "results/ej2_1b/mars_mission");
+            xyzWriter.createFile(result,  "results/mars_missionV"+config.getTakeOffSpeed());
             JSONWriter<MarsMissionResult> jsonWriter = new JSONWriter<>();
-            jsonWriter.createFile(result,"results/ej2_1b/mars_mission");
+            jsonWriter.createFile(result,"results/mars_missionV"+config.getTakeOffSpeed());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
