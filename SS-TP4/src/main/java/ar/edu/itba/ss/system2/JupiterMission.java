@@ -15,7 +15,7 @@ public class JupiterMission extends AbstractMission{
 
     public JupiterMission(SpaceMissionConfig config){
         super(config);
-        this.jupiter = new Particle(JUPITER_ID,6.500280253784848e8,-3.745881860038198e8,10000,1.89818722e27,6.373758360629619,1.194722075367566e1,0,0, new Particle.Color(0,255,0));
+        this.jupiter = new Particle(JUPITER_ID,6.500280253784848e8,-3.745881860038198e8,71492,1.89818722e27,6.373758360629619,1.194722075367566e1,0,0, new Particle.Color(0,255,0));
         setAcc(jupiter, List.of(earth, mars, sun));
         this.missedTargetCC = new MissedTargetCutCondition(jupiter);
         int IO = 421600;

@@ -136,7 +136,7 @@ public class BenchmarkRunner {
             SpaceMissionResult result = mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
             results.add(new SpaceMissionDistance(result.getTakeOffTime(),result.getTargetDistance()));
             if(result.isSuccessful()){
-                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE));
+                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE) + " (" + takeOffTime + ")");
                 return results;
 
             }
@@ -164,7 +164,7 @@ public class BenchmarkRunner {
             SpaceMissionResult result = mission.simulate(deltaT,takeOffTime,velocity);
             results.add(new MarsMissionVelocity(result.getTakeOffSpeed(),result.getTotalTime(),result.isSuccessful()));
             if(result.isSuccessful()){
-                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED ON WITH TAKEOFF DATE "+mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
+                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED ON WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE) + " (" + takeOffTime + ")");
 
             }else{
                 System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND\n");

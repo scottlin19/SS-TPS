@@ -50,25 +50,21 @@ def ej1_3(jsons):
         dcm = list(map(lambda dcm: dcm['dcm'], dcms))
         plt.plot(deltaTs, dcm, '-o', label=f"{method}")
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     plt.ylabel('ECM ($m^2$)')
     plt.xlabel('delta t (s)')
     plt.show()
 
 
 
-def ej2_1(jsons):
+def ej2_1a(jsons):
     for jsonData in jsons:
-        takeOffTime = list(map(lambda data: data['takeOffTime'],jsonData))
-        total = len(takeOffTime)
-        takeOffTime = takeOffTime[:int(total/2)]
-        marsDistance = list(map(lambda data: data['marsDistance'],jsonData))[:int(total/2)]
+        takeOffTime = np.array(list(map(lambda data: data['takeOffTime'],jsonData))) / (24  * 60 * 60) 
+        marsDistance = list(map(lambda data: data['targetDistance'],jsonData))
         #print(marsDistance)
-        plt.plot(takeOffTime, marsDistance, '-o', label="Distance to Mars")
-        plt.legend()
-        #plt.yscale('log')
-        plt.ylabel('Distancia a Mars (Km)')
-        plt.xlabel('Tiempo hasta despegue (s)')
+        plt.plot(takeOffTime, marsDistance, '-o')
+        plt.ylabel(f'Distancia (km)')
+        plt.xlabel('Tiempo hasta despegue (dia)')
         plt.show()
 
 def ej2_1_dt(json):
@@ -103,12 +99,14 @@ def ej2_1_b(json):
         if len(spaceship_data) > 0:
             spaceship_vals.append(spaceship_data[0])
             times.append(snapshot['time'])
-    mod_vels = list(map(lambda it: math.sqrt(it['posX']**2 + it['posY']**2), spaceship_vals))
+    mod_vels = list(map(lambda it: math.sqrt(it['velX']**2 + it['velY']**2), spaceship_vals))
+    print(f"Tiempo hasta llegar a la orbita: {times[-1] - takeOffTime} s")
+    times = (np.array(times) - takeOffTime) / (24  * 60 * 60)
+    print(f"Tiempo hasta llegar a la orbita: {times[-1]} dias")
     plt.plot(times, mod_vels, '-o', label="Modulo de la velocidad de la nave")
     plt.legend()
-    # plt.yscale('log')
     plt.ylabel('Modulo de la velocidad de la nave (km/s)')
-    plt.xlabel('Tiempo hasta despegue (s)')
+    plt.xlabel('Tiempo (dias)')
     plt.show()
 
     last = json['snapshots'][-1]
@@ -182,7 +180,7 @@ if __name__ == "__main__":
         #ej2_1_dt(jsons)
         
         jsons = get_jsons_in_folder(dirs[0])
-        ej2_1(jsons)
+        ej2_1a(jsons)
         jsons = get_jsons_in_folder(dirs[1])
         if(len(jsons) != 1):
             print(f"folder should contain 1 json for ej2_1b and ej3_1b")

@@ -22,6 +22,10 @@ public class SpaceMissionResult extends SimulationResult {
         this.takeOffSpeed  = takeOffSpeed;
     }
 
+    public String getTarget() {
+        return target;
+    }
+
     public double getTakeOffSpeed() {
         return takeOffSpeed;
     }

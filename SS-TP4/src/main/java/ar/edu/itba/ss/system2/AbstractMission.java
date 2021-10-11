@@ -107,7 +107,7 @@ public abstract class AbstractMission {
             2e5,
             0,
             0,
-            0,0,new Particle.Color(255,255,255));    
+            0,0,new Particle.Color(255,255,255));
         double shipEarthDist = Particle.dist(spaceship,earth);
         this.spaceship.setVelX(earth.getVelX() + Math.abs((7.12 + initialVelocity))*etX(spaceship,earth,shipEarthDist));
         this.spaceship.setVelY(earth.getVelY() + Math.abs(7.12 + initialVelocity)*etY(spaceship,earth,shipEarthDist));
@@ -156,7 +156,7 @@ public abstract class AbstractMission {
             XYZWriter xyzWriter = new XYZWriter();
             xyzWriter.createFile(result,  "results/ej3_1b/" + mission.getName() + "_V" + config.getTakeOffSpeed());
             JSONWriter<SpaceMissionResult> jsonWriter = new JSONWriter<>();
-            jsonWriter.createFile(result,"results/" + mission.getName() + "_V" + config.getTakeOffSpeed());
+            jsonWriter.createFile(result,"results/ej3_1b/" + mission.getName() + "_V" + config.getTakeOffSpeed());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
