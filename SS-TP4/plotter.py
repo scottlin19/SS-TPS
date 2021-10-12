@@ -60,6 +60,7 @@ def ej1_3(jsons):
 def ej2_1a(jsons):
     for jsonData in jsons:
         takeOffTime = np.array(list(map(lambda data: data['takeOffTime'],jsonData))) / (24  * 60 * 60) 
+        print(takeOffTime)
         marsDistance = list(map(lambda data: data['targetDistance'],jsonData))
         #print(marsDistance)
         plt.plot(takeOffTime, marsDistance, '-o')
@@ -69,20 +70,27 @@ def ej2_1a(jsons):
 
 def ej2_1_dt(json):
     for jsonData in jsons:
-        deltaT = list(map(lambda data: data['deltaT'],jsonData))
-       
+        deltaTs = list(map(lambda data: data['deltaT'],jsonData))
+        timeAndEnergies = list(map(lambda data: data['timeAndEnergies'],jsonData))
+        for deltaT,timeAndEnergy in zip(deltaTs,timeAndEnergies):
+            times = np.array(list(map(lambda data: data['time'], timeAndEnergy))) / (24  * 60 * 60) 
+            enegies = list(map(lambda data: data['energy'], timeAndEnergy))
+            plt.plot(times, enegies, '-o', label=f"deltaT={deltaT}")
         #takeOffTime = takeOffTime[:int(total/2)]
-        energy_means = list(map(lambda data: np.mean(data['energies']),jsonData))
-        #print(marsDistance)
-        energies_diff = []
-        for i in range(1,len(energy_means)):
-            energies_diff.append(energy_means[i] - energy_means[i-1])
-
-        plt.plot(deltaT[1:], energies_diff, '-o', label="Energy Standard Deviation")
-        plt.legend()
+        # energy_means = list(map(lambda data: np.mean(data['energies']),jsonData))
+        # energy_std = list(map(lambda data: np.std(data['energies']),jsonData))
+        # print(np.array(energy_means).shape)
+        # print(np.array(energy_std).shape)
+        # #print(marsDistance)
+        # energies_diff = []
+        # for i in range(1,len(energy_means)):
+        #     energies_diff.append(energy_means[i] - energy_means[i-1])
+        # plt.errorbar(deltaT, energy_means, yerr = energy_std)
+        # plt.plot(deltaT[1:], energies_diff, '-o', label="Energy Standard Deviation")
         #plt.yscale('log')
-        plt.ylabel('Energy Standard Deviation (?)')
-        plt.xlabel('dT (s)')
+        # plt.legend()
+        plt.ylabel('Energia')
+        plt.xlabel('t (dias)')
         plt.show()
 
 
@@ -175,7 +183,7 @@ if __name__ == "__main__":
         ej1(list(filter(lambda json: json['method'] != 'analytic', jsons)), analytic)
         jsons = get_jsons_in_folder(dirs[1])
         ej1_3(jsons)
-    elif choice == "2":
+    elif choice == "2":  # Ejercicios 2.1 a,b
        # jsons = get_jsons_in_folder(dirs[0])
         #ej2_1_dt(jsons)
         
@@ -186,8 +194,11 @@ if __name__ == "__main__":
             print(f"folder should contain 1 json for ej2_1b and ej3_1b")
         ej2_1_b(jsons[0])
     
-    elif choice == "3":
+    elif choice == "3": # Ejercicio 2.2
         jsons = get_jsons_in_folder(dirs[0])
         ej2_2(jsons)
 
 
+    elif choice == "4": # Ejercicio dt optimo
+        jsons = get_jsons_in_folder(dirs[0])
+        ej2_1_dt(jsons)

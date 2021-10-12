@@ -20,6 +20,7 @@ public class BenchmarkRunner {
 
     private static final String RESULTS_DIRECTORY = "results/";
     private static final String EJ2_1A_RESULTS_DIR = "ej2_1a/";
+    private static final String DTS_RESULTS_DIR = "dts/";
     private static final String EJ2_1B_RESULTS_DIR = "ej2_1b/";
     private static final String EJ2_2_RESULTS_DIR = "ej2_2/";
     private static final String EJ3_RESULTS_DIR = "ej3/";
@@ -36,17 +37,17 @@ public class BenchmarkRunner {
             SpaceMissionConfig config = new Gson().fromJson(bufferedReader, SpaceMissionConfig.class);
 
             // Calculate DT
-//           JSONWriter<List<MarsMissionEnergy>> mmEnergyWriter =new JSONWriter<>();
-//           List<MarsMissionEnergy> energies = calculateDt(config);
-//           mmEnergyWriter.createFile(energies, RESULTS_DIRECTORY+EJ2_1A_RESULTS_DIR + "simulation_energy");
+            JSONWriter<List<MarsMissionEnergy>> mmEnergyWriter =new JSONWriter<>();
+            List<MarsMissionEnergy> energies = calculateDt(config);
+            mmEnergyWriter.createFile(energies, RESULTS_DIRECTORY + DTS_RESULTS_DIR + "simulation_energy");
 
             //Ej2_1a
-            List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
-            JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
-            SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
-            System.out.printf("Min %s distance: %f with takeOff time = %f", config.getTarget(), min.getTargetDistance(), min.getTakeOffTime());
-            String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
-            mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
+//            List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
+//            JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
+//            SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
+//            System.out.printf("Min %s distance: %f with takeOff time = %f", config.getTarget(), min.getTargetDistance(), min.getTakeOffTime());
+//            String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
+//            mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
 
             //Ej2_2
 //            List<MarsMissionVelocity> results2_2 = ej2_2(config);
@@ -73,46 +74,83 @@ public class BenchmarkRunner {
                 throw new RuntimeException("Invalid target");
         }
     }
+    private static class TimeAndEnergy{
+        private final double time;
+        private final double energy;
 
-    private static List<Double> calculateEnergy(List<SimulationSnapshot> snapshots){
-        List<Double> energies = new ArrayList<>();
+        public TimeAndEnergy(double time, double energy){
+            this.time = time;
+            this.energy = energy;
+        }
+
+        public double getTime() {
+            return time;
+        }
+
+        public double getEnergy() {
+            return energy;
+        }
+    }
+
+    private static List<TimeAndEnergy> calculateEnergy(List<SimulationSnapshot> snapshots){
+        List<TimeAndEnergy> timeAndEnergies = new ArrayList<>();
         double G = 6.693e-20;
-        for(List<Particle> particles : snapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList())){
+        for(SimulationSnapshot snapshot : snapshots){
+            List<Particle> particles = snapshot.getParticles();
+            double time = snapshot.getTime();
             double K = 0;
             double P = 0;
             for(Particle p1: particles){
-                K += 0.5*p1.getMass()*(Math.pow(p1.getVelX(),2) + Math.pow(p1.getVelY(),2));
+                K += 0.5 * p1.getMass() * ( Math.pow(p1.getVelX(),2) + Math.pow(p1.getVelY(),2) );
                 for(Particle p2: particles){
                     if(!p1.equals(p2)){
-                        P += -G*p1.getMass()*p2.getMass()/Particle.dist(p1,p2);
+                        P += - G * p1.getMass() * p2.getMass() / Particle.dist(p1,p2);
                     }
                 }
             }
-            energies.add(K+P);
+            double sum = K+P;
+            System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
+            timeAndEnergies.add(new TimeAndEnergy(time,K+P));
         }
-        return energies;
+        return timeAndEnergies;
+//        for(List<Particle> particles : snapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList())){
+//            double K = 0;
+//            double P = 0;
+//            for(Particle p1: particles){
+//                K += 0.5 * p1.getMass() * ( Math.pow(p1.getVelX(),2) + Math.pow(p1.getVelY(),2) );
+//                for(Particle p2: particles){
+//                    if(!p1.equals(p2)){
+//                        P += - G * p1.getMass() * p2.getMass() / Particle.dist(p1,p2);
+//                    }
+//                }
+//            }
+//            double sum = K+P;
+//            System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
+//            energies.add(K+P);
+//        }
+//        return energies;
     }
 
     public static List<MarsMissionEnergy> calculateDt(SpaceMissionConfig config){
         List<MarsMissionEnergy> results = new ArrayList<>();
 
         double maxDeltaT = 60*60;
-        double step= 60;
+        double step = 100;
         List<Double> deltaTs = new ArrayList<>();
-        for(double i = maxDeltaT; i >= 60;i-= step){
+        for(double i = maxDeltaT; i >= 100;i-= step){
             deltaTs.add(i);
         }
         double takeOffTime = config.getTakeOffTime();
 
         for(Double deltaT: deltaTs){
-            System.out.println("dT: "+deltaT);
+            System.out.println("dT:  " + deltaT);
             AbstractMission mission = instantiateMission(config);
 //            MarsMission mm = new MarsMission(config);
-            SpaceMissionResult result = (SpaceMissionResult) mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
+            SpaceMissionResult result =  mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
             results.add(new MarsMissionEnergy(deltaT,calculateEnergy(result.getSnapshots())));
             if(result.isSuccessful()){
                 System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
-                return results;
+//                return results;
             }
         }
         System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND ON MARS");
@@ -123,25 +161,26 @@ public class BenchmarkRunner {
         List<SpaceMissionDistance> results = new ArrayList<>();
 
         int interval = (int) config.getDeltaT();
+//        interval = config.getMaxTime() / 10000;
         List<Long> takeOffTimes = new ArrayList<>();
         for(long i = 0; i <= config.getMaxTime();i+=interval){
             takeOffTimes.add(i);
         }
         double deltaT = config.getDeltaT();
-
+        StringBuilder sb = new StringBuilder();
         for(Long takeOffTime: takeOffTimes){
-            System.out.println("TakeOff Time: "+takeOffTime);
+            System.out.println("TakeOff Time: " + takeOffTime / (24  * 60 * 60)  + " days, " + takeOffTime + " s");
             AbstractMission mission = instantiateMission(config);
 //            MarsMission mm = new MarsMission(config);
             SpaceMissionResult result = mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
             results.add(new SpaceMissionDistance(result.getTakeOffTime(),result.getTargetDistance()));
             if(result.isSuccessful()){
-                System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE) + " (" + takeOffTime + ")");
-                return results;
-
+                sb.append(mission.getName() + " SUCCESS: SPACESHIP LANDED WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds(takeOffTime).format(DateTimeFormatter.ISO_DATE) + " (" + takeOffTime + ")\n");
+//                return results;
             }
         }
-        System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND");
+        System.out.println("results: \n" + sb);
+//        System.out.println("MISSION FAILED: SPACESHIP DIDN'T LAND");
         return results;
     }
 
@@ -200,19 +239,19 @@ public class BenchmarkRunner {
 
     private static class MarsMissionEnergy{
         private final double deltaT;
-        private final List<Double> energies;
+        private final List<TimeAndEnergy> timeAndEnergies;
 
-        public MarsMissionEnergy(double deltaT, List<Double> energies) {
+        public MarsMissionEnergy(double deltaT, List<TimeAndEnergy> timeAndEnergies) {
             this.deltaT = deltaT;
-            this.energies = energies;
+            this.timeAndEnergies = timeAndEnergies;
         }
 
         public double getDeltaT() {
             return deltaT;
         }
 
-        public List<Double> getEnergies() {
-            return energies;
+        public List<TimeAndEnergy> getTimeAndEnergies() {
+            return timeAndEnergies;
         }
     }
 
