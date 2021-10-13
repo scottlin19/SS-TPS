@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 
 public class BenchmarkRunner {
@@ -42,7 +42,7 @@ public class BenchmarkRunner {
 //            List<MarsMissionEnergy> energies = calculateDt(config);
 //            mmEnergyWriter.createFile(energies, RESULTS_DIRECTORY + DTS_RESULTS_DIR + "simulation_energy");
 
-            //Ej2_1a
+//            //Ej2_1a
             List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
             JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
             SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
@@ -50,7 +50,7 @@ public class BenchmarkRunner {
             String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
             mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
 
-//            //Ej2_2
+            //Ej2_2
 //            List<MarsMissionVelocity> results2_2 = ej2_2(config);
 //            JSONWriter<List<MarsMissionVelocity>> mmVelocityWriter =new JSONWriter<>();
 //            MarsMissionVelocity minVelocity = results2_2.stream().min(Comparator.comparingInt(o -> (int) o.totalTime)).get();
@@ -97,7 +97,6 @@ public class BenchmarkRunner {
         List<TimeAndEnergy> timeAndEnergies = new ArrayList<>();
         double G = 6.693e-20;
         double initialEnergy = 0;
-        System.out.println("calculate ENERGY");
         for(int s = 0; s < snapshots.size(); s++){
             SimulationSnapshot snapshot = snapshots.get(s);
             List<Particle> particles = snapshot.getParticles();
@@ -113,11 +112,10 @@ public class BenchmarkRunner {
                 }
             }
             double sum = K+P;
-           // System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
+            System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
             if(s == 0){
                 initialEnergy = sum;
             }
-            System.out.println("diff: "+(sum-initialEnergy));
             timeAndEnergies.add(new TimeAndEnergy(time,sum-initialEnergy));
         }
 
@@ -199,7 +197,7 @@ public class BenchmarkRunner {
         double takeOffTime  = config.getTakeOffTime();
         double deltaT = config.getDeltaT();
         List<Double> velocities= new ArrayList<>();
-        double maxVelocity = 8.5;
+        double maxVelocity = 8.1;
         double velocityStep = 0.001;
         for(double vel = config.getTakeOffSpeed(); vel <= maxVelocity;vel+=velocityStep){
             velocities.add(vel);
@@ -210,7 +208,7 @@ public class BenchmarkRunner {
             AbstractMission mission = instantiateMission(config);
 //            MarsMission mm = new MarsMission(config);
             SpaceMissionResult result = mission.simulate(deltaT,takeOffTime,velocity);
-            results.add(new MarsMissionVelocity(result.getTakeOffSpeed(),result.getTotalTime(),result.isSuccessful()));
+            results.add(new MarsMissionVelocity(result.getTakeOffSpeed(),result.getTotalTime() - result.getTakeOffTime(),result.getState()));
             if(result.isSuccessful()){
                 System.out.println(mission.getName() + " SUCCESS: SPACESHIP LANDED ON WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE) + " (" + takeOffTime + ")");
 
@@ -225,16 +223,16 @@ public class BenchmarkRunner {
     private static class MarsMissionVelocity{
         private final double velocity;
         private final double totalTime;
-        private final boolean successful;
+        private final String state;
 
-        public MarsMissionVelocity(double velocity, double totalTime,boolean successful) {
+        public MarsMissionVelocity(double velocity, double totalTime,String state) {
             this.velocity = velocity;
             this.totalTime = totalTime;
-            this.successful = successful;
+            this.state = state;
         }
 
-        public boolean isSuccessful() {
-            return successful;
+        public String getState() {
+            return state;
         }
 
         public double getVelocity() {

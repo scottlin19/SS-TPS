@@ -1,8 +1,8 @@
 {
   "target": "jupiter",
-  "maxTime": 63072000,
+  "maxTime": 378432000,
   "strategy": "verlet",
-  "deltaT": 300,
+  "deltaT": 3000,
   "takeOffTime": 31801800,
   "takeOffSpeed": 8,
   "step": 144

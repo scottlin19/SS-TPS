@@ -67,21 +67,19 @@ def ej2_1_dt(json):
         ax.ticklabel_format(useOffset=False)
         # ax.plot(times[:len(energies) -2], energies[:len(energies) -2], '-o', label=f"dt={int(deltaT)}")
         for deltaT,timeAndEnergy in zip(deltaTs,timeAndEnergies):
-            print(deltaT)
             times = np.array(list(map(lambda data: data['time'], timeAndEnergy))) / (24  * 60 * 60) 
-            energies = list(map(lambda data: data['energy'] - timeAndEnergy[0]['energy'], timeAndEnergy))
             energies = list(map(lambda data: data['energy'], timeAndEnergy))
             ax.plot(times[:len(energies) -2], energies[:len(energies) -2], 'o', label=f"dt={int(deltaT)}")
             energies_std.append(np.std(np.array(energies)))
- 
-      
+
+
         # plt.yscale('log')
         plt.legend(loc="lower right")
         plt.ylabel('Energía(t) - Energía(0) (J)')
         plt.xlabel('t (días)')
         plt.show()
         fig.savefig('energyVSdtslog', bbox_inches='tight')
-        
+
 
         # plt.plot(deltaTs, energies_std,'-o')
         # plt.ylabel('Desvío estándar de la energía')
@@ -96,7 +94,7 @@ def ej2_1a(jsons):
         #print(marsDistance)
         if state == 'Aterriza':
             marker = 'bo'
-        elif state == "En órbita":
+        elif state == "Alcanza órbita":
             marker = 'go'
         else:
             marker = 'ro'
@@ -107,7 +105,7 @@ def ej2_1a(jsons):
         inOrbitData = list(filter(lambda data: data['state'] == "IN_ORBIT",jsonData))
         missData = list(filter(lambda data: data['state'] == "MISS",jsonData))
         plotData(landedData, "Aterriza")
-        plotData(inOrbitData, "En órbita")
+        plotData(inOrbitData, "Alcanza órbita")
         plotData(missData, "Falla")
         plt.ylabel(f'Distancia (km)')
         plt.xlabel('Tiempo hasta despegue (dia)')
@@ -148,26 +146,36 @@ def ej2_1_b(json):
 
 def ej2_2(json):
 
-    def plotData(jsonData, successful):
+    def plotData(jsonData, state):
         initialVelocities = list(map(lambda data: data['velocity'],jsonData))
         total = len(initialVelocities)
-        travelDuration = list(map(lambda data: data['totalTime'],jsonData))
+        travelDuration = list(map(lambda data: data['totalTime'] / (24*60*60),jsonData))
         #print(marsDistance)
-        if successful:
-            marker = '-bo'
+        if state == 'Aterriza':
+            marker = 'bo'
+        elif state == "Alcanza órbita":
+            marker = 'go'
         else:
-            marker = '-ro'
+            marker = 'ro'
             
-        plt.plot(initialVelocities, travelDuration, marker)
+        plt.plot(initialVelocities, travelDuration, marker,label=f"{state}")
         #plt.yscale('log')
 
     for jsonData in jsons:
-        successfulData = list(filter(lambda data: data['successful'],jsonData))
-        unsuccessfulData = list(filter(lambda data: not data['successful'],jsonData))
-        plotData(successfulData, True)
-        plotData(unsuccessfulData, False)
-        
-        plt.ylabel('Duración del trayecto (s)')
+        landedData = list(filter(lambda data: data['state'] == "LANDED",jsonData))
+        inOrbitData = list(filter(lambda data: data['state'] == "IN_ORBIT",jsonData))
+        missData = list(filter(lambda data: data['state'] == "MISS",jsonData))
+        # successfulData = list(filter(lambda data: data['successful'],jsonData))
+        # unsuccessfulData = list(filter(lambda data: not data['successful'],jsonData))
+        times = list(map(lambda data: data['totalTime'], landedData))
+        min_time = min(times)
+        min_vals = list(filter(lambda data: data['totalTime'] == min_time,landedData))[0]
+        print(f"Optimized travel time is: {min_vals['totalTime']}, for v0 = {min_vals['velocity']} km/s")
+        plotData(landedData, "Aterriza")
+        plotData(inOrbitData, "Alcanza órbita")
+        plotData(missData, "Falla")
+        plt.legend()
+        plt.ylabel('Duración del trayecto (días)')
         plt.xlabel('Velocidad inicial (km/s)')
         plt.show()
 
