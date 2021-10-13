@@ -4,6 +4,7 @@ import ar.edu.itba.ss.commons.Particle;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 import ar.edu.itba.ss.commons.writers.JSONWriter;
 import ar.edu.itba.ss.system1.FirstSystemRunner;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -92,10 +93,12 @@ public class BenchmarkRunner {
         }
     }
 
-    private static List<TimeAndEnergy> calculateEnergy(List<SimulationSnapshot> snapshots,double initialEnergy){
+    private static List<TimeAndEnergy> calculateEnergy(List<SimulationSnapshot> snapshots){
         List<TimeAndEnergy> timeAndEnergies = new ArrayList<>();
         double G = 6.693e-20;
-        for(SimulationSnapshot snapshot : snapshots){
+        double initialEnergy = 0;
+        for(int s = 0; s < snapshots.size(); s++){
+            SimulationSnapshot snapshot = snapshots.get(s);
             List<Particle> particles = snapshot.getParticles();
             double time = snapshot.getTime();
             double K = 0;
@@ -110,8 +113,12 @@ public class BenchmarkRunner {
             }
             double sum = K+P;
             System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
+            if(s == 0){
+                initialEnergy = sum;
+            }
             timeAndEnergies.add(new TimeAndEnergy(time,sum-initialEnergy));
         }
+
         return timeAndEnergies;
 
     }
@@ -127,14 +134,14 @@ public class BenchmarkRunner {
         }
         double takeOffTime = config.getTakeOffTime();
         AbstractMission mission = instantiateMission(config);
-        double initialEnergy = calculateEnergy(mission.simulate(step,takeOffTime,config.getTakeOffSpeed()).getSnapshots(),0).get(0).getEnergy();
+
 
         for(Double deltaT: deltaTs){
             System.out.println("dT:  " + deltaT);
             mission = instantiateMission(config);
 //            MarsMission mm = new MarsMission(config);
             SpaceMissionResult result =  mission.simulate(step,takeOffTime,config.getTakeOffSpeed());
-            results.add(new MarsMissionEnergy(deltaT,calculateEnergy(result.getSnapshots(),initialEnergy)));
+            results.add(new MarsMissionEnergy(deltaT,calculateEnergy(result.getSnapshots())));
             if(result.isSuccessful()){
                 System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
 //                return results;
