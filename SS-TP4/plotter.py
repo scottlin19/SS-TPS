@@ -59,51 +59,34 @@ def ej1_3(jsons):
 
 def ej2_1_dt(json):
     for jsonData in jsons:
-        # deltaT1 = jsonData[5]['deltaT']
-        # timeAndEnergies1 = jsonData[5]['timeAndEnergies']
-        # times = []
-        # energies = []
-        # for timeAndEnergy in timeAndEnergies1:
-        #     times.append(timeAndEnergy['time'])
-        #     energies.append(timeAndEnergy['energy'])
-        # plt.plot(times,energies , '-o')    
-        deltaT = list(map(lambda data: data['deltaT'],jsonData))
+
+        deltaTs = list(map(lambda data: data['deltaT'],jsonData))
         timeAndEnergies = list(map(lambda data: data['timeAndEnergies'],jsonData))
-        # energies_std = []
-        # fig, ax = plt.subplots()
-        # ax.ticklabel_format(useOffset=False)
+        energies_std = []
+        fig, ax = plt.subplots()
+        ax.ticklabel_format(useOffset=False)
         # ax.plot(times[:len(energies) -2], energies[:len(energies) -2], '-o', label=f"dt={int(deltaT)}")
         for deltaT,timeAndEnergy in zip(deltaTs,timeAndEnergies):
+            print(deltaT)
             times = np.array(list(map(lambda data: data['time'], timeAndEnergy))) / (24  * 60 * 60) 
+            energies = list(map(lambda data: data['energy'] - timeAndEnergy[0]['energy'], timeAndEnergy))
             energies = list(map(lambda data: data['energy'], timeAndEnergy))
-            energies = np.array(energies) - energies[0]
-            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], '-o', label=f"dt={int(deltaT)}")
-        #     energies_std.append(np.std(np.array(energies)))
-            #ax.yaxis.set_major_formatter(FormatStrFormatter('{x:,.0f}'))
-            # ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-        #takeOffTime = takeOffTime[:int(total/2)]
-        # energy_means = list(map(lambda data: np.mean(data['energies']),jsonData))
-        # energy_std = list(map(lambda data: np.std(data['energies']),jsonData))
-        # print(np.array(energy_means).shape)
-        # print(np.array(energy_std).shape)
-        # #print(marsDistance)
-        # energies_diff = []
-        # for i in range(1,len(energy_means)):
-        #     energies_diff.append(energy_means[i] - energy_means[i-1])
-        # plt.errorbar(deltaT, energy_means, yerr = energy_std)
-        # plt.plot(deltaT[1:], energies_diff, '-o', label="Energy Standard Deviation")
-        #plt.yscale('log')
-        plt.legend(bbox_to_anchor=(1,1), loc="upper left")
-        plt.ylabel('Energía (J)')
+            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], 'o', label=f"dt={int(deltaT)}")
+            energies_std.append(np.std(np.array(energies)))
+ 
+      
+        # plt.yscale('log')
+        plt.legend(loc="lower right")
+        plt.ylabel('Energía(t) - Energía(0) (J)')
         plt.xlabel('t (días)')
         plt.show()
-        fig.savefig('energyVSdts', bbox_inches='tight')
+        fig.savefig('energyVSdtslog', bbox_inches='tight')
         
 
-        plt.plot(deltaTs, energies_std,'-o')
-        plt.ylabel('Desvío estándar de la energía')
-        plt.xlabel('dt (s)')
-        plt.show()
+        # plt.plot(deltaTs, energies_std,'-o')
+        # plt.ylabel('Desvío estándar de la energía')
+        # plt.xlabel('dt (s)')
+        # plt.show()
 
 def ej2_1a(jsons):
     def plotData(jsonData, state):

@@ -1,5 +1,5 @@
 {
-  "target": "mars",
+  "target": "jupiter",
   "maxTime": 63072000,
   "strategy": "verlet",
   "deltaT": 300,

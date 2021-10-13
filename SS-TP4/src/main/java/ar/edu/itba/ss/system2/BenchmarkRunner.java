@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 
 public class BenchmarkRunner {
@@ -42,7 +42,7 @@ public class BenchmarkRunner {
 //            List<MarsMissionEnergy> energies = calculateDt(config);
 //            mmEnergyWriter.createFile(energies, RESULTS_DIRECTORY + DTS_RESULTS_DIR + "simulation_energy");
 
-//            //Ej2_1a
+            //Ej2_1a
             List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
             JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
             SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
@@ -50,7 +50,7 @@ public class BenchmarkRunner {
             String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
             mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
 
-            //Ej2_2
+//            //Ej2_2
 //            List<MarsMissionVelocity> results2_2 = ej2_2(config);
 //            JSONWriter<List<MarsMissionVelocity>> mmVelocityWriter =new JSONWriter<>();
 //            MarsMissionVelocity minVelocity = results2_2.stream().min(Comparator.comparingInt(o -> (int) o.totalTime)).get();
@@ -97,6 +97,7 @@ public class BenchmarkRunner {
         List<TimeAndEnergy> timeAndEnergies = new ArrayList<>();
         double G = 6.693e-20;
         double initialEnergy = 0;
+        System.out.println("calculate ENERGY");
         for(int s = 0; s < snapshots.size(); s++){
             SimulationSnapshot snapshot = snapshots.get(s);
             List<Particle> particles = snapshot.getParticles();
@@ -112,10 +113,11 @@ public class BenchmarkRunner {
                 }
             }
             double sum = K+P;
-            System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
+           // System.out.println("K: " + K + ", P: " + P + ", K+P: " + sum);
             if(s == 0){
                 initialEnergy = sum;
             }
+            System.out.println("diff: "+(sum-initialEnergy));
             timeAndEnergies.add(new TimeAndEnergy(time,sum-initialEnergy));
         }
 
@@ -129,18 +131,20 @@ public class BenchmarkRunner {
         double maxDeltaT = 60*60;
         double step = 5*60;
         List<Double> deltaTs = new ArrayList<>();
-        for(double i = step*2; i <= maxDeltaT;i+= step){
-            deltaTs.add(i);
+        int k = 0;
+        for(double i = step; i <= maxDeltaT;i+= step){
+            if(k%3== 0 || i == maxDeltaT){
+                deltaTs.add(i);
+            }
+            k++;
         }
         double takeOffTime = config.getTakeOffTime();
-        AbstractMission mission = instantiateMission(config);
-
 
         for(Double deltaT: deltaTs){
             System.out.println("dT:  " + deltaT);
-            mission = instantiateMission(config);
+            AbstractMission mission = instantiateMission(config);
 //            MarsMission mm = new MarsMission(config);
-            SpaceMissionResult result =  mission.simulate(step,takeOffTime,config.getTakeOffSpeed());
+            SpaceMissionResult result =  mission.simulate(deltaT,takeOffTime,config.getTakeOffSpeed());
             results.add(new MarsMissionEnergy(deltaT,calculateEnergy(result.getSnapshots())));
             if(result.isSuccessful()){
                 System.out.println("MISSION SUCCESS: SPACESHIP LANDED ON MARS WITH TAKEOFF DATE " + mission.getStartDate().plusSeconds((long) takeOffTime).format(DateTimeFormatter.ISO_DATE));
@@ -195,7 +199,7 @@ public class BenchmarkRunner {
         double takeOffTime  = config.getTakeOffTime();
         double deltaT = config.getDeltaT();
         List<Double> velocities= new ArrayList<>();
-        double maxVelocity = 9;
+        double maxVelocity = 8.5;
         double velocityStep = 0.001;
         for(double vel = config.getTakeOffSpeed(); vel <= maxVelocity;vel+=velocityStep){
             velocities.add(vel);
