@@ -1,7 +1,7 @@
 package ar.edu.itba.ss.system2;
 
 import ar.edu.itba.ss.commons.*;
-import ar.edu.itba.ss.system2.cut_conditions.LandedOnTargetCutCondition;
+import ar.edu.itba.ss.system2.cut_conditions.EnteredOrbitCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MaxTimeCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MissedTargetCutCondition;
 import java.util.List;
@@ -19,7 +19,7 @@ public class MarsMission extends AbstractMission{
         this.maxTimeCC = new MaxTimeCutCondition(config.getMaxTime(),config.getDeltaT());
 
         int DEIMOS = 23460;
-        this.landedOnTargetCC = new LandedOnTargetCutCondition(DEIMOS);
+        this.enteredOrbitCC = new EnteredOrbitCutCondition(DEIMOS);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class MarsMission extends AbstractMission{
         int step = config.getStep();
         int i = 0;
 
-        while(!landedOnTargetCC.cut(spaceship,mars) && !missedTargetCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) ){
+        while(!enteredOrbitCC.cut(spaceship,mars) && !missedTargetCC.cut(spaceship,mars) && !maxTimeCC.cut(spaceship,mars) ){
             if (!takenOff && currentTime >= takeOffTime){
                 System.out.printf("Taking off... (%.0fs)\n",currentTime);
                 createSpaceship(initialVelocity, List.of(earth, sun, mars));
@@ -51,13 +51,7 @@ public class MarsMission extends AbstractMission{
             mars = futureMars;
             setAcc(earth, List.of(mars, this.sun));
             setAcc(mars, List.of(earth, this.sun));
-//            setAcc(futureEarth, List.of(futureMars, this.sun));
-//            setAcc(futureMars, List.of(futureEarth, this.sun));
-//            pastEarth = earth;
-//            pastMars = mars;
 
-//            earth = futureEarth;
-//            mars = futureMars;
             if(takenOff){
                 futureSpaceship = updateStrategy.update(pastSpaceship, spaceship, deltaT, currentTime);
                 setAcc(futureSpaceship, List.of(futureEarth,futureMars,this.sun));
@@ -84,7 +78,7 @@ public class MarsMission extends AbstractMission{
         }
 
         System.out.printf("Simulation finished at time %.0fs with minimum distance to mars = %fkm\n", currentTime, targetMinDistance - mars.getRadius());
-        return new SpaceMissionResult(config.getTarget(), currentTime,takeOffTime,targetMinDistance - mars.getRadius(),isSuccessful(mars),initialVelocity,snapshots);
+        return new SpaceMissionResult(config.getTarget(), currentTime,takeOffTime,targetMinDistance - mars.getRadius(),enteredOrbitCC.getState().toString(),initialVelocity,snapshots);
 
     }
 

@@ -3,10 +3,8 @@ package ar.edu.itba.ss.system2;
 import java.util.List;
 
 import ar.edu.itba.ss.commons.Particle;
-import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
-import ar.edu.itba.ss.system2.cut_conditions.LandedOnTargetCutCondition;
-import ar.edu.itba.ss.system2.cut_conditions.MaxTimeCutCondition;
+import ar.edu.itba.ss.system2.cut_conditions.EnteredOrbitCutCondition;
 import ar.edu.itba.ss.system2.cut_conditions.MissedTargetCutCondition;
 
 public class JupiterMission extends AbstractMission{
@@ -19,7 +17,7 @@ public class JupiterMission extends AbstractMission{
         setAcc(jupiter, List.of(earth, mars, sun));
         this.missedTargetCC = new MissedTargetCutCondition(jupiter);
         int IO = 421600;
-        this.landedOnTargetCC = new LandedOnTargetCutCondition(IO);
+        this.enteredOrbitCC = new EnteredOrbitCutCondition(IO);
     }
 
     @Override
@@ -37,7 +35,7 @@ public class JupiterMission extends AbstractMission{
         int step = config.getStep();
         int i = 0;
 
-        while(!landedOnTargetCC.cut(spaceship,jupiter) && !missedTargetCC.cut(spaceship,jupiter) && !maxTimeCC.cut(spaceship,jupiter) ){
+        while(!enteredOrbitCC.cut(spaceship,jupiter) && !missedTargetCC.cut(spaceship,jupiter) && !maxTimeCC.cut(spaceship,jupiter) ){
             if (!takenOff && currentTime >= takeOffTime){
                 System.out.printf("Taking off... (%.0fs)\n",currentTime);
                 createSpaceship(initialVelocity, List.of(earth, sun, mars));
@@ -88,7 +86,7 @@ public class JupiterMission extends AbstractMission{
             snapshots.add(new SimulationSnapshot(List.of(earth,mars,jupiter,sun), currentTime));
         }
         System.out.printf("Simulation finished at time %.0fs with minimum distance to jupiter = %fkm\n",currentTime,targetMinDistance-jupiter.getRadius());
-        return new SpaceMissionResult(config.getTarget(), currentTime,takeOffTime,targetMinDistance - jupiter.getRadius(),isSuccessful(jupiter),initialVelocity,snapshots);
+        return new SpaceMissionResult(config.getTarget(), currentTime,takeOffTime,targetMinDistance - jupiter.getRadius(),enteredOrbitCC.getState().toString(),initialVelocity,snapshots);
     }
 
     @Override

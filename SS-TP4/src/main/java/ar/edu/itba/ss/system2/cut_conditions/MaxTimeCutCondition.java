@@ -22,4 +22,10 @@ public class MaxTimeCutCondition extends CutCondition{
         return cut;
 
     }
+
+    @Override
+    public State getState() {
+        return State.MISS;
+    }
+
 }

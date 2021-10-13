@@ -11,7 +11,7 @@ import re
 
 font = {
             'weight' : 'normal',
-            'size'   : 20}
+            'size'   : 18}
 
 plt.rc('font', **font)
 
@@ -26,7 +26,7 @@ def ej1(jsons, analytic):
     print(analytic)
     analytic_x = list(map(lambda snapshot: snapshot['particles'][0]['posX'], analytic['snapshots']))
     deltaT = analytic['snapshots'][1]['time'] - analytic['snapshots'][0]['time']
-    print(f"delta T: {deltaT}")
+    print(f"dt: {deltaT}")
     for jsonData in jsons:
         method = jsonData['method']
         totalTime = jsonData['totalTime']
@@ -52,30 +52,35 @@ def ej1_3(jsons):
     plt.legend()
     plt.yscale('log')
     plt.ylabel('ECM ($m^2$)')
-    plt.xlabel('delta t (s)')
+    plt.xlabel('dt (s)')
     plt.show()
 
 
 
-def ej2_1a(jsons):
-    for jsonData in jsons:
-        takeOffTime = np.array(list(map(lambda data: data['takeOffTime'],jsonData))) / (24  * 60 * 60) 
-        print(takeOffTime)
-        marsDistance = list(map(lambda data: data['targetDistance'],jsonData))
-        #print(marsDistance)
-        plt.plot(takeOffTime, marsDistance, '-o')
-        plt.ylabel(f'Distancia (km)')
-        plt.xlabel('Tiempo hasta despegue (dia)')
-        plt.show()
-
 def ej2_1_dt(json):
     for jsonData in jsons:
-        deltaTs = list(map(lambda data: data['deltaT'],jsonData))
+        # deltaT1 = jsonData[5]['deltaT']
+        # timeAndEnergies1 = jsonData[5]['timeAndEnergies']
+        # times = []
+        # energies = []
+        # for timeAndEnergy in timeAndEnergies1:
+        #     times.append(timeAndEnergy['time'])
+        #     energies.append(timeAndEnergy['energy'])
+        # plt.plot(times,energies , '-o')    
+        deltaT = list(map(lambda data: data['deltaT'],jsonData))
         timeAndEnergies = list(map(lambda data: data['timeAndEnergies'],jsonData))
+        # energies_std = []
+        # fig, ax = plt.subplots()
+        # ax.ticklabel_format(useOffset=False)
+        # ax.plot(times[:len(energies) -2], energies[:len(energies) -2], '-o', label=f"dt={int(deltaT)}")
         for deltaT,timeAndEnergy in zip(deltaTs,timeAndEnergies):
             times = np.array(list(map(lambda data: data['time'], timeAndEnergy))) / (24  * 60 * 60) 
-            enegies = list(map(lambda data: data['energy'], timeAndEnergy))
-            plt.plot(times, enegies, '-o', label=f"deltaT={deltaT}")
+            energies = list(map(lambda data: data['energy'], timeAndEnergy))
+            energies = np.array(energies) - energies[0]
+            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], '-o', label=f"dt={int(deltaT)}")
+        #     energies_std.append(np.std(np.array(energies)))
+            #ax.yaxis.set_major_formatter(FormatStrFormatter('{x:,.0f}'))
+            # ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
         #takeOffTime = takeOffTime[:int(total/2)]
         # energy_means = list(map(lambda data: np.mean(data['energies']),jsonData))
         # energy_std = list(map(lambda data: np.std(data['energies']),jsonData))
@@ -88,14 +93,48 @@ def ej2_1_dt(json):
         # plt.errorbar(deltaT, energy_means, yerr = energy_std)
         # plt.plot(deltaT[1:], energies_diff, '-o', label="Energy Standard Deviation")
         #plt.yscale('log')
-        # plt.legend()
-        plt.ylabel('Energia')
-        plt.xlabel('t (dias)')
+        plt.legend(bbox_to_anchor=(1,1), loc="upper left")
+        plt.ylabel('Energía (J)')
+        plt.xlabel('t (días)')
+        plt.show()
+        fig.savefig('energyVSdts', bbox_inches='tight')
+        
+
+        plt.plot(deltaTs, energies_std,'-o')
+        plt.ylabel('Desvío estándar de la energía')
+        plt.xlabel('dt (s)')
+        plt.show()
+
+def ej2_1a(jsons):
+    def plotData(jsonData, state):
+        distances = list(map(lambda data: data['targetDistance'],jsonData))
+       
+        takeOffTimes = list(map(lambda data: data['takeOffTime']/(24*60*60),jsonData))
+        #print(marsDistance)
+        if state == 'Aterriza':
+            marker = 'bo'
+        elif state == "En órbita":
+            marker = 'go'
+        else:
+            marker = 'ro'
+        plt.plot(takeOffTimes, distances, marker,label=state)
+
+    for jsonData in jsons:
+        landedData = list(filter(lambda data: data['state'] == "LANDED",jsonData))
+        inOrbitData = list(filter(lambda data: data['state'] == "IN_ORBIT",jsonData))
+        missData = list(filter(lambda data: data['state'] == "MISS",jsonData))
+        plotData(landedData, "Aterriza")
+        plotData(inOrbitData, "En órbita")
+        plotData(missData, "Falla")
+        plt.ylabel(f'Distancia (km)')
+        plt.xlabel('Tiempo hasta despegue (dia)')
+        plt.legend()
         plt.show()
 
 
 def ej2_1_b(json):
     totalTime = json['totalTime']
+    
     targetDistance = json['targetDistance']
     takeOffTime = json['takeOffTime']
     successful = json['successful']
@@ -111,9 +150,9 @@ def ej2_1_b(json):
     print(f"Tiempo hasta llegar a la orbita: {times[-1] - takeOffTime} s")
     times = (np.array(times) - takeOffTime) / (24  * 60 * 60)
     print(f"Tiempo hasta llegar a la orbita: {times[-1]} dias")
-    plt.plot(times, mod_vels, '-o', label="Modulo de la velocidad de la nave")
+    plt.plot(times, mod_vels, '-o', label="Módulo de la velocidad de la nave")
     plt.legend()
-    plt.ylabel('Modulo de la velocidad de la nave (km/s)')
+    plt.ylabel('Módulo de la velocidad de la nave (km/s)')
     plt.xlabel('Tiempo (dias)')
     plt.show()
 

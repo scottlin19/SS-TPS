@@ -25,5 +25,12 @@ public class MissedTargetCutCondition extends CutCondition{
 
     }
 
+    @Override
+    public State getState() {
+        return State.MISS;
+    }
+
+
+
 
 }
