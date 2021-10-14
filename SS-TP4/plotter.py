@@ -69,7 +69,7 @@ def ej2_1_dt(json):
         for deltaT,timeAndEnergy in zip(deltaTs,timeAndEnergies):
             times = np.array(list(map(lambda data: data['time'], timeAndEnergy))) / (24  * 60 * 60) 
             energies = list(map(lambda data: data['energy'], timeAndEnergy))
-            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], 'o', label=f"dt={int(deltaT)}")
+            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], 'o', label=f"dt={int(deltaT)}segs")
             energies_std.append(np.std(np.array(energies)))
 
 
