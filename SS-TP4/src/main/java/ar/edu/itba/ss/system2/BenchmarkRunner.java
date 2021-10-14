@@ -25,6 +25,7 @@ public class BenchmarkRunner {
     private static final String EJ2_1B_RESULTS_DIR = "ej2_1b/";
     private static final String EJ2_2_RESULTS_DIR = "ej2_2/";
     private static final String EJ3_RESULTS_DIR = "ej3/";
+    private static final String EJ3_2_RESULTS_DIR = "ej3_2/";
     private static final String EJ3_1A_RESULTS_DIR = "ej3_1a/";
 
     public static void main(String[] args) {
@@ -43,19 +44,20 @@ public class BenchmarkRunner {
 //            mmEnergyWriter.createFile(energies, RESULTS_DIRECTORY + DTS_RESULTS_DIR + "simulation_energy");
 
 //            //Ej2_1a
-            List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
-            JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
-            SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
-            System.out.printf("Min %s distance: %f with takeOff time = %f", config.getTarget(), min.getTargetDistance(), min.getTakeOffTime());
-            String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
-            mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
+//            List<SpaceMissionDistance> results2_1 = calculateTakeoffTime(config);
+//            JSONWriter<List<SpaceMissionDistance>> mmDistanceWriter = new JSONWriter<>();
+//            SpaceMissionDistance min = results2_1.stream().min(Comparator.comparingInt(o -> (int) o.targetDistance)).get();
+//            System.out.printf("Min %s distance: %f with takeOff time = %f", config.getTarget(), min.getTargetDistance(), min.getTakeOffTime());
+//            String dir = "jupiter".equals(config.getTarget()) ? EJ3_1A_RESULTS_DIR : EJ2_1A_RESULTS_DIR;
+//            mmDistanceWriter.createFile(results2_1, RESULTS_DIRECTORY + dir + "simulation_takeOffDate");
 
             //Ej2_2
-//            List<MarsMissionVelocity> results2_2 = ej2_2(config);
-//            JSONWriter<List<MarsMissionVelocity>> mmVelocityWriter =new JSONWriter<>();
-//            MarsMissionVelocity minVelocity = results2_2.stream().min(Comparator.comparingInt(o -> (int) o.totalTime)).get();
-//            System.out.printf("Min total time: %f with takeOff velocity = %f",minVelocity.getTotalTime(),minVelocity.getVelocity());
-//            mmVelocityWriter.createFile(results2_2, RESULTS_DIRECTORY+EJ2_2_RESULTS_DIR + "simulation_takeOffVel");
+            List<MarsMissionVelocity> results2_2 = ej2_2(config);
+            JSONWriter<List<MarsMissionVelocity>> mmVelocityWriter =new JSONWriter<>();
+            MarsMissionVelocity minVelocity = results2_2.stream().min(Comparator.comparingInt(o -> (int) o.totalTime)).get();
+            String dir = "jupiter".equals(config.getTarget()) ? EJ3_2_RESULTS_DIR : EJ2_2_RESULTS_DIR;
+            System.out.printf("Min total time: %f with takeOff velocity = %f",minVelocity.getTotalTime(),minVelocity.getVelocity());
+            mmVelocityWriter.createFile(results2_2, RESULTS_DIRECTORY + dir + "simulation_takeOffVel");
 
 
 
@@ -116,7 +118,7 @@ public class BenchmarkRunner {
             if(s == 0){
                 initialEnergy = sum;
             }
-            timeAndEnergies.add(new TimeAndEnergy(time,sum-initialEnergy));
+            timeAndEnergies.add(new TimeAndEnergy(time,Math.abs(sum-initialEnergy)));
         }
 
         return timeAndEnergies;

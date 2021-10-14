@@ -69,7 +69,7 @@ def ej2_1_dt(json):
         for deltaT,timeAndEnergy in zip(deltaTs,timeAndEnergies):
             times = np.array(list(map(lambda data: data['time'], timeAndEnergy))) / (24  * 60 * 60) 
             energies = list(map(lambda data: data['energy'], timeAndEnergy))
-            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], 'o', label=f"dt={int(deltaT)}s")
+            ax.plot(times[:len(energies) -2], energies[:len(energies) -2], 'o', label=f"dt={int(deltaT)} s")
             energies_std.append(np.std(np.array(energies)))
 
 
@@ -131,17 +131,20 @@ def ej2_1_b(json):
     print(f"Tiempo hasta llegar a la orbita: {times[-1] - takeOffTime} s")
     times = (np.array(times) - takeOffTime) / (24  * 60 * 60)
     print(f"Tiempo hasta llegar a la orbita: {times[-1]} dias")
-    plt.plot(times, mod_vels, '-o', label="Módulo de la velocidad de la nave")
+    plt.plot(times[:-2], mod_vels[:-2], '-o', label="Módulo de la velocidad de la nave")
     plt.legend()
     plt.ylabel('Módulo de la velocidad de la nave (km/s)')
     plt.xlabel('Tiempo (dias)')
     plt.show()
 
     last = json['snapshots'][-1]
-    last_mars = list(filter(lambda particle: particle['id'] == 2,last['particles']))[0]
+    if target == "jupiter":
+        last_target = list(filter(lambda particle: particle['id'] == 5,last['particles']))[0]
+    elif target == "mars":
+        last_target = list(filter(lambda particle: particle['id'] == 5,last['particles']))[0]
     last_spaceship = list(filter(lambda particle: particle['id'] == 1,last['particles']))[0]
-
-    print(f"Velocidad relativa al llegar a {target}: {math.sqrt(last_spaceship['posX']**2 + last_spaceship['posY']**2) - math.sqrt(last_mars['posX']**2 + last_mars['posY']**2)} km/s")
+    print(f"spaceship: velx: {last_spaceship['velX']}, vely: {last_spaceship['velY']}")
+    print(f"Velocidad relativa al llegar a {target}: {math.sqrt(last_spaceship['posX']**2 + last_spaceship['posY']**2) - math.sqrt(last_target['posX']**2 + last_target['posY']**2)} km/s")
     
 
 def ej2_2(json):
@@ -170,7 +173,11 @@ def ej2_2(json):
         times = list(map(lambda data: data['totalTime'], landedData))
         min_time = min(times)
         min_vals = list(filter(lambda data: data['totalTime'] == min_time,landedData))[0]
-        print(f"Optimized travel time is: {min_vals['totalTime']}, for v0 = {min_vals['velocity']} km/s")
+        times = list(map(lambda data: data['totalTime'], inOrbitData))
+        min_time = min(times)
+        orbit_min_vals = list(filter(lambda data: data['totalTime'] == min_time,inOrbitData))[0]
+        print(f"For landed: Optimized travel time is: {min_vals['totalTime']}, for v0 = {min_vals['velocity']} km/s")
+        print(f"For in orbit: Optimized travel time is: {orbit_min_vals['totalTime']}, for v0 = {orbit_min_vals['velocity']} km/s")
         plotData(landedData, "Aterriza")
         plotData(inOrbitData, "Alcanza órbita")
         plotData(missData, "Falla")

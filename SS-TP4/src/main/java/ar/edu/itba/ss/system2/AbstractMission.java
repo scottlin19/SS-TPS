@@ -154,9 +154,9 @@ public abstract class AbstractMission {
                 System.out.println(mission.getName() + " FAILED: SPACESHIP DIDN'T LAND");
             }
             XYZWriter xyzWriter = new XYZWriter();
-            xyzWriter.createFile(result,  "results/ej2_1b/" + mission.getName() + "_V" + config.getTakeOffSpeed());
+            xyzWriter.createFile(result,  "results/" + mission.getName() + "_V" + config.getTakeOffSpeed());
             JSONWriter<SpaceMissionResult> jsonWriter = new JSONWriter<>();
-            jsonWriter.createFile(result,"results/ej2_1b/" + mission.getName() + "_V" + config.getTakeOffSpeed());
+            jsonWriter.createFile(result,"results/" + mission.getName() + "_V" + config.getTakeOffSpeed());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
