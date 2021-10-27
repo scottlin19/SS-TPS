@@ -1,6 +1,4 @@
 package ar.edu.itba.ss.commons;
-
-import ar.edu.itba.ss.cim.Particle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;

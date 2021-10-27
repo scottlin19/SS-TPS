@@ -1,6 +1,6 @@
 package ar.edu.itba.ss.commons;
 
-import ar.edu.itba.ss.cim.Particle;
+import ar.edu.itba.ss.commons.Particle;
 
 public class ParticleDTO {
     private double posX;

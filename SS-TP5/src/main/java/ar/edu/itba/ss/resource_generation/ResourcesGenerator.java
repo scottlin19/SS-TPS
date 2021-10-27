@@ -1,7 +1,7 @@
 package ar.edu.itba.ss.resource_generation;
 
-import ar.edu.itba.ss.cim.Grid;
-import ar.edu.itba.ss.cim.Particle;
+import ar.edu.itba.ss.commons.Grid;
+import ar.edu.itba.ss.commons.Particle;
 import com.google.gson.Gson;
 
 import java.io.*;

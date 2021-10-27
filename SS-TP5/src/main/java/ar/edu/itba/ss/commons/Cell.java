@@ -1,6 +1,5 @@
-package ar.edu.itba.ss.cim;
+package ar.edu.itba.ss.commons;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
