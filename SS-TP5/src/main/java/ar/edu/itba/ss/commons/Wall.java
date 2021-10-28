@@ -19,9 +19,7 @@ public class Wall {
         return p2;
     }
 
-    public boolean collidesWith(Particle p){
-
-    }
+ 
 
 
 }
