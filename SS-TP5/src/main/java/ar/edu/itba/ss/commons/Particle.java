@@ -1,108 +1,41 @@
 package ar.edu.itba.ss.commons;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class Particle {
 
-    private final int id;
-    private double posX, posY;
-    private double velocity;
-    private double direction;
-    private Map<Integer, Double> neighboursDirs;
-    private double radius;
-    private final double ETA;
+    protected final int id;
+    protected Point2D.Double pos;
+    protected double radius;
 
-
-
-
-    public Particle(int id, double posX, double posY, double radius, double ETA, double initialVelocity, double direction){
+    public Particle(int id, Point2D.Double pos, double radius) {
         this.id = id;
+        this.pos = pos;
         this.radius = radius;
-        this.ETA = ETA;
-        this.velocity = initialVelocity;
-        this.posX = posX;
-        this.posY = posY;
-        this.direction = direction;
-        this.neighboursDirs = new HashMap<>();
     }
 
-
-    public void update(int limits){
-        double newPosX = posX + velocity * Math.cos(direction);
-        if(newPosX < 0){
-            newPosX += limits;
-        }else if (newPosX > limits){
-            newPosX -= limits;
-        }
-
-        double newPosY = posY + velocity * Math.sin(direction);
-        if(newPosY < 0){
-            newPosY += limits;
-        }else if (newPosY > limits){
-            newPosY -= limits;
-        }
-//        System.out.println("Particle " + id + " PREV POSITIONS: " + posX + ", "+posY +  " NEW POSITIONS: "+newPosX + ", "+newPosY);
-        posX = newPosX;
-        posY = newPosY;
-
-        List<Double> neighbourDirections = new ArrayList<>(neighboursDirs.values());
-        neighbourDirections.add(direction);
-        double sinProm = neighbourDirections.stream().mapToDouble(Math::sin).average().orElse(Double.NaN);
-        double cosProm = neighbourDirections.stream().mapToDouble(Math::cos).average().orElse(Double.NaN);
-        double dirProm = Math.atan2(sinProm,cosProm);
-        direction = dirProm + randomNoise();
-        clearNeighbours();
-
-    }
-
-    private double randomNoise(){
-
-        return ThreadLocalRandom.current().nextDouble()*ETA - ETA/2;
-    }
-
-    public void clearNeighbours() {
-        neighboursDirs = new HashMap<>();
-    }
 
     /* ---------------- GETTERS, SETTERS, EQUALS, HASH, TOSTRING ---------------- */
+
+
+
+
     public int getId() {
         return id;
     }
 
-    public double getVelocity(){
-        return velocity;
-    }
-
-    public void setVelocity(double velocity){
-        this.velocity = velocity;
-    }
-
-    public double getDirection() {
-        return direction;
-    }
-
-    public void setDirection(double direction) {
-        this.direction = direction;
-    }
-
     public double getPosX() {
-        return posX;
-    }
-
-    public void setPosX(double posX) {
-        this.posX = posX;
+        return pos.x;
     }
 
     public double getPosY() {
-        return posY;
-    }
-
-    public void setPosY(double posY) {
-        this.posY = posY;
+        return pos.y;
     }
 
     public double getRadius() {
@@ -111,31 +44,6 @@ public class Particle {
 
     public void setRadius(double radius) {
         this.radius = radius;
-    }
-
-    public Map<Integer, Double> getNeighbours() {
-        return neighboursDirs;
-    }
-
-    public void setNeighbours(Map<Integer, Double> neighboursDirs) {
-        this.neighboursDirs = neighboursDirs;
-    }
-
-    public boolean hasNeighbours(){
-        return !this.neighboursDirs.isEmpty();
-    }
-
-
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("Particle: " + id + "{" +
-                "posX=" + posX +
-                ", posY=" + posY+", radius= "+radius+", neighbours= [");
-        for(Map.Entry<Integer, Double> entry: neighboursDirs.entrySet()){
-            sb.append("Particle").append(entry.getKey()).append("{ posX= ").append(entry.getValue()).append("}, ");
-        }
-        return sb.append("]}").toString();
     }
 
     @Override
