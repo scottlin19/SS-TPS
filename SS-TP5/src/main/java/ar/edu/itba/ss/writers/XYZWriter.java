@@ -1,6 +1,6 @@
 package ar.edu.itba.ss.writers;
 
-import ar.edu.itba.ss.commons.Particle;
+import ar.edu.itba.ss.commons.Pedestrian;
 import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 
@@ -15,11 +15,11 @@ public class XYZWriter implements OutputFileWriter<SimulationResult> {
     @Override
     public void createFile(SimulationResult result,String outPath)  {
         List<SimulationSnapshot> simulationSnapshots = result.getSnapshots();
-        List<List<Particle>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getParticles).collect(Collectors.toList());
+        List<List<Pedestrian>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getPedestrians).collect(Collectors.toList());
         try(final BufferedWriter writer = new BufferedWriter(new FileWriter(addExtension(outPath)))){
-            for(List<Particle> snapshot: snapshots){
+            for(List<Pedestrian> snapshot: snapshots){
                 writer.write(snapshot.size()+"\n\n");
-                for(Particle p: snapshot){
+                for(Pedestrian p: snapshot){
 
                     writer.write(p.getPosX()+" "+
                             p.getPosY()+" "+

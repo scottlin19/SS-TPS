@@ -4,23 +4,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Cell {
-    private final Set<Particle> particles;
+    private final Set<Pedestrian> pedestrians;
 
 
     Cell(){
-        this.particles = new HashSet<>();
+        this.pedestrians = new HashSet<>();
     }
 
-    public Set<Particle> getParticles(){
-        return particles;
+    public Set<Pedestrian> getPedestrians(){
+        return pedestrians;
     }
 
-    public boolean hasParticles(){
-        return !this.particles.isEmpty();
+    public boolean hasPedestrians(){
+        return !this.pedestrians.isEmpty();
     }
 
     @Override
     public String toString(){
-        return particles.toString();
+        return pedestrians.toString();
     }
 }
