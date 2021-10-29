@@ -1,5 +1,7 @@
 package ar.edu.itba.ss.commons;
 
+import static ar.edu.itba.ss.commons.Wall.collidesWith;
+
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Objects;
@@ -15,28 +17,43 @@ public class Pedestrian {
     private double                      radius;
     private List<Point2D.Double>        collisions;
 
-    public Pedestrian(int id, Point2D.Double pos, double radius,double Ve) {
-
+    public Pedestrian(int id, Point2D.Double pos, double radius,double Ve,Target target) {
         this.id = id;
         this.pos = pos;
         this.radius = radius;
         this.Vd = new Point2D.Double(0, 0);
         this.Ve = Ve;
+        this.desiredPosition = target.getClosestPoint(this);
     }
 
     public void update(double deltaT) {
         pos.setLocation(pos.x + deltaT * Vd.x, pos.y + deltaT * Vd.y);
     }
 
-    public void addCollision(Pedestrian p) {
-        collisions.add(p.pos);
+    public void addCollision(Point2D.Double pos) {
+        collisions.add(pos);
     }
 
     public static void addNeighbour(Pedestrian p1, Pedestrian p2) {
         if(intersects(p1,p2)){
-            p1.addCollision(p2);
-            p2.addCollision(p1);
+            p1.addCollision(p2.pos);
+            p2.addCollision(p1.pos);
         }
+    }
+
+    public static void addWall(Pedestrian p, Wall w) {
+        Point2D.Double pos = collidesWith(w,p);
+        if(pos != null){
+            p.addCollision(pos);
+        }
+    }
+
+    public boolean hasCollisions(){
+        return !collisions.isEmpty();
+    }
+
+    public void clearCollisions(){
+        this.collisions.clear();
     }
 
     public void updateCollisions(double deltaT, double VdMax, double rMin, double rMax, int B, double tau) {
@@ -47,7 +64,6 @@ public class Pedestrian {
             incrementRadius(rMax / (tau/deltaT), rMax);
         }
         else {
-            // TODO: check walls collisions
             p = getEscapeVelocity(collisions);
             Vd.setLocation(p);
             radius = rMin;
@@ -63,6 +79,7 @@ public class Pedestrian {
         return dist <= (p1.getRadius() + p2.getRadius());
     }
 
+    // Vector
     public Point2D.Double getDesiredVelocity(double VdMax, double rMin, double rMax, int B) {
         double velMod = VdMax * Math.pow((radius - rMin) / (rMax - rMin), B);
         Point2D.Double desiredDirection = getDirectionVersor(desiredPosition);
@@ -71,6 +88,7 @@ public class Pedestrian {
         return desiredDirection;
     }
 
+    // Vector
     public Point2D.Double getEscapeVelocity(List<Point2D.Double> contacts) {
         List<Point2D.Double> contactDirs = contacts.stream().map(this::getDirectionVersor).collect(Collectors.toList());
         double sumX = contactDirs.stream().mapToDouble(Point2D.Double::getX).sum();
@@ -91,8 +109,8 @@ public class Pedestrian {
     }
 
     public Point2D.Double getDirectionVersor(Point2D.Double other){
-        double diffX = other.x - pos.x;
-        double diffY = other.y - pos.y;
+        double diffX = pos.x - other.x;
+        double diffY = pos.y - other.y;
         double mod = Math.sqrt(Math.pow(diffX,2) + Math.pow(diffY,2));
         return new Point2D.Double(diffX/mod,diffY/mod);
     }

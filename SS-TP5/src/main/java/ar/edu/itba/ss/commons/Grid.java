@@ -3,6 +3,8 @@ package ar.edu.itba.ss.commons;
 import ar.edu.itba.ss.CPMConfig;
 
 import static ar.edu.itba.ss.commons.Pedestrian.addNeighbour;
+import static ar.edu.itba.ss.commons.Pedestrian.addWall;
+
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.function.Supplier;
@@ -18,6 +20,7 @@ public class Grid {
     private final Cell[][]                  grid;
     private final List<Pedestrian>          pedestrians;
     private final List<Wall>                walls;
+    private final List<Target>              targets;
     private final double                    rMin,rMax;
     private final double                    vdMax;
     private final int                       B;
@@ -42,6 +45,7 @@ public class Grid {
             }
         }
         this.walls                          = initWalls();
+        this.targets                        = initTargets();
     }
 
     private List<Wall> initWalls() {
@@ -51,6 +55,19 @@ public class Grid {
             new Wall(new Point2D.Double(L,0), new Point2D.Double(L,L), Wall.Orientation.VERTICAL),
             new Wall(new Point2D.Double(0,L), new Point2D.Double(L/2 - entranceLength/2,L), Wall.Orientation.HORIZONTAL),
             new Wall(new Point2D.Double(L/2 + entranceLength/2,L), new Point2D.Double(L,L), Wall.Orientation.HORIZONTAL)
+        );
+    }
+
+    private List<Target> initTargets(){
+        return List.of(
+                new Target(
+                        new Point2D.Double(L/2 - entranceLength/2 + 0.1, L),
+                        new Point2D.Double(L/2 + entranceLength/2 - 0.1, L)
+                ),
+                new Target(
+                        new Point2D.Double(L/2 - 1.5,L+10),
+                        new Point2D.Double(L/2 + 1.5,L+10)
+                )
         );
     }
 
@@ -70,21 +87,30 @@ public class Grid {
 
             double posX = r.nextDouble()*deltaPos + rMin;
             double posY = L * r.nextDouble();
+            Pedestrian pedestrian = new Pedestrian(i,new Point2D.Double(posX,posY),rMin,vdMax);
+
+            int[] index = grid.addPedestrian(pedestrian);
+            grid.addNeighboursForPedestrian(pedestrian, index[0], index[1]);
+            if (pedestrian.hasCollisions()) {
+                grid.removePedestrian(pedestrian);
+            } else {
+                i++;
+                iter = 0;
+                pedestrians.add(pedestrian);
+            }
 
         }
-        Pedestrian pedestrian = new Pedestrian(i,new Point2D.Double(posX,posY),rMin,vdMax);
 
-        int[] index = grid.addParticle(particle);
-        grid.addNeighboursForParticle(directions, particle, index[0], index[1]);
-        if (particle.hasNeighbours()) {
-            grid.removeParticle(particle);
-        } else {
-            i++;
-            iter = 0;
-            result.add(particle);
-
-        }
         return pedestrians;
+    }
+
+    public int[] addPedestrian(Pedestrian pedestrian){
+        pedestrians.add(pedestrian);
+        int gridI = (int) (Math.floor(pedestrian.getPosY()/cellLong));
+        int gridJ = (int) (Math.floor(pedestrian.getPosX()/cellLong));
+        Cell cell = getCellFromGrid(gridI,gridJ);
+        cell.getPedestrians().add(pedestrian);
+        return new int[]{gridI,gridJ};
     }
 
     public void removePedestrian(Pedestrian pedestrian){
@@ -93,14 +119,13 @@ public class Grid {
         int gridJ = (int) (Math.floor(pedestrian.getPosX()/cellLong));
         Cell cell = getCellFromGrid(gridI,gridJ);
         cell.getPedestrians().remove(pedestrian);
-        Set<Integer> neigh_ids = pedestrian.getc().keySet();
-        particles.stream().filter(p -> neigh_ids.contains(p.getId())).forEach(p->p.getNeighbours().remove(particle.getId()));
+        pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
     }
 
-    public void addNeighboursForParticle(List<int[]> directions,Particle particle, int gridI, int gridJ){
-        Cell cell = getCellFromGrid(gridI,gridJ);
-        Map<Cell,List<int[]>> neighbourCells = getCellNeighbours(directions,gridI,gridJ);
-        addNeighbours(particle,cell.getParticles(),neighbourCells,RC);
+    public void addNeighboursForPedestrian(Pedestrian particle, int gridI, int gridJ){
+        Set<Pedestrian> auxSet = new HashSet<>();
+        getCellNeighbours(CIMDirections,gridI,gridJ).forEach(c -> auxSet.addAll(c.getPedestrians()));
+        addNeighbours(particle,auxSet);
     }
 
 
@@ -161,11 +186,7 @@ public class Grid {
     }
 
     public void addWallCollisions(Pedestrian pedestrian){
-
-    }
-
-    public void addNeighbours(Pedestrian pedestrian, Set<Pedestrian> cellPedestrians) {
-        cellPedestrians.forEach(p -> addNeighbour(pedestrian,p));
+        this.walls.forEach(wall -> addWall(pedestrian,wall));
     }
 
     private Pair<Integer> gridPosForPedestrian(Pedestrian p){
@@ -173,6 +194,12 @@ public class Grid {
         int gridJ = (int) (Math.floor(p.getPosX()/cellLong));
         return new Pair<>(gridI,gridJ);
     }
+
+    public void addNeighbours(Pedestrian pedestrian, Set<Pedestrian> cellPedestrians) {
+        cellPedestrians.forEach(p -> addNeighbour(pedestrian,p));
+    }
+
+
 
 
     public List<Cell> getCellNeighbours(List<int[]> directions,int i, int j){
