@@ -61,21 +61,6 @@ public class Grid {
         return new int[]{gridI,gridJ};
     }
 
-    public void removeParticle(Particle particle){
-        particles.remove(particle);
-        int gridI =(int) (Math.floor(particle.getPosY()/cellLong));
-        int gridJ = (int) (Math.floor(particle.getPosX()/cellLong));
-        Cell cell = getCellFromGrid(gridI,gridJ);
-        cell.getParticles().remove(particle);
-        Set<Integer> neigh_ids = particle.getNeighbours().keySet();
-        particles.stream().filter(p -> neigh_ids.contains(p.getId())).forEach(p->p.getNeighbours().remove(particle.getId()));
-    }
-
-    public void addNeighboursForParticle(List<int[]> directions,Particle particle, int gridI, int gridJ){
-        Cell cell = getCellFromGrid(gridI,gridJ);
-        Map<Cell,List<int[]>> neighbourCells = getCellNeighbours(directions,gridI,gridJ);
-        addNeighbours(particle,cell.getParticles(),neighbourCells,RC);
-    }
 
     public void completeGrid(){
 
