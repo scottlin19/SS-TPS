@@ -3,6 +3,7 @@ package ar.edu.itba.ss.commons;
 import static ar.edu.itba.ss.commons.Wall.collidesWith;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ public class Pedestrian {
     private Point2D.Double              desiredPosition;
     private double                      radius;
     private List<Point2D.Double>        collisions;
+    private Target                      target;
 
     public Pedestrian(int id, Point2D.Double pos, double radius,double Ve,Target target) {
         this.id = id;
@@ -23,11 +25,14 @@ public class Pedestrian {
         this.radius = radius;
         this.Vd = new Point2D.Double(0, 0);
         this.Ve = Ve;
-        this.desiredPosition = target.getClosestPoint(this);
+        this.target = target;
+        this.desiredPosition = target.getClosestPoint(pos);
+        this.collisions = new ArrayList<>();
     }
 
     public void update(double deltaT) {
         pos.setLocation(pos.x + deltaT * Vd.x, pos.y + deltaT * Vd.y);
+        desiredPosition = target.getClosestPoint(pos);
     }
 
     public void addCollision(Point2D.Double pos) {
@@ -115,6 +120,12 @@ public class Pedestrian {
         return new Point2D.Double(diffX/mod,diffY/mod);
     }
 
+
+    public void updateTarget(Target target) {
+        this.target = target;
+        this.desiredPosition = target.getClosestPoint(pos);
+    }
+
     /* ---------------- GETTERS, SETTERS, EQUALS, HASH, TOSTRING ---------------- */
 
     @Override
@@ -156,5 +167,35 @@ public class Pedestrian {
 
     public List<Point2D.Double> getCollisions() {
         return collisions;
+    }
+
+    public Point2D.Double getVd() {
+        return Vd;
+    }
+
+    public double getVe() {
+        return Ve;
+    }
+
+    public Point2D.Double getDesiredPosition() {
+        return desiredPosition;
+    }
+
+    public Target getTarget() {
+        return target;
+    }
+
+    @Override
+    public String toString() {
+        return "Pedestrian{" +
+            "id=" + id +
+            ", pos=" + pos +
+            ", Vd=" + Vd +
+            ", Ve=" + Ve +
+            ", desiredPosition=" + desiredPosition +
+            ", radius=" + radius +
+            ", collisions=" + collisions +
+            ", target=" + target +
+            '}';
     }
 }

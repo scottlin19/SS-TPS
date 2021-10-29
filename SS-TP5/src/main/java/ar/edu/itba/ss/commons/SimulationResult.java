@@ -4,13 +4,11 @@ import java.util.List;
 
 public class SimulationResult {
     private final double                    totalTime;
-    private final String                    method;
     private final List<SimulationSnapshot>  snapshots;
 
-    public SimulationResult(double totalTime, List<SimulationSnapshot> snapshots, String method) {
-        this.totalTime = totalTime;
-        this.method = method;
+    public SimulationResult(List<SimulationSnapshot> snapshots ,double totalTime) {
         this.snapshots = snapshots;
+        this.totalTime = totalTime;
     }
 
     public double getTotalTime() {
@@ -19,10 +17,5 @@ public class SimulationResult {
 
     public List<SimulationSnapshot> getSnapshots() {
         return snapshots;
-    }
-
-
-    public String getMethod() {
-        return method;
     }
 }

@@ -1,40 +1,78 @@
 package ar.edu.itba.ss;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CPMConfig {
 
+    @JsonProperty("L")
     private double L;
-    private double VdMAX;
-    private double rMin, rMax;
+
+    @JsonProperty("VdMax")
+    private double VdMax;
+
+    @JsonProperty("Ve")
+    private double Ve;
+
+    @JsonProperty("rMin")
+    private double rMin;
+
+    @JsonProperty("rMax")
+    private double rMax;
+
+    @JsonProperty("tau")
     private double tau;
+
+    @JsonProperty("N")
     private long N;
+
+    @JsonProperty("B")
     private int B;
+
+    @JsonProperty("entranceLength")
     private double entranceLength;
 
-    public CPMConfig(double L, double vdMAX, double rMin, double rMax, double tau, long N,int B, double entranceLength) {
+    @JsonProperty("K")
+    private int K;
+
+    public CPMConfig(){
+
+    }
+
+    public CPMConfig(double VdMax,double L, double Ve, double rMin, double rMax, double tau , long N,int B, double entranceLength,int K) {
         this.L = L;
-        this.VdMAX = vdMAX;
+        this.VdMax = VdMax;
+        this.Ve = Ve;
         this.rMin = rMin;
         this.rMax = rMax;
         this.tau = tau;
         this.N = N;
         this.B = B;
         this.entranceLength = entranceLength;
+        this.K = K;
     }
 
-    public int getB() {
-        return B;
+    public double getL() {
+        return L;
     }
 
-    public void setB(int b) {
-        B = b;
+    public void setL(double l) {
+        L = l;
     }
 
-    public double getVdMAX() {
-        return VdMAX;
+    public double getVdMax() {
+        return VdMax;
     }
 
-    public void setVdMAX(double vdMAX) {
-        VdMAX = vdMAX;
+    public void setVdMax(double VdMax) {
+        this.VdMax = VdMax;
+    }
+
+    public double getVe() {
+        return Ve;
+    }
+
+    public void setVe(double ve) {
+        Ve = ve;
     }
 
     public double getrMin() {
@@ -69,12 +107,12 @@ public class CPMConfig {
         N = n;
     }
 
-    public double getL() {
-        return L;
+    public int getB() {
+        return B;
     }
 
-    public void setL(double l) {
-        L = l;
+    public void setB(int b) {
+        B = b;
     }
 
     public double getEntranceLength() {
@@ -83,5 +121,13 @@ public class CPMConfig {
 
     public void setEntranceLength(double entranceLength) {
         this.entranceLength = entranceLength;
+    }
+
+    public int getK() {
+        return K;
+    }
+
+    public void setK(int k) {
+        K = k;
     }
 }

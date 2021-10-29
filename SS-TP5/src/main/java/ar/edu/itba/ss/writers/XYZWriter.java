@@ -1,6 +1,7 @@
 package ar.edu.itba.ss.writers;
 
 import ar.edu.itba.ss.commons.Pedestrian;
+import ar.edu.itba.ss.commons.PedestrianDTO;
 import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 
@@ -15,15 +16,15 @@ public class XYZWriter implements OutputFileWriter<SimulationResult> {
     @Override
     public void createFile(SimulationResult result,String outPath)  {
         List<SimulationSnapshot> simulationSnapshots = result.getSnapshots();
-        List<List<Pedestrian>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getPedestrians).collect(Collectors.toList());
+        List<List<PedestrianDTO>> snapshots = simulationSnapshots.stream().map(SimulationSnapshot::getPedestrians).collect(Collectors.toList());
         try(final BufferedWriter writer = new BufferedWriter(new FileWriter(addExtension(outPath)))){
-            for(List<Pedestrian> snapshot: snapshots){
+            for(List<PedestrianDTO> snapshot: snapshots){
                 writer.write(snapshot.size()+"\n\n");
-                for(Pedestrian p: snapshot){
+                for(PedestrianDTO p: snapshot){
 
-                    writer.write(p.getPosX()+" "+
-                            p.getPosY()+" "+
-                            p.getRadius());
+                    writer.write(p.getX()+" "+
+                            p.getY()+" "+
+                            p.getRadius() + "\n");
 
                 }
             }
@@ -35,6 +36,6 @@ public class XYZWriter implements OutputFileWriter<SimulationResult> {
 
     @Override
     public String addExtension(String outPath) {
-        return outPath.contains(".exyz") ? outPath : outPath+".exyz";
+        return outPath.contains(".exyz") ? outPath : outPath + ".exyz";
     }
 }

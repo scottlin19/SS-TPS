@@ -7,45 +7,61 @@ import static ar.edu.itba.ss.commons.Pedestrian.addWall;
 
 import java.awt.geom.Point2D;
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 
 public class Grid {
 
-    private static final String             RESULTS_DIRECTORY = "results/";
 
     private final double                    L;
     private final int                       M;
     private final double                    cellLong;
-    private final Cell[][]                  grid;
-    private final List<Pedestrian>          pedestrians;
-    private final List<Wall>                walls;
-    private final List<Target>              targets;
     private final double                    rMin,rMax;
     private final double                    vdMax;
     private final int                       B;
     private final double                    tau;
     private final double                    entranceLength;
 
-    public Grid(CPMConfig config){
+    private final Cell[][]                  grid;
+    private final List<Pedestrian>          pedestrians;
+    private final List<Wall>                walls;
+
+    private final Target                    FIRST_TARGET;
+    private final Target                    SECOND_TARGET;
+
+    public Grid(CPMConfig config,boolean generate){
         this.L                              = config.getL();
         this.rMin                           = config.getrMin();
         this.rMax                           = config.getrMax();
-        this.vdMax                          = config.getVdMAX();
+        this.vdMax                          = config.getVdMax();
         this.B                              = config.getB();
         this.tau                            = config.getTau();
         this.entranceLength                 = config.getEntranceLength();
         this.M                              = (int) Math.floor((L / rMax ));
         this.cellLong                       = L / M;
         this.grid                           = new Cell[M][M];
-        this.pedestrians                    = generatePedestrians(config);
+        this.walls                          = initWalls();
+        this.FIRST_TARGET = new Target(
+            new Point2D.Double(L/2 - entranceLength/2 + 0.1, L),
+            new Point2D.Double(L/2 + entranceLength/2 - 0.1, L),
+            1
+        );
+        this.SECOND_TARGET = new Target(
+            new Point2D.Double(L/2 - 1.5, L+10),
+            new Point2D.Double(L/2 + 1.5, L+10),
+            2
+        );
+
+        if(generate){
+            this.pedestrians = generatePedestrians(config);
+        }else{
+            this.pedestrians                    = new LinkedList<>();
+        }
         for(int i = 0; i < M; i++){
             for(int j = 0; j < M; j++){
                 this.grid[i][j] = new Cell();
             }
         }
-        this.walls                          = initWalls();
-        this.targets                        = initTargets();
     }
 
     private List<Wall> initWalls() {
@@ -58,46 +74,39 @@ public class Grid {
         );
     }
 
-    private List<Target> initTargets(){
-        return List.of(
-                new Target(
-                        new Point2D.Double(L/2 - entranceLength/2 + 0.1, L),
-                        new Point2D.Double(L/2 + entranceLength/2 - 0.1, L)
-                ),
-                new Target(
-                        new Point2D.Double(L/2 - 1.5,L+10),
-                        new Point2D.Double(L/2 + 1.5,L+10)
-                )
-        );
-    }
-
-    private List<Pedestrian> generatePedestrians(CPMConfig config){
+    public List<Pedestrian> generatePedestrians(CPMConfig config){
         Random r = new Random();
         double deltaPos = (L-rMin-0.01);
-        List<Pedestrian> pedestrians = new ArrayList<>();
+        List<Pedestrian> pedestrians = new LinkedList<>();
 
-        Grid grid = new Grid(config);
+        Grid grid = new Grid(config,false);
         long N = config.getN();
         int i = 0;
         int iter = 0;
-        int maxIter = 1000;
+        int maxIter = 50000;
 
         while (i < N && iter < maxIter) {
             iter++;
 
-            double posX = r.nextDouble()*deltaPos + rMin;
-            double posY = L * r.nextDouble();
-            Pedestrian pedestrian = new Pedestrian(i,new Point2D.Double(posX,posY),rMin,vdMax);
+            double posX = r.nextDouble()*deltaPos+rMin;
+            double posY = r.nextDouble()*deltaPos+rMin;
+            Pedestrian pedestrian = new Pedestrian(i,new Point2D.Double(posX,posY),rMin,config.getVe(), FIRST_TARGET);
 
             int[] index = grid.addPedestrian(pedestrian);
+            System.out.println("adding pedestrian: "+ pedestrian);
             grid.addNeighboursForPedestrian(pedestrian, index[0], index[1]);
             if (pedestrian.hasCollisions()) {
+                System.out.println("has collisions: "+grid.pedestrians);
                 grid.removePedestrian(pedestrian);
+                grid.pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
+
+
             } else {
                 i++;
                 iter = 0;
                 pedestrians.add(pedestrian);
             }
+            System.out.printf("i = %d, iter = %d\n",i,iter);
 
         }
 
@@ -119,13 +128,12 @@ public class Grid {
         int gridJ = (int) (Math.floor(pedestrian.getPosX()/cellLong));
         Cell cell = getCellFromGrid(gridI,gridJ);
         cell.getPedestrians().remove(pedestrian);
-        pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
     }
 
     public void addNeighboursForPedestrian(Pedestrian particle, int gridI, int gridJ){
         Set<Pedestrian> auxSet = new HashSet<>();
         getCellNeighbours(CIMDirections,gridI,gridJ).forEach(c -> auxSet.addAll(c.getPedestrians()));
-        addNeighbours(particle,auxSet);
+        addCollisions(particle,auxSet);
     }
 
 
@@ -164,8 +172,34 @@ public class Grid {
         add(new int[]{1,1});
     }};
 
-    public void updatePedestrians(double deltaT){
-        this.pedestrians.forEach(pedestrian -> pedestrian.update(deltaT));
+    private void checkTargetCollisions(Pedestrian p, Consumer<Pedestrian> callback){
+        if(p.getTarget().equals(FIRST_TARGET) && FIRST_TARGET.checkCollision(p)){
+            p.updateTarget(SECOND_TARGET);
+        }
+        else if(p.getTarget().equals(SECOND_TARGET) && SECOND_TARGET.checkCollision(p)){
+            callback.accept(p);
+        }
+    }
+
+    public List<Pedestrian> updatePedestrians(double deltaT){
+        List<Pedestrian> arrived = new LinkedList<>();
+        this.pedestrians.forEach(pedestrian -> {
+            pedestrian.update(deltaT);
+            checkTargetCollisions(pedestrian, arrived::add);
+        });
+        // snapshot
+        List<Pedestrian> returned = List.copyOf(pedestrians);
+        arrived.forEach(this::removePedestrian);
+
+        return returned;
+    }
+
+    public boolean allPedestriansLeft(){
+        return pedestrians.isEmpty();
+    }
+
+    public void updateCollisions(double deltaT){
+
         for(int i = 0; i < M; i++){
             for(int j = 0; j < M; j++){
                 Cell curr = this.grid[i][j];
@@ -176,15 +210,14 @@ public class Grid {
                     for(Pedestrian pedestrian: curr.getPedestrians()){
                         auxSet.remove(pedestrian);
 
-                        addNeighbours(pedestrian,auxSet);
+                        addCollisions(pedestrian,auxSet);
                         addWallCollisions(pedestrian);
                     }
-               }
+                }
             }
         }
         this.pedestrians.forEach((p) -> p.updateCollisions(deltaT, vdMax, rMin, rMax, B, tau));
     }
-
     public void addWallCollisions(Pedestrian pedestrian){
         this.walls.forEach(wall -> addWall(pedestrian,wall));
     }
@@ -195,12 +228,13 @@ public class Grid {
         return new Pair<>(gridI,gridJ);
     }
 
-    public void addNeighbours(Pedestrian pedestrian, Set<Pedestrian> cellPedestrians) {
-        cellPedestrians.forEach(p -> addNeighbour(pedestrian,p));
+    public void addCollisions(Pedestrian pedestrian, Set<Pedestrian> cellPedestrians) {
+        cellPedestrians.forEach(p -> {
+            if(!p.equals(pedestrian)){
+                addNeighbour(pedestrian, p);
+            }
+        });
     }
-
-
-
 
     public List<Cell> getCellNeighbours(List<int[]> directions,int i, int j){
         List<Cell> cells = new ArrayList<>();
