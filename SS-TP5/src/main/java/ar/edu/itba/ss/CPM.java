@@ -23,7 +23,7 @@ public class CPM {
 
     public CPM(CPMConfig config) {
 
-        this.grid = new Grid(config, true);
+        this.grid = new Grid(config);
         this.snapshots = new ArrayList<>();
     }
 

@@ -24,13 +24,13 @@ public class Grid {
     private final double                    entranceLength;
 
     private final Cell[][]                  grid;
-    private final List<Pedestrian>          pedestrians;
+    private List<Pedestrian>          pedestrians;
     private final List<Wall>                walls;
 
     private final Target                    FIRST_TARGET;
     private final Target                    SECOND_TARGET;
 
-    public Grid(CPMConfig config,boolean generate){
+    public Grid(CPMConfig config){
         this.L                              = config.getL();
         this.rMin                           = config.getrMin();
         this.rMax                           = config.getrMax();
@@ -55,17 +55,16 @@ public class Grid {
                                                 2
                                             );
 
-        if(generate){
-            this.pedestrians = generatePedestrians(config);
-        }else{
-            this.pedestrians = new LinkedList<>();
-        }
+        this.pedestrians = new LinkedList<>();
+
+
 
         for(int i = 0; i < My; i++){
             for(int j = 0; j < Mx; j++){
                 this.grid[i][j] = new Cell();
             }
         }
+        generatePedestrians(config);
     }
 
     private List<Wall> initWalls() {
@@ -78,12 +77,10 @@ public class Grid {
         );
     }
 
-    public List<Pedestrian> generatePedestrians(CPMConfig config){
+    public void generatePedestrians(CPMConfig config){
         Random r = new Random();
         double deltaPos = (L-rMin-0.01);
-        List<Pedestrian> pedestrians = new LinkedList<>();
 
-        Grid grid = new Grid(config,false);
         long N = config.getN();
         int i = 0;
         int iter = 0;
@@ -96,13 +93,13 @@ public class Grid {
             double posY = r.nextDouble()*deltaPos+rMin;
             Pedestrian pedestrian = new Pedestrian(i,new Point2D.Double(posX,posY),rMin,config.getVe(), FIRST_TARGET);
 
-            int[] index = grid.addPedestrian(pedestrian);
+            int[] index = addPedestrian(pedestrian);
             System.out.println("adding pedestrian: "+ pedestrian);
-            grid.addNeighboursForPedestrian(pedestrian, index[0], index[1]);
+            addNeighboursForPedestrian(pedestrian, index[0], index[1]);
             if (pedestrian.hasCollisions()) {
-                System.out.println("has collisions: "+grid.pedestrians);
-                grid.removePedestrian(pedestrian);
-                grid.pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
+                System.out.println("has collisions: "+pedestrians);
+                removePedestrian(pedestrian);
+                pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
 
 
             } else {
@@ -114,7 +111,7 @@ public class Grid {
 
         }
 
-        return pedestrians;
+
     }
 
     public int[] addPedestrian(Pedestrian pedestrian){
