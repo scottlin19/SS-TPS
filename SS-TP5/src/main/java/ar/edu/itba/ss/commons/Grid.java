@@ -12,9 +12,10 @@ import java.util.function.Consumer;
 
 public class Grid {
 
+    private static final int SECOND_TARGET_DISTANCE = 10;
 
     private final double                    L;
-    private final int                       M;
+    private final int                       Mx, My;
     private final double                    cellLong;
     private final double                    rMin,rMax;
     private final double                    vdMax;
@@ -37,28 +38,31 @@ public class Grid {
         this.B                              = config.getB();
         this.tau                            = config.getTau();
         this.entranceLength                 = config.getEntranceLength();
-        this.M                              = (int) Math.floor((L / rMax ));
-        this.cellLong                       = L / M;
-        this.grid                           = new Cell[M][M];
+        this.Mx                              = (int) Math.floor((L / rMax )); // ancho
+        this.My                              = (int) Math.floor(((L + SECOND_TARGET_DISTANCE) / rMax )); // largo
+        System.out.println("Mx: " + Mx + ", My:" + My);
+        this.cellLong                       = L / Mx;
+        this.grid                           = new Cell[My][Mx];
         this.walls                          = initWalls();
-        this.FIRST_TARGET = new Target(
-            new Point2D.Double(L/2 - entranceLength/2 + 0.1, L),
-            new Point2D.Double(L/2 + entranceLength/2 - 0.1, L),
-            1
-        );
-        this.SECOND_TARGET = new Target(
-            new Point2D.Double(L/2 - 1.5, L+10),
-            new Point2D.Double(L/2 + 1.5, L+10),
-            2
-        );
+        this.FIRST_TARGET                   = new Target(
+                                                new Point2D.Double(L/2 - entranceLength/2 + 0.1, L),
+                                                new Point2D.Double(L/2 + entranceLength/2 - 0.1, L),
+                                                1
+                                            );
+        this.SECOND_TARGET                  = new Target(
+                                                new Point2D.Double(L/2 - 1.5, L + SECOND_TARGET_DISTANCE),
+                                                new Point2D.Double(L/2 + 1.5, L + SECOND_TARGET_DISTANCE),
+                                                2
+                                            );
 
         if(generate){
             this.pedestrians = generatePedestrians(config);
         }else{
-            this.pedestrians                    = new LinkedList<>();
+            this.pedestrians = new LinkedList<>();
         }
-        for(int i = 0; i < M; i++){
-            for(int j = 0; j < M; j++){
+
+        for(int i = 0; i < My; i++){
+            for(int j = 0; j < Mx; j++){
                 this.grid[i][j] = new Cell();
             }
         }
@@ -126,6 +130,7 @@ public class Grid {
         pedestrians.remove(pedestrian);
         int gridI =(int) (Math.floor(pedestrian.getPosY()/cellLong));
         int gridJ = (int) (Math.floor(pedestrian.getPosX()/cellLong));
+        System.out.println("grid pos: " + gridI + "," + gridJ);
         Cell cell = getCellFromGrid(gridI,gridJ);
         cell.getPedestrians().remove(pedestrian);
     }
@@ -134,6 +139,7 @@ public class Grid {
         Set<Pedestrian> auxSet = new HashSet<>();
         getCellNeighbours(CIMDirections,gridI,gridJ).forEach(c -> auxSet.addAll(c.getPedestrians()));
         addCollisions(particle,auxSet);
+        addWallCollisions(particle);
     }
 
 
@@ -152,8 +158,8 @@ public class Grid {
 
 
     public void clearGrid(){
-        for(int i = 0; i < M; i++){
-            for(int j = 0; j < M; j++){
+        for(int i = 0; i < My; i++){
+            for(int j = 0; j < Mx; j++){
                 grid[i][j].getPedestrians().clear();
             }
         }
@@ -200,15 +206,17 @@ public class Grid {
 
     public void updateCollisions(double deltaT){
 
-        for(int i = 0; i < M; i++){
-            for(int j = 0; j < M; j++){
+        for(int i = 0; i < My; i++){
+            for(int j = 0; j < Mx; j++){
                 Cell curr = this.grid[i][j];
+                System.out.println(curr);
                 if(curr.hasPedestrians()){
                     Set<Pedestrian> auxSet = new HashSet<>(curr.getPedestrians());
                     getCellNeighbours(CIMDirections,i,j).forEach(c -> auxSet.addAll(c.getPedestrians()));
 
                     for(Pedestrian pedestrian: curr.getPedestrians()){
                         auxSet.remove(pedestrian);
+                        System.out.println("updating collisions for p: " + pedestrian.getId() + ", posibles: " + auxSet);
 
                         addCollisions(pedestrian,auxSet);
                         addWallCollisions(pedestrian);
@@ -241,7 +249,7 @@ public class Grid {
         for (int[] dir : directions){
             int di = i+dir[0];
             int dj = j+dir[1];
-            if(dj < 0 || dj >= this.M || di < 0 || di >= this.M) {
+            if(dj < 0 || dj >= this.Mx || di < 0 || di >= this.My) {
                 continue;
             }
             cells.add(this.grid[di][dj]);
@@ -255,8 +263,8 @@ public class Grid {
         pedestrians.forEach(System.out::println);
     }
     public void printGrid(){
-        for(int i = 0; i < M; i++){
-            for(int j = 0; j < M; j++){
+        for(int i = 0; i < My; i++){
+            for(int j = 0; j < Mx; j++){
                 Cell curr = this.grid[i][j];
                 if(curr.hasPedestrians()){
                     Set<Pedestrian> pedestrians = curr.getPedestrians();

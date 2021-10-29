@@ -41,6 +41,7 @@ public class Pedestrian {
 
     public static void addNeighbour(Pedestrian p1, Pedestrian p2) {
         if(intersects(p1,p2)){
+            System.out.println("Pedestrians (" + p1.id + "," + p2.id + ") collide");
             p1.addCollision(p2.pos);
             p2.addCollision(p1.pos);
         }
@@ -62,6 +63,7 @@ public class Pedestrian {
     }
 
     public void updateCollisions(double deltaT, double VdMax, double rMin, double rMax, int B, double tau) {
+        System.out.println("For pedestrian: " + id + " - Collisions are: " + collisions);
         Point2D.Double p = null;
         if(collisions.isEmpty()){
             p = getDesiredVelocity(VdMax, rMin, rMax, B);
@@ -114,8 +116,8 @@ public class Pedestrian {
     }
 
     public Point2D.Double getDirectionVersor(Point2D.Double other){
-        double diffX = pos.x - other.x;
-        double diffY = pos.y - other.y;
+        double diffX = other.x - pos.x;
+        double diffY = other.y - pos.y;
         double mod = Math.sqrt(Math.pow(diffX,2) + Math.pow(diffY,2));
         return new Point2D.Double(diffX/mod,diffY/mod);
     }

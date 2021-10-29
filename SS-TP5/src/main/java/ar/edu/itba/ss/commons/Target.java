@@ -25,10 +25,10 @@ public class Target extends Wall{
         if(pX < from || pX > to){
             Random r = new Random();
             double x = r.nextDouble()*(to-from) + from;
-            System.out.println("CLOSETS POINT: "+new Point2D.Double(x,p1.y));
+//            System.out.println("CLOSETS POINT: "+new Point2D.Double(x,p1.y));
             return new Point2D.Double(x,p1.y);
         }else{
-            System.out.println("CLOSETS POINT:"+ new Point2D.Double(pX,p1.y));
+//            System.out.println("CLOSETS POINT:"+ new Point2D.Double(pX,p1.y));
             return new Point2D.Double(pX,p1.y);
         }
     }
