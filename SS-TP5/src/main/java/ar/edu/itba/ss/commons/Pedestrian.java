@@ -41,7 +41,7 @@ public class Pedestrian {
 
     public static void addNeighbour(Pedestrian p1, Pedestrian p2) {
         if(intersects(p1,p2)){
-            System.out.println("Pedestrians (" + p1.id + "," + p2.id + ") collide");
+            //System.out.println("Pedestrians (" + p1.id + "," + p2.id + ") collide");
             p1.addCollision(p2.pos);
             p2.addCollision(p1.pos);
         }
@@ -63,15 +63,18 @@ public class Pedestrian {
     }
 
     public void updateCollisions(double deltaT, double VdMax, double rMin, double rMax, int B, double tau) {
-        System.out.println("For pedestrian: " + id + " - Collisions are: " + collisions);
-        Point2D.Double p = null;
+       // System.out.println("For pedestrian: " + id + " - Collisions are: " + collisions);
+        Point2D.Double p;
         if(collisions.isEmpty()){
+
             p = getDesiredVelocity(VdMax, rMin, rMax, B);
+           // System.out.println("DESIRED VEL: "+p);
             Vd.setLocation(p);
             incrementRadius(rMax / (tau/deltaT), rMax);
         }
         else {
             p = getEscapeVelocity(collisions);
+            //System.out.println("ESCAPE VEL: "+p);
             Vd.setLocation(p);
             radius = rMin;
         }
@@ -89,7 +92,7 @@ public class Pedestrian {
     // Vector
     public Point2D.Double getDesiredVelocity(double VdMax, double rMin, double rMax, int B) {
         double velMod = VdMax * Math.pow((radius - rMin) / (rMax - rMin), B);
-        Point2D.Double desiredDirection = getDirectionVersor(desiredPosition);
+        Point2D.Double desiredDirection = getDirectionVersor(pos,desiredPosition);
         desiredDirection.x *= velMod;
         desiredDirection.y *= velMod;
         return desiredDirection;
@@ -97,7 +100,7 @@ public class Pedestrian {
 
     // Vector
     public Point2D.Double getEscapeVelocity(List<Point2D.Double> contacts) {
-        List<Point2D.Double> contactDirs = contacts.stream().map(this::getDirectionVersor).collect(Collectors.toList());
+        List<Point2D.Double> contactDirs = contacts.stream().map(c-> getDirectionVersor(c,pos)).collect(Collectors.toList());
         double sumX = contactDirs.stream().mapToDouble(Point2D.Double::getX).sum();
         double sumY = contactDirs.stream().mapToDouble(Point2D.Double::getY).sum();
         double mod = Math.sqrt(Math.pow(sumX, 2) + Math.pow(sumY, 2));
@@ -115,9 +118,9 @@ public class Pedestrian {
         }
     }
 
-    public Point2D.Double getDirectionVersor(Point2D.Double other){
-        double diffX = other.x - pos.x;
-        double diffY = other.y - pos.y;
+    public Point2D.Double getDirectionVersor(Point2D.Double  from,Point2D.Double other){
+        double diffX = other.x - from.x;
+        double diffY = other.y - from.y;
         double mod = Math.sqrt(Math.pow(diffX,2) + Math.pow(diffY,2));
         return new Point2D.Double(diffX/mod,diffY/mod);
     }

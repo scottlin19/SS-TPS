@@ -100,18 +100,18 @@ public class Grid {
                 System.out.println("has collisions: "+pedestrians);
                 removePedestrian(pedestrian);
                 pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
-
-
             } else {
                 i++;
                 iter = 0;
-                pedestrians.add(pedestrian);
+
             }
             System.out.printf("i = %d, iter = %d\n",i,iter);
 
         }
+    }
 
-
+    public List<Pedestrian> getPedestrians() {
+        return pedestrians;
     }
 
     public int[] addPedestrian(Pedestrian pedestrian){
@@ -134,7 +134,7 @@ public class Grid {
 
     public void addNeighboursForPedestrian(Pedestrian particle, int gridI, int gridJ){
         Set<Pedestrian> auxSet = new HashSet<>();
-        getCellNeighbours(CIMDirections,gridI,gridJ).forEach(c -> auxSet.addAll(c.getPedestrians()));
+        getCellNeighbours(ALLDirections,gridI,gridJ).forEach(c -> auxSet.addAll(c.getPedestrians()));
         addCollisions(particle,auxSet);
         addWallCollisions(particle);
     }
@@ -166,11 +166,28 @@ public class Grid {
         clearGrid();
         completeGrid();
     }
+    private final static List<int[]> ALLDirections = new LinkedList<>(){{
+        add(new int[]{0,0});
+
+        add(new int[]{0,-1});
+        add(new int[]{0,1});
+
+        add(new int[]{1,0});
+        add(new int[]{-1,0});
+
+        add(new int[]{1,1});
+        add(new int[]{1,-1});
+
+        add(new int[]{-1,1});
+        add(new int[]{-1,-1});
+
+
+    }};
 
     private final static List<int[]> CIMDirections = new LinkedList<>(){{
         add(new int[]{0,-1});
         add(new int[]{1,-1});
-        add(new int[]{0,0});
+
         add(new int[]{1,0});
         add(new int[]{1,1});
     }};
@@ -206,14 +223,14 @@ public class Grid {
         for(int i = 0; i < My; i++){
             for(int j = 0; j < Mx; j++){
                 Cell curr = this.grid[i][j];
-                System.out.println(curr);
+
                 if(curr.hasPedestrians()){
                     Set<Pedestrian> auxSet = new HashSet<>(curr.getPedestrians());
                     getCellNeighbours(CIMDirections,i,j).forEach(c -> auxSet.addAll(c.getPedestrians()));
 
                     for(Pedestrian pedestrian: curr.getPedestrians()){
                         auxSet.remove(pedestrian);
-                        System.out.println("updating collisions for p: " + pedestrian.getId() + ", posibles: " + auxSet);
+                        //System.out.println("updating collisions for p: " + pedestrian.getId() + ", posibles: " + auxSet);
 
                         addCollisions(pedestrian,auxSet);
                         addWallCollisions(pedestrian);
@@ -221,7 +238,8 @@ public class Grid {
                 }
             }
         }
-        this.pedestrians.forEach((p) -> p.updateCollisions(deltaT, vdMax, rMin, rMax, B, tau));
+        System.out.println("pedestrians: "+pedestrians);
+        this.pedestrians.forEach(p -> p.updateCollisions(deltaT, vdMax, rMin, rMax, B, tau));
     }
     public void addWallCollisions(Pedestrian pedestrian){
         this.walls.forEach(wall -> addWall(pedestrian,wall));
@@ -263,13 +281,15 @@ public class Grid {
         for(int i = 0; i < My; i++){
             for(int j = 0; j < Mx; j++){
                 Cell curr = this.grid[i][j];
+
                 if(curr.hasPedestrians()){
                     Set<Pedestrian> pedestrians = curr.getPedestrians();
+                    System.out.printf("CELL[%d][%d]="+pedestrians+"\n",i,j);
                     for(Pedestrian pedestrian: pedestrians){
                         System.out.println(pedestrian);
                     }
                 }
-                System.out.println("###############################################################################");
+
             }
         }
     }

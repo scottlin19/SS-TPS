@@ -30,12 +30,13 @@ public class CPM {
     public SimulationResult simulate(double deltaT,int step) {
         double time = 0;
         int i = 0;
-        while(!grid.allPedestriansLeft() && time < 10){
+        while(!grid.allPedestriansLeft() && time < 60){
+
             List<Pedestrian> pedestrians = grid.updatePedestrians(deltaT);
             if(i % step == 0){
                 snapshots.add(new SimulationSnapshot(pedestrians, time));
             }
-
+            grid.updateGrid();
             grid.updateCollisions(deltaT);
             time += deltaT;
             i++;
