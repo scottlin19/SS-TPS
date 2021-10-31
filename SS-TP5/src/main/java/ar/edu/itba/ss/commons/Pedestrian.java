@@ -54,15 +54,7 @@ public class Pedestrian {
         }
     }
 
-    public boolean hasCollisions(){
-        return !collisions.isEmpty();
-    }
-
-    public void clearCollisions(){
-        this.collisions.clear();
-    }
-
-    public void updateCollisions(double deltaT, double VdMax, double rMin, double rMax, int B, double tau) {
+    public void updateCollisions(double deltaT, double VdMax, double rMin, double rMax, double B, double tau) {
        // System.out.println("For pedestrian: " + id + " - Collisions are: " + collisions);
         Point2D.Double p;
         if(collisions.isEmpty()){
@@ -90,7 +82,7 @@ public class Pedestrian {
     }
 
     // Vector
-    public Point2D.Double getDesiredVelocity(double VdMax, double rMin, double rMax, int B) {
+    public Point2D.Double getDesiredVelocity(double VdMax, double rMin, double rMax, double B) {
         double velMod = VdMax * Math.pow((radius - rMin) / (rMax - rMin), B);
         Point2D.Double desiredDirection = getDirectionVersor(pos,desiredPosition);
         desiredDirection.x *= velMod;
@@ -129,6 +121,14 @@ public class Pedestrian {
     public void updateTarget(Target target) {
         this.target = target;
         this.desiredPosition = target.getClosestPoint(pos);
+    }
+
+    public boolean hasCollisions(){
+        return !collisions.isEmpty();
+    }
+
+    public void clearCollisions(){
+        this.collisions.clear();
     }
 
     /* ---------------- GETTERS, SETTERS, EQUALS, HASH, TOSTRING ---------------- */

@@ -20,28 +20,30 @@ public class CPM {
 
     private final Grid                          grid;
     private final List<SimulationSnapshot>      snapshots;
+    private final double                        maxTime;
 
     public CPM(CPMConfig config) {
 
         this.grid = new Grid(config);
         this.snapshots = new ArrayList<>();
+        this.maxTime = config.getMaxTime();
     }
 
     public SimulationResult simulate(double deltaT,int step) {
         double time = 0;
         int i = 0;
-        while(!grid.allPedestriansLeft() && time < 60){
+        while(!grid.allPedestriansLeft() && time < maxTime){
 
-            List<Pedestrian> pedestrians = grid.updatePedestrians(deltaT);
+            Grid.GridStatus status = grid.updatePedestrians(deltaT);
             if(i % step == 0){
-                snapshots.add(new SimulationSnapshot(pedestrians, time));
+                snapshots.add(new SimulationSnapshot(status.getCurrent(), status.getExited(), time));
             }
             grid.updateGrid();
             grid.updateCollisions(deltaT);
             time += deltaT;
             i++;
         }
-        return new SimulationResult(snapshots, time - deltaT);
+        return new SimulationResult(snapshots, grid.getWalls(),time - deltaT);
     }
 
     public static void main(String[] args) throws IOException {
@@ -60,6 +62,6 @@ public class CPM {
         jsonWriter.createFile(result, RESULTS_DIRECTORY + "simulation.json");
 
         XYZWriter xyzWriter = new XYZWriter();
-        xyzWriter.createFile(result,RESULTS_DIRECTORY + "simulation.exyz");
+        xyzWriter.createFile(result,RESULTS_DIRECTORY + "simulation");
     }
 }

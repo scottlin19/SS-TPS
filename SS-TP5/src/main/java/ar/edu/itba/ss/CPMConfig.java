@@ -26,7 +26,7 @@ public class CPMConfig {
     private long N;
 
     @JsonProperty("B")
-    private int B;
+    private double B;
 
     @JsonProperty("entranceLength")
     private double entranceLength;
@@ -34,13 +34,16 @@ public class CPMConfig {
     @JsonProperty("K")
     private int K;
 
+    @JsonProperty("maxTime")
+    private double maxTime;
+
     public CPMConfig(){
 
     }
 
-    public CPMConfig(double VdMax,double L, double Ve, double rMin, double rMax, double tau , long N,int B, double entranceLength,int K) {
-        this.L = L;
+    public CPMConfig(double VdMax,double L, double Ve, double rMin, double rMax, double tau , long N, double B, double entranceLength,int K, double maxTime) {
         this.VdMax = VdMax;
+        this.L = L;
         this.Ve = Ve;
         this.rMin = rMin;
         this.rMax = rMax;
@@ -49,6 +52,7 @@ public class CPMConfig {
         this.B = B;
         this.entranceLength = entranceLength;
         this.K = K;
+        this.maxTime = maxTime;
     }
 
     public double getL() {
@@ -107,11 +111,11 @@ public class CPMConfig {
         N = n;
     }
 
-    public int getB() {
+    public double getB() {
         return B;
     }
 
-    public void setB(int b) {
+    public void setB(double b) {
         B = b;
     }
 
@@ -129,5 +133,13 @@ public class CPMConfig {
 
     public void setK(int k) {
         K = k;
+    }
+
+    public double getMaxTime() {
+        return maxTime;
+    }
+
+    public void setMaxTime(double maxTime) {
+        this.maxTime = maxTime;
     }
 }

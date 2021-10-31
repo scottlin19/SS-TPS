@@ -5,10 +5,12 @@ import java.util.List;
 public class SimulationResult {
     private final double                    totalTime;
     private final List<SimulationSnapshot>  snapshots;
+    private final List<Wall>             walls;
 
-    public SimulationResult(List<SimulationSnapshot> snapshots ,double totalTime) {
+    public SimulationResult(List<SimulationSnapshot> snapshots ,List<Wall> walls,double totalTime) {
         this.snapshots = snapshots;
         this.totalTime = totalTime;
+        this.walls = walls;
     }
 
     public double getTotalTime() {
@@ -17,5 +19,9 @@ public class SimulationResult {
 
     public List<SimulationSnapshot> getSnapshots() {
         return snapshots;
+    }
+
+    public List<Wall> getWalls(){
+        return this.walls;
     }
 }

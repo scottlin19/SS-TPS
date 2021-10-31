@@ -7,6 +7,7 @@ import java.io.File;
 public class JSONWriter<T> implements OutputFileWriter<T> {
     @Override
     public void createFile(T result,String outPath) {
+        createDirs(outPath);
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File(addExtension(outPath)), result);

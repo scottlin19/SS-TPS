@@ -19,7 +19,7 @@ public class Grid {
     private final double                    cellLong;
     private final double                    rMin,rMax;
     private final double                    vdMax;
-    private final int                       B;
+    private final double                       B;
     private final double                    tau;
     private final double                    entranceLength;
 
@@ -40,7 +40,7 @@ public class Grid {
         this.entranceLength                 = config.getEntranceLength();
         this.Mx                              = (int) Math.floor((L / rMax )); // ancho
         this.My                              = (int) Math.floor(((L + SECOND_TARGET_DISTANCE) / rMax )); // largo
-        System.out.println("Mx: " + Mx + ", My:" + My);
+//        System.out.println("Mx: " + Mx + ", My:" + My);
         this.cellLong                       = L / Mx;
         this.grid                           = new Cell[My][Mx];
         this.walls                          = initWalls();
@@ -57,14 +57,13 @@ public class Grid {
 
         this.pedestrians = new LinkedList<>();
 
-
-
         for(int i = 0; i < My; i++){
             for(int j = 0; j < Mx; j++){
                 this.grid[i][j] = new Cell();
             }
         }
         generatePedestrians(config);
+        System.out.println("Pedestrian amount: " + this.pedestrians.size());
     }
 
     private List<Wall> initWalls() {
@@ -94,10 +93,10 @@ public class Grid {
             Pedestrian pedestrian = new Pedestrian(i,new Point2D.Double(posX,posY),rMin,config.getVe(), FIRST_TARGET);
 
             int[] index = addPedestrian(pedestrian);
-            System.out.println("adding pedestrian: "+ pedestrian);
+//            System.out.println("adding pedestrian: "+ pedestrian);
             addNeighboursForPedestrian(pedestrian, index[0], index[1]);
             if (pedestrian.hasCollisions()) {
-                System.out.println("has collisions: "+pedestrians);
+//                System.out.println("has collisions: "+pedestrians);
                 removePedestrian(pedestrian);
                 pedestrians.stream().filter(Pedestrian::hasCollisions).forEach(Pedestrian::clearCollisions);
             } else {
@@ -105,10 +104,12 @@ public class Grid {
                 iter = 0;
 
             }
-            System.out.printf("i = %d, iter = %d\n",i,iter);
+//            System.out.printf("i = %d, iter = %d\n",i,iter);
 
         }
     }
+
+
 
     public List<Pedestrian> getPedestrians() {
         return pedestrians;
@@ -127,7 +128,7 @@ public class Grid {
         pedestrians.remove(pedestrian);
         int gridI =(int) (Math.floor(pedestrian.getPosY()/cellLong));
         int gridJ = (int) (Math.floor(pedestrian.getPosX()/cellLong));
-        System.out.println("grid pos: " + gridI + "," + gridJ);
+//        System.out.println("grid pos: " + gridI + "," + gridJ);
         Cell cell = getCellFromGrid(gridI,gridJ);
         cell.getPedestrians().remove(pedestrian);
     }
@@ -162,6 +163,10 @@ public class Grid {
         }
     }
 
+    public List<Wall> getWalls(){
+        return this.walls;
+    }
+
     public void updateGrid(){
         clearGrid();
         completeGrid();
@@ -192,26 +197,48 @@ public class Grid {
         add(new int[]{1,1});
     }};
 
-    private void checkTargetCollisions(Pedestrian p, Consumer<Pedestrian> callback){
+    private void checkTargetCollisions(Pedestrian p, Consumer<Pedestrian> exited_callback, Consumer<Pedestrian> arrived_callback){
         if(p.getTarget().equals(FIRST_TARGET) && FIRST_TARGET.checkCollision(p)){
             p.updateTarget(SECOND_TARGET);
+            exited_callback.accept(p);
         }
         else if(p.getTarget().equals(SECOND_TARGET) && SECOND_TARGET.checkCollision(p)){
-            callback.accept(p);
+            arrived_callback.accept(p);
         }
     }
-
-    public List<Pedestrian> updatePedestrians(double deltaT){
+//    private static int amount = 0;
+    public GridStatus updatePedestrians(double deltaT){
         List<Pedestrian> arrived = new LinkedList<>();
+        List<Pedestrian> exited = new LinkedList<>();
         this.pedestrians.forEach(pedestrian -> {
             pedestrian.update(deltaT);
-            checkTargetCollisions(pedestrian, arrived::add);
+            checkTargetCollisions(pedestrian, exited::add, arrived::add);
         });
+//        amount += exited.size();
+//        System.out.println("exited amount: " +  amount);
         // snapshot
         List<Pedestrian> returned = List.copyOf(pedestrians);
         arrived.forEach(this::removePedestrian);
 
-        return returned;
+        return new GridStatus(returned, exited);
+    }
+
+    public static class GridStatus{
+        private final List<Pedestrian> current;
+        private final List<Pedestrian> exited;
+
+        public GridStatus(List<Pedestrian> current, List<Pedestrian> exited) {
+            this.current = current;
+            this.exited = exited;
+        }
+
+        public List<Pedestrian> getCurrent() {
+            return current;
+        }
+
+        public List<Pedestrian> getExited() {
+            return exited;
+        }
     }
 
     public boolean allPedestriansLeft(){
@@ -238,7 +265,7 @@ public class Grid {
                 }
             }
         }
-        System.out.println("pedestrians: "+pedestrians);
+//        System.out.println("pedestrians: "+pedestrians);
         this.pedestrians.forEach(p -> p.updateCollisions(deltaT, vdMax, rMin, rMax, B, tau));
     }
     public void addWallCollisions(Pedestrian pedestrian){
