@@ -16,37 +16,100 @@ font = {
 plt.rc('font', **font)
 
 def ej1(json):
-    timeToArrived = {}
     for i,iteration in enumerate(json):
-        # for snapshot in iteration:
-        #     if(timeToArrived.get(snapshot['time']) == None):
-        #         timeToArrived[snapshot['time']] = list()
-        #     timeToArrived[snapshot['time']].append(snapshot['acumExited'])
         times = list(map(lambda snapshot: snapshot['time'], iteration))
         arrives = list(map(lambda snapshot: snapshot['acumExited'], iteration))
         plt.plot(times, arrives, '-o', label=f"simulation {i}")
     plt.legend()
+    plt.ylabel("Cantidad de particulas")
+    plt.xlabel("tiempo (s)")
     plt.show()
+
+
+def ej2(json):
+    timeToArrived = {}
+    for iteration in json:
+        for snapshot in iteration:
+            if(timeToArrived.get(snapshot['acumExited']) == None):
+                timeToArrived[snapshot['acumExited']] = list()
+            timeToArrived[snapshot['acumExited']].append(snapshot['time'])
+    means = []
+    std_dev = []
+    amounts = list(timeToArrived.keys())
+    for amount in amounts:
+        means.append(np.mean(np.array(timeToArrived[amount])))
+        std_dev.append(np.std(np.array(timeToArrived[amount])))
+    plt.errorbar(amounts, means , yerr=std_dev, fmt='o')
+    plt.ylabel("Cantidad de particulas")
+    plt.xlabel("tiempo promedio (s)")
+    plt.show()
+    plt.errorbar(means, amounts, xerr=std_dev, fmt='o')
+    plt.ylabel("Cantidad de particulas")
+    plt.xlabel("tiempo promedio (s)")
+    plt.show()
+    Qs, times = calculateQ(json[0])
+    plt.plot(times, Qs)
+    plt.show()
+
+def calculateQ (iteration):
+    Qs = []
+    times = []
+
+    for i,snapshot in enumerate(iteration):
+        if(i > 0):
+            prev = iteration[i-1]['acumExited']
+            curr = iteration[i]['acumExited']
+            time = snapshot['time']
+            Qs.append((curr - prev)/time)
+            times.append(time)
+
+    return Qs,times
+    
+        
 
 def ej3(json):
     for iteration in json:
-        D = iteration['D']
-        N = iteration['N']
+        print("Itero xD")
+        D = iteration['d']
+        N = iteration['n']
         results = iteration['results']
-        for result in results:
-            snapshots = result['snapshots']
-            
-
-        
+        Qs,times = calculateQProm(results,"exited")
+        Qs = Qs[::20]
+        times = times[::20]
+   
+        print(f"ahora ploteo xD QLEN= {len(Qs)} TIMES LEN = {len(times)}" )
+        plt.plot(Qs,times, label=f"d = {D}, N = {N}")
+        print(f"ya plotié")
+        break
+    plt.legend()
+    plt.ylabel("Q promedio (?)")
+    plt.xlabel("tiempo (s)")
     plt.show()
+    
 
-def calculateQ (result):
-    snapshots = result['snapshots']
-    dNs = []
-    for i in range(len(snapshots)):
+def calculateQProm (results, exitedField):
+ 
+    times = []
+    QProms = np.array([])
+    print("Arrancó QProm")
+    for i, result in enumerate(results):
+        snapshots = result['snapshots']
+        Qs = np.array([])
+        for j in range(len(snapshots)-1):
+            next = snapshots[j+1]
+            curr = snapshots[j]
+            nextExited = len(next[exitedField])
+            currExited = len(curr[exitedField])
+            dN = nextExited-currExited
+            time = next['time']
+            Qs.append(dN/time)
+            if i == 0:
+                times.append(time)
         
-
-
+    print("Terminó QProm")
+    return Qs,times
+    
+        
 
 def get_jsons_in_folder(dir):
     jsons = []
@@ -70,3 +133,9 @@ if __name__ == "__main__":
     if choice == "1":
         json = get_jsons_in_folder(dirs[0])[0]
         ej1(json)
+    elif choice == "2":
+        json = get_jsons_in_folder(dirs[0])[0]
+        ej2(json)
+    elif choice == "3":
+        json = get_jsons_in_folder(dirs[0])[0]
+        ej3(json)
