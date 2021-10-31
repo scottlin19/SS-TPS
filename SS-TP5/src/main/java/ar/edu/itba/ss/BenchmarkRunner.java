@@ -2,9 +2,6 @@ package ar.edu.itba.ss;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import ar.edu.itba.ss.commons.PedestrianDTO;
 import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 import ar.edu.itba.ss.writers.JSONWriter;
@@ -45,6 +42,7 @@ public class BenchmarkRunner {
                     acum += snapshot.getExited().size();
                     iteration.add(new ExitedAndTime(
                         acum,
+                        snapshot.getExited().size(),
                         snapshot.getTime()
                     ));
                 }
@@ -59,11 +57,17 @@ public class BenchmarkRunner {
 
     public static class ExitedAndTime{
         private final int acumExited;
+        private final int exited;
         private final double time;
 
-        public ExitedAndTime(int acumExited, double time){
+        public ExitedAndTime(int acumExited, int exited, double time){
             this.acumExited = acumExited;
+            this.exited = exited;
             this.time = time;
+        }
+
+        public int getExited() {
+            return exited;
         }
 
         public int getAcumExited() {
@@ -137,7 +141,7 @@ public class BenchmarkRunner {
 
 
     public static void main(String[] args) {
-        //Ej 1
+        //Ej 1/2
         List<List<ExitedAndTime>> res = ej1(5);
         JSONWriter<List<List<ExitedAndTime>>> jsonWriter = new JSONWriter<>();
         jsonWriter.createFile(res, RESULTS_DIRECTORY + EJ1_DIRECTORY + "results");
