@@ -47,29 +47,81 @@ def ej2(json):
     plt.ylabel("Cantidad de particulas")
     plt.xlabel("tiempo promedio (s)")
     plt.show()
-    Qs, times = calculateQ(json[0])
-    plt.plot(times, Qs)
+    Qs, times, stdQs = calculateQProm(json)
+    # plt.plot(times, Qs)
+    plt.errorbar(times, Qs, yerr=stdQs, fmt='o')
+    plt.ylabel("Caudal (1/s)")
+    plt.xlabel("tiempo (s)")
+    # for iteration in json:
+    #     Qs, times = calculateQ (iteration, 2)
+    #     plt.plot(times, Qs)
     plt.show()
 
-def calculateQ (iteration):
+def calculateQProm(results):
+    totalQs = []
+    totalTimes = []
+    for simulation in results:
+        Qs, times = calculateQ(simulation, 2)
+        totalQs.append(np.array(Qs))
+        totalTimes.append(np.array(times))
+    _min = float('inf')
+    for times in totalTimes:
+        cur = times.shape[0]
+        if(cur < _min):
+            _min = cur
+    auxQs = []
+    # for Qs in totalQs:
+    #     auxQs.append(Qs[:_min])
+    # totalTimes = times[:_min]
+    totalQs = np.mean(np.array(auxQs), axis=0)
+    return totalQs, totalTimes, np.std(np.array(auxQs), axis=0)
+
+
+def calculateQ (iteration, dt):
     Qs = []
     times = []
-
-    for i,snapshot in enumerate(iteration):
-        if(i > 0):
-            prev = iteration[i-1]['acumExited']
-            curr = iteration[i]['acumExited']
-            time = snapshot['time']
-            Qs.append((curr - prev)/time)
-            times.append(time)
-
+    i = 0
+    prev_j = 0
+    total = len(iteration) - 1
+    timeStep = 0.2
+    while(prev_j < total):
+        acum = 0
+        target = i + dt
+        for j,snapshot in enumerate(iteration[prev_j:]):
+            if(snapshot['time'] >= i and snapshot['time'] <= target):
+                acum += snapshot['exited']
+            elif(snapshot['time'] > target):
+                break
+            elif(snapshot['time'] < i):
+                prev_j += 1
+        Qs.append(acum/dt)
+        times.append(i)
+        i += 1
     return Qs,times
     
-        
-
 def ej3(json):
     for iteration in json:
         print("Itero xD")
+        D = iteration['d']
+        N = iteration['n']
+        results = iteration['results']
+        Qs,times = calculateQProm(results)
+        Qs = Qs[::20]
+        times = times[::20]
+   
+        print(f"ahora ploteo xD QLEN= {len(Qs)} TIMES LEN = {len(times)}" )
+        plt.plot(Qs,times, label=f"d = {D}, N = {N}")
+        print(f"ya plotié")
+        break
+    plt.legend()
+    plt.ylabel("Q promedio (?)")
+    plt.xlabel("tiempo (s)")
+    plt.show()
+    
+
+
+def ej4(json):
+    for iteration in json:
         D = iteration['d']
         N = iteration['n']
         results = iteration['results']
@@ -85,31 +137,6 @@ def ej3(json):
     plt.ylabel("Q promedio (?)")
     plt.xlabel("tiempo (s)")
     plt.show()
-    
-
-def calculateQProm (results, exitedField):
- 
-    times = []
-    QProms = np.array([])
-    print("Arrancó QProm")
-    for i, result in enumerate(results):
-        snapshots = result['snapshots']
-        Qs = np.array([])
-        for j in range(len(snapshots)-1):
-            next = snapshots[j+1]
-            curr = snapshots[j]
-            nextExited = len(next[exitedField])
-            currExited = len(curr[exitedField])
-            dN = nextExited-currExited
-            time = next['time']
-            Qs.append(dN/time)
-            if i == 0:
-                times.append(time)
-        
-    print("Terminó QProm")
-    return Qs,times
-    
-        
 
 def get_jsons_in_folder(dir):
     jsons = []
@@ -139,3 +166,6 @@ if __name__ == "__main__":
     elif choice == "3":
         json = get_jsons_in_folder(dirs[0])[0]
         ej3(json)
+    elif choice == "4":
+        json = get_jsons_in_folder(dirs[0])[0]
+        ej4(json)

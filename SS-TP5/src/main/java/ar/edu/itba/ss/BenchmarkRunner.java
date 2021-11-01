@@ -14,21 +14,51 @@ public class BenchmarkRunner {
 
     private static final String EJ3_DIRECTORY           = "ej3/";
 
+    private static final CPMConfig PAPER_CONFIG_1 = new CPMConfig(
+        1.55,
+        20,
+        1.55,
+        0.15,
+        0.32,
+        0.5,
+        200,
+        0.9,
+        1.2,
+        1,
+        3600
+    );
+
+    private static final CPMConfig PAPER_CONFIG_2 = new CPMConfig(
+        0.95,
+        20,
+        0.95,
+        0.10,
+        0.37,
+        0.5,
+        200,
+        0.9,
+        1.2,
+        1,
+        3600
+    );
+
+    private static final CPMConfig CUSTOM_CONFIG = new CPMConfig(
+        2,
+        20,
+        2,
+        0.15,
+        0.32,
+        0.5,
+        200,
+        0.9,
+        1.2,
+        1,
+        3600
+    );
 
     public static List<List<ExitedAndTime>> ej1(final int iterations, boolean filter){
         final List<List<ExitedAndTime>> srs = new ArrayList<>();
-        double VdMax = 2.0;
-        int L = 20;
-        double Ve = 2.0;
-        double rMin = 0.15;
-        double rMax = 0.32;
-        double tau = 0.5;
-        int N = 200;
-        double B = 0.8;
-        double entranceLength = 1.2;
-        int K = 2;
-
-        CPMConfig config = new CPMConfig(VdMax,L,Ve,rMin,rMax,tau,N,B,entranceLength,K, 3600);
+        CPMConfig config = CUSTOM_CONFIG;
         double deltaT = config.getrMin()/(2*Math.max(config.getVdMax(),config.getVe()));
         CPM cpm;
         int step = 1;
@@ -142,21 +172,15 @@ public class BenchmarkRunner {
 
 
     public static void main(String[] args) {
-        //Ej 1
-        List<List<ExitedAndTime>> res = ej1(5, true);
+        //Ej 1/2
+        List<List<ExitedAndTime>> res = ej1(20, true);
         JSONWriter<List<List<ExitedAndTime>>> jsonWriter = new JSONWriter<>();
         jsonWriter.createFile(res, RESULTS_DIRECTORY + EJ1_DIRECTORY + "results");
 
-
-        //Ej 2
-        List<List<ExitedAndTime>> ej2res = ej1(5, false);
-        JSONWriter<List<List<ExitedAndTime>>> ej2JsonWriter = new JSONWriter<>();
-        ej2JsonWriter.createFile(ej2res, RESULTS_DIRECTORY + EJ2_DIRECTORY + "results");
-
         //Ej 3
-        List<Ej3Result> ej3res = ej3(3);
-        JSONWriter<List<Ej3Result>> ej3JsonWriter = new JSONWriter<>();
-        ej3JsonWriter.createFile(ej3res, RESULTS_DIRECTORY + EJ3_DIRECTORY + "results");
+//        List<Ej3Result> ej3res = ej3(3);
+//        JSONWriter<List<Ej3Result>> ej3JsonWriter = new JSONWriter<>();
+//        ej3JsonWriter.createFile(ej3res, RESULTS_DIRECTORY + EJ3_DIRECTORY + "results");
 
    }
 }
