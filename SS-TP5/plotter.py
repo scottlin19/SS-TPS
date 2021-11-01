@@ -70,9 +70,9 @@ def calculateQProm(results):
         if(cur < _min):
             _min = cur
     auxQs = []
-    # for Qs in totalQs:
-    #     auxQs.append(Qs[:_min])
-    # totalTimes = times[:_min]
+    for Qs in totalQs:
+        auxQs.append(Qs[:_min])
+    totalTimes = times[:_min]
     totalQs = np.mean(np.array(auxQs), axis=0)
     return totalQs, totalTimes, np.std(np.array(auxQs), axis=0)
 
