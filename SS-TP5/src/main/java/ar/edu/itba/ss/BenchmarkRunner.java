@@ -10,11 +10,12 @@ public class BenchmarkRunner {
 
     private static final String RESULTS_DIRECTORY       = "results/";
     private static final String EJ1_DIRECTORY           = "ej1/";
+    private static final String EJ2_DIRECTORY           = "ej2/";
 
     private static final String EJ3_DIRECTORY           = "ej3/";
 
 
-    public static List<List<ExitedAndTime>> ej1(final int iterations){
+    public static List<List<ExitedAndTime>> ej1(final int iterations, boolean filter){
         final List<List<ExitedAndTime>> srs = new ArrayList<>();
         double VdMax = 2.0;
         int L = 20;
@@ -38,7 +39,7 @@ public class BenchmarkRunner {
             int acum = 0;
             List<ExitedAndTime> iteration = new ArrayList<>();
             for(SimulationSnapshot snapshot : sr.getSnapshots()){
-                if(!snapshot.getExited().isEmpty()) {
+                if(!filter || !snapshot.getExited().isEmpty()) {
                     acum += snapshot.getExited().size();
                     iteration.add(new ExitedAndTime(
                         acum,
@@ -141,10 +142,16 @@ public class BenchmarkRunner {
 
 
     public static void main(String[] args) {
-        //Ej 1/2
-        List<List<ExitedAndTime>> res = ej1(5);
+        //Ej 1
+        List<List<ExitedAndTime>> res = ej1(5, true);
         JSONWriter<List<List<ExitedAndTime>>> jsonWriter = new JSONWriter<>();
         jsonWriter.createFile(res, RESULTS_DIRECTORY + EJ1_DIRECTORY + "results");
+
+
+        //Ej 2
+        List<List<ExitedAndTime>> ej2res = ej1(5, false);
+        JSONWriter<List<List<ExitedAndTime>>> ej2JsonWriter = new JSONWriter<>();
+        ej2JsonWriter.createFile(ej2res, RESULTS_DIRECTORY + EJ2_DIRECTORY + "results");
 
         //Ej 3
         List<Ej3Result> ej3res = ej3(3);

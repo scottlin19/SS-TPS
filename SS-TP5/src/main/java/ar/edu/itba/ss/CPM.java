@@ -32,15 +32,15 @@ public class CPM {
     public SimulationResult simulate(double deltaT,int step) {
         double time = 0;
         int i = 0;
+        snapshots.add(new SimulationSnapshot(grid.getPedestrians(), new ArrayList<>(), time));
         while(!grid.allPedestriansLeft() && time < maxTime){
-
+            time += deltaT;
             Grid.GridStatus status = grid.updatePedestrians(deltaT);
             if(i % step == 0){
                 snapshots.add(new SimulationSnapshot(status.getCurrent(), status.getExited(), time));
             }
             grid.updateGrid();
             grid.updateCollisions(deltaT);
-            time += deltaT;
             i++;
         }
         return new SimulationResult(snapshots, grid.getWalls(),time - deltaT);
