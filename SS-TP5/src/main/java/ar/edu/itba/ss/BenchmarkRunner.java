@@ -130,26 +130,28 @@ public class BenchmarkRunner {
             CPMConfig config = new CPMConfig(VdMax,L,Ve,rMin,rMax,tau,N,B,D,step, 60);
             double deltaT = config.getrMin()/(2*Math.max(config.getVdMax(),config.getVe()));
             CPM cpm;
-            List<ExitedAndTime> results = new ArrayList<>();
+            List<List<ExitedAndTime>> iteration = new ArrayList<>();
 
             for(int j = 0 ; j < iterations ; j++){
                 System.out.println("Iteration " + i);
                 cpm = new CPM(config);
                 SimulationResult sr = cpm.simulate(deltaT,step);
                 int acum = 0;
+                List<ExitedAndTime> exitedAndTimes = new ArrayList<>();
                 for(SimulationSnapshot snapshot : sr.getSnapshots()){
                     if(!snapshot.getExited().isEmpty()) {
                         acum += snapshot.getExited().size();
-                        results.add(new ExitedAndTime(
+                        exitedAndTimes.add(new ExitedAndTime(
                                 acum,
                                 snapshot.getExited().size(),
                                 snapshot.getTime()
                         ));
                     }
                 }
+                iteration.add(exitedAndTimes);
 
             }
-            ej3Results.add(new Ej3Result(D,N,results));
+            ej3Results.add(new Ej3Result(D,N,iteration));
         }
         return ej3Results;
     }
@@ -159,9 +161,9 @@ public class BenchmarkRunner {
 
         private final double d;
         private final long N;
-        private final List<ExitedAndTime> exitedAndTimes;
+        private final List<List<ExitedAndTime>> exitedAndTimes;
 
-        public Ej3Result(double d, long n, List<ExitedAndTime> exitedAndTimes) {
+        public Ej3Result(double d, long n, List<List<ExitedAndTime>> exitedAndTimes) {
             this.d = d;
             this.N = n;
             this.exitedAndTimes = exitedAndTimes;
@@ -175,7 +177,7 @@ public class BenchmarkRunner {
             return N;
         }
 
-        public List<ExitedAndTime> getResults() {
+        public List<List<ExitedAndTime>> getExitedAndTimes() {
             return exitedAndTimes;
         }
     }
