@@ -26,7 +26,8 @@ def ej1(json):
     plt.show()
 
 
-def ej2(json):
+
+def getDescarga(json):
     timeToArrived = {}
     for iteration in json:
         for snapshot in iteration:
@@ -39,6 +40,10 @@ def ej2(json):
     for amount in amounts:
         means.append(np.mean(np.array(timeToArrived[amount])))
         std_dev.append(np.std(np.array(timeToArrived[amount])))
+    return amounts, means, std_dev
+
+def ej2(json):
+    amounts, means, std_dev = getDescarga(json)
     plt.errorbar(amounts, means , yerr=std_dev, fmt='o')
     plt.ylabel("Cantidad de particulas")
     plt.xlabel("tiempo promedio (s)")
@@ -47,15 +52,44 @@ def ej2(json):
     plt.ylabel("Cantidad de particulas")
     plt.xlabel("tiempo promedio (s)")
     plt.show()
-    Qs, times, stdQs = calculateQProm(json)
-    # plt.plot(times, Qs)
-    plt.errorbar(times, Qs, yerr=stdQs, fmt='o')
-    plt.ylabel("Caudal (1/s)")
-    plt.xlabel("tiempo (s)")
-    # for iteration in json:
-    #     Qs, times = calculateQ (iteration, 2)
-    #     plt.plot(times, Qs)
+    Qs, times = calculateQ2(amounts, means, 2)
+    plt.plot(times, Qs)
     plt.show()
+    # Qs, times, stdQs = calculateQProm(json)
+    # # plt.plot(times, Qs)
+    # plt.errorbar(times, Qs, yerr=stdQs, fmt='o')
+    # plt.ylabel("Caudal (1/s)")
+    # plt.xlabel("tiempo (s)")
+    # # for iteration in json:
+    # #     Qs, times = calculateQ (iteration, 2)
+    # #     plt.plot(times, Qs)
+    # plt.show()
+
+def calculateQ2(exiteds, times, dt):
+    Qs = []
+    aux_times = []
+    i = 0
+    total = len(times) - 1
+    timeStep = 0.2
+    end = False
+    while(not end):
+        acum = 0
+        target = i + dt
+        j = 0
+        vals = []
+        for exited, time in zip(exiteds, times):
+            if(time >= i and time <= target):
+                vals.append(exited)
+            elif(time > target):
+                acum = vals[-1] - vals[0] 
+                break
+            if(j == total):
+                end = True
+            j += 1
+        Qs.append(acum/dt)
+        aux_times.append(i)
+        i += timeStep
+    return Qs,aux_times
 
 def calculateQProm(results):
     totalQs = []
@@ -77,17 +111,17 @@ def calculateQProm(results):
     return totalQs, totalTimes, np.std(np.array(auxQs), axis=0)
 
 
-def calculateQ (iteration, dt):
+def calculateQ (snapshots, dt):
     Qs = []
     times = []
     i = 0
     prev_j = 0
-    total = len(iteration) - 1
+    total = len(snapshots) - 1
     timeStep = 0.2
     while(prev_j < total):
         acum = 0
         target = i + dt
-        for j,snapshot in enumerate(iteration[prev_j:]):
+        for j,snapshot in enumerate(snapshots[prev_j:]):
             if(snapshot['time'] >= i and snapshot['time'] <= target):
                 acum += snapshot['exited']
             elif(snapshot['time'] > target):
@@ -100,44 +134,95 @@ def calculateQ (iteration, dt):
     return Qs,times
     
 def ej3(json):
+    Ds = []
+    Ns = []
+    #mediumRadiuses = []
+    totalQs = []
+    totalTimes = []
     for iteration in json:
-        print("Itero xD")
         D = iteration['d']
+        Ds.append(D)
+
         N = iteration['n']
-        results = iteration['results']
-        Qs,times = calculateQProm(results)
-        Qs = Qs[::20]
-        times = times[::20]
-   
-        print(f"ahora ploteo xD QLEN= {len(Qs)} TIMES LEN = {len(times)}" )
-        plt.plot(Qs,times, label=f"d = {D}, N = {N}")
-        print(f"ya plotié")
-        break
-    plt.legend()
-    plt.ylabel("Q promedio (?)")
-    plt.xlabel("tiempo (s)")
+        Ns.append(N)
+
+        
+        #mediumRadiuses.append(iteration['mediumRadiuses'])
+
+        for exitedAndTimes in iteration['exitedAndTimes']:
+            timeToArrived = {} 
+            for snapshot in exitedAndTimes:
+                if(timeToArrived.get(snapshot['acumExited']) == None):
+                    timeToArrived[snapshot['acumExited']] = list()
+                timeToArrived[snapshot['acumExited']].append(snapshot['time'])
+            means = []
+            std_dev = []
+            amounts = list(timeToArrived.keys())
+            for amount in amounts:
+                means.append(np.mean(np.array(timeToArrived[amount])))
+                std_dev.append(np.std(np.array(timeToArrived[amount])))
+        Qs, times = calculateQ2(amounts, means, 2)
+        totalQs.append(Qs)
+        totalTimes.append(times)
+
+    for i in range(len(totalQs)):
+        
+        plt.plot(totalTimes[i], totalQs[i],label=f"d = {Ds[i]}, N = {Ns[i]}")
+        plt.legend()
+        plt.ylabel("Q (1/s)")
+        plt.xlabel("tiempo (s)")
+        plt.show()
+
+    Qproms = []
+    Qstds = []
+    for i,Qs in enumerate(totalQs):
+        times = totalTimes[i]
+        Qacum = []
+        for j, Q in enumerate(Qs):
+            if times[j] >= 15 and times[j] <= 50:
+                Qacum.append(Q)
+        Qproms.append(np.mean(Qacum))
+        Qstds.append(np.std(Qacum))
+    for i, Qprom in enumerate(Qproms):
+        plt.errorbar(Ds, Qproms , yerr=Qstds, fmt='o')
+        plt.ylabel("Q promedio (1/s)")
+        plt.xlabel("d (m)")
+    plt.show()
+
+    Bs = np.arange(start=-50, stop=50, step=0.01)
+
+    errors = []
+    _min = float('inf')
+    _min_error = float('inf')
+    for i in range(len(Bs)):
+        E = 0
+        for j,Qprom in enumerate(Qproms):
+            E+= (Qprom - Bs[i]*(Ds[j])**1.5)**2
+        errors.append(E)
+        if E < _min_error:
+            _min = Bs[i]
+            _min_error = E
+    
+    print(f"Min error: {_min_error}")
+    print(f"Min B: {_min}")
+    plt.figure()
+    plt.ylabel("Error ($m^2$)")
+    plt.xlabel("Pendiente de ajuste ($m^2$/s)")
+    plt.plot(Bs, errors)
     plt.show()
     
-
-
-def ej4(json):
-    for iteration in json:
-        D = iteration['d']
-        N = iteration['n']
-        results = iteration['results']
-        Qs,times = calculateQProm(results,"exited")
-        Qs = Qs[::20]
-        times = times[::20]
-   
-        print(f"ahora ploteo xD QLEN= {len(Qs)} TIMES LEN = {len(times)}" )
-        plt.plot(Qs,times, label=f"d = {D}, N = {N}")
-        print(f"ya plotié")
-        break
-    plt.legend()
-    plt.ylabel("Q promedio (?)")
-    plt.xlabel("tiempo (s)")
+    def linear_error(min_xs,intervals):
+        return min_xs*intervals
+        
+    plt.plot(Ds, linear_error(_min, np.array(Ds)))
+    for i, Qprom in enumerate(Qproms):
+        plt.errorbar(Ds, Qproms , yerr=Qstds, fmt='o')
+        plt.ylabel("Q promedio (1/s)")
+        plt.xlabel("d (m)")
     plt.show()
 
+
+    
 def get_jsons_in_folder(dir):
     jsons = []
     pattern = re.compile("\.json$")
