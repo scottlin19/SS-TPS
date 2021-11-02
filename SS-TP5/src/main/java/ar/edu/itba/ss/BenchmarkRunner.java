@@ -121,7 +121,7 @@ public class BenchmarkRunner {
         double rMax = 0.32;
         double tau = 0.5;
         List<Long> Ns = List.of(200L,260L,320L,380L);
-        double B = 0.8;
+        double B = 0.9;
         List<Double> Ds = List.of(1.2,1.8,2.4,3.0);
         int step = 1;
         for(int i = 0; i < Ns.size();i++){
@@ -130,12 +130,24 @@ public class BenchmarkRunner {
             CPMConfig config = new CPMConfig(VdMax,L,Ve,rMin,rMax,tau,N,B,D,step, 60);
             double deltaT = config.getrMin()/(2*Math.max(config.getVdMax(),config.getVe()));
             CPM cpm;
-            List<SimulationResult> results = new ArrayList<>();
+            List<ExitedAndTime> results = new ArrayList<>();
+
             for(int j = 0 ; j < iterations ; j++){
                 System.out.println("Iteration " + i);
                 cpm = new CPM(config);
                 SimulationResult sr = cpm.simulate(deltaT,step);
-                results.add(sr);
+                int acum = 0;
+                for(SimulationSnapshot snapshot : sr.getSnapshots()){
+                    if(!snapshot.getExited().isEmpty()) {
+                        acum += snapshot.getExited().size();
+                        results.add(new ExitedAndTime(
+                                acum,
+                                snapshot.getExited().size(),
+                                snapshot.getTime()
+                        ));
+                    }
+                }
+
             }
             ej3Results.add(new Ej3Result(D,N,results));
         }
@@ -147,12 +159,12 @@ public class BenchmarkRunner {
 
         private final double d;
         private final long N;
-        private final List<SimulationResult> results;
+        private final List<ExitedAndTime> exitedAndTimes;
 
-        public Ej3Result(double d, long n, List<SimulationResult> results) {
+        public Ej3Result(double d, long n, List<ExitedAndTime> exitedAndTimes) {
             this.d = d;
             this.N = n;
-            this.results = results;
+            this.exitedAndTimes = exitedAndTimes;
         }
 
         public double getD() {
@@ -163,8 +175,8 @@ public class BenchmarkRunner {
             return N;
         }
 
-        public List<SimulationResult> getResults() {
-            return results;
+        public List<ExitedAndTime> getResults() {
+            return exitedAndTimes;
         }
     }
 
@@ -173,14 +185,14 @@ public class BenchmarkRunner {
 
     public static void main(String[] args) {
         //Ej 1/2
-        List<List<ExitedAndTime>> res = ej1(20, true);
-        JSONWriter<List<List<ExitedAndTime>>> jsonWriter = new JSONWriter<>();
-        jsonWriter.createFile(res, RESULTS_DIRECTORY + EJ1_DIRECTORY + "results");
+//        List<List<ExitedAndTime>> res = ej1(20, true);
+//        JSONWriter<List<List<ExitedAndTime>>> jsonWriter = new JSONWriter<>();
+//        jsonWriter.createFile(res, RESULTS_DIRECTORY + EJ1_DIRECTORY + "results");
 
         //Ej 3
-//        List<Ej3Result> ej3res = ej3(3);
-//        JSONWriter<List<Ej3Result>> ej3JsonWriter = new JSONWriter<>();
-//        ej3JsonWriter.createFile(ej3res, RESULTS_DIRECTORY + EJ3_DIRECTORY + "results");
+        List<Ej3Result> ej3res = ej3(3);
+        JSONWriter<List<Ej3Result>> ej3JsonWriter = new JSONWriter<>();
+        ej3JsonWriter.createFile(ej3res, RESULTS_DIRECTORY + EJ3_DIRECTORY + "results");
 
    }
 }
