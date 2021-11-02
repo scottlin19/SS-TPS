@@ -68,11 +68,11 @@ public class Grid {
 
     private List<Wall> initWalls() {
         return List.of(
-            new Wall(new Point2D.Double(0,0), new Point2D.Double(L,0), Wall.Orientation.HORIZONTAL),
-            new Wall(new Point2D.Double(0,0), new Point2D.Double(0,L), Wall.Orientation.VERTICAL),
-            new Wall(new Point2D.Double(L,0), new Point2D.Double(L,L), Wall.Orientation.VERTICAL),
-            new Wall(new Point2D.Double(0,L), new Point2D.Double(L/2 - entranceLength/2,L), Wall.Orientation.HORIZONTAL),
-            new Wall(new Point2D.Double(L/2 + entranceLength/2,L), new Point2D.Double(L,L), Wall.Orientation.HORIZONTAL)
+            new Wall(new Point2D.Double(0,0), new Point2D.Double(L,0), Wall.Orientation.HORIZONTAL), // TOP
+            new Wall(new Point2D.Double(0,0), new Point2D.Double(0,L), Wall.Orientation.VERTICAL), // LEFT
+            new Wall(new Point2D.Double(L,0), new Point2D.Double(L,L), Wall.Orientation.VERTICAL), // RIGHT
+            new Wall(new Point2D.Double(0,L), new Point2D.Double(L/2 - entranceLength/2,L), Wall.Orientation.HORIZONTAL), // BOTTOM
+            new Wall(new Point2D.Double(L/2 + entranceLength/2,L), new Point2D.Double(L,L), Wall.Orientation.HORIZONTAL) // BOTTOM
         );
     }
 
