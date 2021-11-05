@@ -1,8 +1,8 @@
 {
   "VdMax": 2,
   "Ve": 2,
-  "entranceLength":1.2,
-  "N": 200,
+  "entranceLength":3,
+  "N": 380,
   "rMax": 0.32,
   "rMin": 0.15,
   "B": 0.9,

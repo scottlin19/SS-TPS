@@ -114,7 +114,7 @@ public class BenchmarkRunner {
 
 
 
-    public static List<Ej3Result> ej3(final int iterations){
+    public static List<Ej3Result> ej3(final int iterations,boolean filter){
         final List<Ej3Result> ej3Results = new ArrayList<>();
         double VdMax = 2.0;
         int L = 20;
@@ -133,17 +133,17 @@ public class BenchmarkRunner {
             double deltaT = config.getrMin()/(2*Math.max(config.getVdMax(),config.getVe()));
             CPM cpm;
             List<List<ExitedAndTime>> iteration = new ArrayList<>();
-            List<Double> mediumRadiusList = new ArrayList<>();
+
             for(int j = 0 ; j < iterations ; j++){
                 System.out.println("Iteration " + i);
                 cpm = new CPM(config);
                 SimulationResult sr = cpm.simulate(deltaT,step);
                 int acum = 0;
-                double mediumRadius = 0;
+
                 List<ExitedAndTime> exitedAndTimes = new ArrayList<>();
                 for(SimulationSnapshot snapshot : sr.getSnapshots()){
-                    mediumRadius += snapshot.getPedestrians().stream().mapToDouble(PedestrianDTO::getRadius).average().getAsDouble();
-                    if(!snapshot.getExited().isEmpty()) {
+
+                    if(!filter || !snapshot.getExited().isEmpty()) {
                         acum += snapshot.getExited().size();
                         exitedAndTimes.add(new ExitedAndTime(
                                 acum,
@@ -151,13 +151,14 @@ public class BenchmarkRunner {
                                 snapshot.getTime()
                         ));
                     }
+
                 }
-                mediumRadius /= sr.getSnapshots().size();
-                mediumRadiusList.add(mediumRadius);
+
+
                 iteration.add(exitedAndTimes);
 
             }
-            ej3Results.add(new Ej3Result(D,N,mediumRadiusList.stream().mapToDouble(Double::doubleValue).average().getAsDouble(),iteration));
+            ej3Results.add(new Ej3Result(D,N,iteration));
         }
         return ej3Results;
     }
@@ -167,20 +168,15 @@ public class BenchmarkRunner {
 
         private final double d;
         private final long N;
-        private final double mediumRadius;
+
         private final List<List<ExitedAndTime>> exitedAndTimes;
 
-        public Ej3Result(double d, long n,double mediumRadius, List<List<ExitedAndTime>> exitedAndTimes) {
+        public Ej3Result(double d, long n, List<List<ExitedAndTime>> exitedAndTimes) {
             this.d = d;
             this.N = n;
-            this.mediumRadius = mediumRadius;
-
-            this.exitedAndTimes = exitedAndTimes;
+                    this.exitedAndTimes = exitedAndTimes;
         }
 
-        public double getMediumRadius() {
-            return mediumRadius;
-        }
 
         public double getD() {
             return d;
@@ -205,7 +201,7 @@ public class BenchmarkRunner {
 //        jsonWriter.createFile(res, RESULTS_DIRECTORY + EJ1_DIRECTORY + "results");
 
         //Ej 3
-        List<Ej3Result> ej3res = ej3(3);
+        List<Ej3Result> ej3res = ej3(10,false);
         JSONWriter<List<Ej3Result>> ej3JsonWriter = new JSONWriter<>();
         ej3JsonWriter.createFile(ej3res, RESULTS_DIRECTORY + EJ3_DIRECTORY + "results");
 

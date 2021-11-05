@@ -82,14 +82,16 @@ def calculateQ2(exiteds, times, dt):
             if(time >= i and time <= target):
                 vals.append(exited)
             elif(time > target):
-                acum = vals[-1] - vals[0] 
+                if len(vals) > 1:
+                    acum = vals[-1] - vals[0]
+                print("BREAK") 
                 break
             j += 1
             if(j == total):
+                print("J == TOTAL :V")
                 end = True
             
         if acum != 0:
-
             Qs.append(acum/dt)
             aux_times.append(i)
         i += timeStep
@@ -97,27 +99,6 @@ def calculateQ2(exiteds, times, dt):
 
 
 
-def calculateQ (snapshots, dt):
-    Qs = []
-    times = []
-    i = 0
-    prev_j = 0
-    total = len(snapshots) - 1
-    timeStep = 0.2
-    while(prev_j < total):
-        acum = 0
-        target = i + dt
-        for j,snapshot in enumerate(snapshots[prev_j:]):
-            if(snapshot['time'] >= i and snapshot['time'] <= target):
-                acum += snapshot['exited']
-            elif(snapshot['time'] > target):
-                break
-            elif(snapshot['time'] < i):
-                prev_j += 1
-        Qs.append(acum/dt)
-        times.append(i)
-        i += 1
-    return Qs,times
     
 def ej3(json):
     Ds = []
@@ -134,19 +115,13 @@ def ej3(json):
         
 
         amounts, means, std_dev = getDescarga(iteration['exitedAndTimes'])
-    
-        plt.errorbar(means, amounts, xerr=std_dev, fmt='o')
-        plt.ylabel("Cantidad de particulas")
-        plt.xlabel("tiempo promedio (s)")
-
-        plt.show()
  
         Qs, times = calculateQ2(amounts, means, 5)
         totalQs.append(Qs)
         totalTimes.append(times)
 
     for i in range(len(totalQs)):
-        plt.plot(totalTimes[i], totalQs[i], '-o', label=f"d = {Ds[i]}, N = {Ns[i]}")
+        plt.plot(totalTimes[i], totalQs[i], label=f"d = {Ds[i]}, N = {Ns[i]}")
     plt.ylabel("Q (1/s)")
     plt.xlabel("tiempo (s)")
     plt.legend()
@@ -160,16 +135,16 @@ def ej3(json):
         for j, Q in enumerate(Qs):
            
             if i == 0:
-                if times[j] >= 15 and times[j] <= 45:
+                if times[j] >= 20 and times[j] <= 60:
                     Qacum.append(Q)
             elif i == 1:
-                if times[j] >= 15 and times[j] <= 60:
+                if times[j] >= 20 and times[j] <= 60:
                     Qacum.append(Q)
             elif i == 2:
-                if times[j] >= 5 and times[j] <= 70:
+                if times[j] >= 20 and times[j] <= 60:
                     Qacum.append(Q)
             elif i == 3:
-                if times[j] >= 5 and times[j] <= 80:
+                if times[j] >= 20 and times[j] <= 60:
                     Qacum.append(Q)            
             
         Qproms.append(np.mean(Qacum))
@@ -182,7 +157,7 @@ def ej3(json):
     plt.show()
 
 
-    Bs = np.arange(start=-5, stop=5, step=0.01)
+    Bs = np.arange(start=0, stop=5, step=0.01)
 
     errors = []
     _min = float('inf')
