@@ -2,6 +2,8 @@ package ar.edu.itba.ss;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ar.edu.itba.ss.commons.PedestrianDTO;
 import ar.edu.itba.ss.commons.SimulationResult;
 import ar.edu.itba.ss.commons.SimulationSnapshot;
 import ar.edu.itba.ss.writers.JSONWriter;
@@ -127,18 +129,20 @@ public class BenchmarkRunner {
         for(int i = 0; i < Ns.size();i++){
             double D = Ds.get(i);
             long N = Ns.get(i);
-            CPMConfig config = new CPMConfig(VdMax,L,Ve,rMin,rMax,tau,N,B,D,step, 60);
+            CPMConfig config = new CPMConfig(VdMax,L,Ve,rMin,rMax,tau,N,B,D,step, 3600);
             double deltaT = config.getrMin()/(2*Math.max(config.getVdMax(),config.getVe()));
             CPM cpm;
             List<List<ExitedAndTime>> iteration = new ArrayList<>();
-
+            List<Double> mediumRadiusList = new ArrayList<>();
             for(int j = 0 ; j < iterations ; j++){
                 System.out.println("Iteration " + i);
                 cpm = new CPM(config);
                 SimulationResult sr = cpm.simulate(deltaT,step);
                 int acum = 0;
+                double mediumRadius = 0;
                 List<ExitedAndTime> exitedAndTimes = new ArrayList<>();
                 for(SimulationSnapshot snapshot : sr.getSnapshots()){
+                    mediumRadius += snapshot.getPedestrians().stream().mapToDouble(PedestrianDTO::getRadius).average().getAsDouble();
                     if(!snapshot.getExited().isEmpty()) {
                         acum += snapshot.getExited().size();
                         exitedAndTimes.add(new ExitedAndTime(
@@ -148,10 +152,12 @@ public class BenchmarkRunner {
                         ));
                     }
                 }
+                mediumRadius /= sr.getSnapshots().size();
+                mediumRadiusList.add(mediumRadius);
                 iteration.add(exitedAndTimes);
 
             }
-            ej3Results.add(new Ej3Result(D,N,iteration));
+            ej3Results.add(new Ej3Result(D,N,mediumRadiusList.stream().mapToDouble(Double::doubleValue).average().getAsDouble(),iteration));
         }
         return ej3Results;
     }
@@ -161,12 +167,19 @@ public class BenchmarkRunner {
 
         private final double d;
         private final long N;
+        private final double mediumRadius;
         private final List<List<ExitedAndTime>> exitedAndTimes;
 
-        public Ej3Result(double d, long n, List<List<ExitedAndTime>> exitedAndTimes) {
+        public Ej3Result(double d, long n,double mediumRadius, List<List<ExitedAndTime>> exitedAndTimes) {
             this.d = d;
             this.N = n;
+            this.mediumRadius = mediumRadius;
+
             this.exitedAndTimes = exitedAndTimes;
+        }
+
+        public double getMediumRadius() {
+            return mediumRadius;
         }
 
         public double getD() {

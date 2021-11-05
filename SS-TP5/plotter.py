@@ -70,6 +70,7 @@ def calculateQ2(exiteds, times, dt):
     aux_times = []
     i = 0
     total = len(times) - 1
+    print("total times: "+str(total))
     timeStep = 0.2
     end = False
     while(not end):
@@ -83,32 +84,17 @@ def calculateQ2(exiteds, times, dt):
             elif(time > target):
                 acum = vals[-1] - vals[0] 
                 break
+            j += 1
             if(j == total):
                 end = True
-            j += 1
-        Qs.append(acum/dt)
-        aux_times.append(i)
+            
+        if acum != 0:
+
+            Qs.append(acum/dt)
+            aux_times.append(i)
         i += timeStep
     return Qs,aux_times
 
-def calculateQProm(results):
-    totalQs = []
-    totalTimes = []
-    for simulation in results:
-        Qs, times = calculateQ(simulation, 2)
-        totalQs.append(np.array(Qs))
-        totalTimes.append(np.array(times))
-    _min = float('inf')
-    for times in totalTimes:
-        cur = times.shape[0]
-        if(cur < _min):
-            _min = cur
-    auxQs = []
-    for Qs in totalQs:
-        auxQs.append(Qs[:_min])
-    totalTimes = times[:_min]
-    totalQs = np.mean(np.array(auxQs), axis=0)
-    return totalQs, totalTimes, np.std(np.array(auxQs), axis=0)
 
 
 def calculateQ (snapshots, dt):
@@ -145,33 +131,26 @@ def ej3(json):
 
         N = iteration['n']
         Ns.append(N)
-
         
-        #mediumRadiuses.append(iteration['mediumRadiuses'])
 
-        for exitedAndTimes in iteration['exitedAndTimes']:
-            timeToArrived = {} 
-            for snapshot in exitedAndTimes:
-                if(timeToArrived.get(snapshot['acumExited']) == None):
-                    timeToArrived[snapshot['acumExited']] = list()
-                timeToArrived[snapshot['acumExited']].append(snapshot['time'])
-            means = []
-            std_dev = []
-            amounts = list(timeToArrived.keys())
-            for amount in amounts:
-                means.append(np.mean(np.array(timeToArrived[amount])))
-                std_dev.append(np.std(np.array(timeToArrived[amount])))
-        Qs, times = calculateQ2(amounts, means, 2)
+        amounts, means, std_dev = getDescarga(iteration['exitedAndTimes'])
+    
+        plt.errorbar(means, amounts, xerr=std_dev, fmt='o')
+        plt.ylabel("Cantidad de particulas")
+        plt.xlabel("tiempo promedio (s)")
+
+        plt.show()
+ 
+        Qs, times = calculateQ2(amounts, means, 5)
         totalQs.append(Qs)
         totalTimes.append(times)
 
     for i in range(len(totalQs)):
-        
-        plt.plot(totalTimes[i], totalQs[i],label=f"d = {Ds[i]}, N = {Ns[i]}")
-        plt.legend()
-        plt.ylabel("Q (1/s)")
-        plt.xlabel("tiempo (s)")
-        plt.show()
+        plt.plot(totalTimes[i], totalQs[i], '-o', label=f"d = {Ds[i]}, N = {Ns[i]}")
+    plt.ylabel("Q (1/s)")
+    plt.xlabel("tiempo (s)")
+    plt.legend()
+    plt.show()
 
     Qproms = []
     Qstds = []
@@ -179,25 +158,39 @@ def ej3(json):
         times = totalTimes[i]
         Qacum = []
         for j, Q in enumerate(Qs):
-            if times[j] >= 15 and times[j] <= 50:
-                Qacum.append(Q)
+           
+            if i == 0:
+                if times[j] >= 15 and times[j] <= 45:
+                    Qacum.append(Q)
+            elif i == 1:
+                if times[j] >= 15 and times[j] <= 60:
+                    Qacum.append(Q)
+            elif i == 2:
+                if times[j] >= 5 and times[j] <= 70:
+                    Qacum.append(Q)
+            elif i == 3:
+                if times[j] >= 5 and times[j] <= 80:
+                    Qacum.append(Q)            
+            
         Qproms.append(np.mean(Qacum))
         Qstds.append(np.std(Qacum))
     for i, Qprom in enumerate(Qproms):
+        print(f"Qprom {Qprom} for D = {Ds[i]}")
         plt.errorbar(Ds, Qproms , yerr=Qstds, fmt='o')
         plt.ylabel("Q promedio (1/s)")
         plt.xlabel("d (m)")
     plt.show()
 
-    Bs = np.arange(start=-50, stop=50, step=0.01)
+
+    Bs = np.arange(start=-5, stop=5, step=0.01)
 
     errors = []
     _min = float('inf')
     _min_error = float('inf')
     for i in range(len(Bs)):
         E = 0
-        for j,Qprom in enumerate(Qproms):
-            E+= (Qprom - Bs[i]*(Ds[j])**1.5)**2
+        for j in range(len(Qproms)):
+            E+= (Qproms[j] - Bs[i]*(Ds[j])**1.5)**2
         errors.append(E)
         if E < _min_error:
             _min = Bs[i]
@@ -211,13 +204,15 @@ def ej3(json):
     plt.plot(Bs, errors)
     plt.show()
     
-    def linear_error(min_xs,intervals):
-        return min_xs*intervals
-        
-    plt.plot(Ds, linear_error(_min, np.array(Ds)))
+    def not_linear_error(min_xs,intervals):
+        return min_xs*intervals**1.5
+
+
+    print(f"min B: {_min}")
+    plt.plot(Ds, not_linear_error(_min, np.array(Ds)))
     for i, Qprom in enumerate(Qproms):
         plt.errorbar(Ds, Qproms , yerr=Qstds, fmt='o')
-        plt.ylabel("Q promedio (1/s)")
+        plt.ylabel("<Q> (1/s)")
         plt.xlabel("d (m)")
     plt.show()
 
@@ -232,6 +227,7 @@ def get_jsons_in_folder(dir):
     return jsons
 
 if __name__ == "__main__":
+  
     choice = sys.argv[1]
     dirs = []
     for arg in sys.argv[2:]:
@@ -249,6 +245,7 @@ if __name__ == "__main__":
         json = get_jsons_in_folder(dirs[0])[0]
         ej2(json)
     elif choice == "3":
+       
         json = get_jsons_in_folder(dirs[0])[0]
         ej3(json)
     elif choice == "4":
