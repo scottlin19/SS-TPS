@@ -55,6 +55,7 @@ public class CPM {
         ObjectMapper objectMapper = new ObjectMapper();
         CPMConfig config = objectMapper.readValue(config_url, CPMConfig.class);
         double deltaT = config.getrMin()/(2*Math.max(config.getVdMax(),config.getVe()));
+        System.out.println("Delta T: "+deltaT);
         CPM cpm = new CPM(config);
         SimulationResult result = cpm.simulate(deltaT, config.getK());
 
