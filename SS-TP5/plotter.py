@@ -19,7 +19,7 @@ def ej1(json):
     for i,iteration in enumerate(json):
         times = list(map(lambda snapshot: snapshot['time'], iteration))
         arrives = list(map(lambda snapshot: snapshot['acumExited'], iteration))
-        plt.plot(times, arrives, '-o', label=f"simulation {i}")
+        plt.plot(times, arrives, '-o', label=f"simulation {i + 1}")
     plt.legend()
     plt.ylabel("Cantidad de particulas")
     plt.xlabel("tiempo (s)")
@@ -45,8 +45,8 @@ def getDescarga(json):
 def ej2(json):
     amounts, means, std_dev = getDescarga(json)
     plt.errorbar(amounts, means , yerr=std_dev, fmt='o')
-    plt.ylabel("Cantidad de particulas")
-    plt.xlabel("tiempo promedio (s)")
+    plt.xlabel("Cantidad de particulas")
+    plt.ylabel("tiempo promedio (s)")
     plt.show()
     plt.errorbar(means, amounts, xerr=std_dev, fmt='o')
     plt.ylabel("Cantidad de particulas")
@@ -182,7 +182,7 @@ def ej3(json):
     plt.show()
 
 
-    Bs = np.arange(start=-5, stop=5, step=0.01)
+    Bs = np.arange(start=0, stop=5, step=0.01)
 
     errors = []
     _min = float('inf')
@@ -202,6 +202,7 @@ def ej3(json):
     plt.ylabel("Error ($m^2$)")
     plt.xlabel("Pendiente de ajuste ($m^2$/s)")
     plt.plot(Bs, errors)
+    plt.plot(_min, _min_error, 'o')
     plt.show()
     
     def not_linear_error(min_xs,intervals):
@@ -248,6 +249,3 @@ if __name__ == "__main__":
        
         json = get_jsons_in_folder(dirs[0])[0]
         ej3(json)
-    elif choice == "4":
-        json = get_jsons_in_folder(dirs[0])[0]
-        ej4(json)
